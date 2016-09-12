@@ -19,8 +19,7 @@ public class FileUtils {
         try {
             BufferedReader bufferedReader = null;
             try {
-                InputStream inputStream =
-                        context.getResources().openRawResource(resourceId);
+                InputStream inputStream = context.getResources().openRawResource(resourceId);
                 bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
                 String line;
                 while ((line = bufferedReader.readLine()) != null) {

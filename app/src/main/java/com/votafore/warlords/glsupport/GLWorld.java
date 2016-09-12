@@ -4,7 +4,10 @@ package com.votafore.warlords.glsupport;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
+import android.os.AsyncTask;
 import android.support.annotation.IntDef;
+
+import com.votafore.warlords.MeshUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,7 +29,8 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
         mObjects = new ArrayList<>();
 
-        attachObjects();
+        ObjectLoader loader = new ObjectLoader();
+        loader.execute();
 
         initCamera();
     }
@@ -254,19 +258,31 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public List<GLUnit> mObjects;
 
-    private void attachObjects(){
 
-        // позже тут будет фоновая загрузка данных объектов
+    private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
 
-        // загрузка объектов сцены
-        // пока что тестовый вариант
+        @Override
+        protected List<GLUnit> doInBackground(Void... params) {
 
-//        MeshUnit unit = new MeshUnit(mContext);
-//        unit.init();
-//
-//        mObjects.add(unit);
+            // загрузка объектов сцены
+            // пока что тестовый вариант
+
+            List<GLUnit> list = new ArrayList<>();
+
+            MeshUnit unit = new MeshUnit(mContext);
+            unit.init();
+
+            list.add(unit);
+
+            return list;
+        }
+
+        @Override
+        protected void onPostExecute(List<GLUnit> list) {
+
+            mObjects = list;
+        }
     }
-
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
