@@ -3,7 +3,8 @@ package com.votafore.warlords.glsupport;
 import android.content.Context;
 import android.opengl.GLES20;
 
-import com.votafore.glloadobject.ShaderUtils;
+
+import com.votafore.warlords.glutil.ShaderUtils;
 
 import java.util.HashMap;
 
