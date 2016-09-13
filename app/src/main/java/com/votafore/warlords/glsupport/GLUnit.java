@@ -12,14 +12,14 @@ public abstract class GLUnit {
 
     protected Context mContext;
 
-    public FloatBuffer buffer;
+    protected FloatBuffer buffer;
 
-    public float[] mVertices;
+    protected float[] mVertices;
 
-    public int textureSlot;
-    public int textureTarget;
-    public int texture;
-    public int textureResID;
+    protected int textureSlot;
+    protected int textureTarget;
+    protected int texture;
+    protected int textureResID;
 
     public GLUnit(Context mContext) {
         this.mContext = mContext;

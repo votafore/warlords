@@ -11,9 +11,7 @@ import com.votafore.warlords.glsupport.GLWorld;
 
 import java.io.IOException;
 
-/**
- * Created by admin on 12.09.2016.
- */
+
 public class MeshUnit extends GLUnit {
 
     private ObjectContainer mContainer;

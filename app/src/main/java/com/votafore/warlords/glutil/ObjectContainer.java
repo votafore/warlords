@@ -219,11 +219,6 @@ public class ObjectContainer {
                     }
                 }
             }
-
-//            cur_model.arr_v = null;
-//            cur_model.arr_vt = null;
-//            cur_model.arr_vn = null;
-//            cur_model.faces = null;
         }
     }
 
