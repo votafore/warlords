@@ -10,6 +10,23 @@ import javax.microedition.khronos.opengles.GL10;
 
 import static android.opengl.GLES20.glViewport;
 
+/**
+ * старался реализовать его так, что бы он выполнял свои функции
+ * (отрисовка) без каких либо изменений кода. Т.е. что бы
+ * сюда больше не приходилось залазить.
+ * <p>
+ * <b>есть 1 момент:</b> в функции onDrawFrame устанавливается
+ * матрица. Т.е. предполагается что в вершинном шейдере есть переменная
+ * <b>uniform mat4 u_Matrix</b>. Поэтому если будет использоваться шейдер
+ * в котором нет такой переменной, то надо будет редактировать код
+ * рендерера.
+ * <p>
+ * Объявляет интерфейс ICallback. Он содержит такие же методы как и в интерфейсе Renderer.
+ * они и вызываются в этих методах. Реализация этого интерфейса (класс) делает все
+ * необходимые установки и настройки рендерера и других объектов, ответственных за
+ * отображение объектов.
+ */
+
 public  class GLRenderer implements Renderer {
 
     public interface ICallback{
@@ -18,18 +35,15 @@ public  class GLRenderer implements Renderer {
         void onDrawFrame(GLShader shader);
     }
 
-    private GLShader mShader;
-
-    private GLWorld mWorld;
-    private ICallback mCallbackHandler;
-
+    private GLShader     mShader;
+    private GLWorld      mWorld;
+    private ICallback    mCallbackHandler;
 
     public GLRenderer(Context context, int resVertexShader, int resFragmentShader) {
 
-        mWorld = GLWorld.getInstance(context);
-        mCallbackHandler = (ICallback)mWorld;
-
-        mShader = new GLShader(context, resVertexShader, resFragmentShader);
+        mWorld              = GLWorld.getInstance(context);
+        mCallbackHandler    = (ICallback)mWorld;
+        mShader             = new GLShader(context, resVertexShader, resFragmentShader);
     }
 
     public GLShader getShader(){
