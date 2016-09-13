@@ -10,23 +10,59 @@ import java.util.HashMap;
 
 
 /**
- * Created by admin on 05.09.2016.
+ * @author Votafore
+ * Created on 05.09.2016.
  */
 public class GLShader {
 
+    /**
+     * интерфейс для изменяемой части механизма создания
+     * и настройки программы (создаваемой из шейдеров). Имеет всего
+     * 1 метод для получения списка параметров: populateParameters(int, HashMap)
+     * @see #populateParameters(int, HashMap)
+     */
     public interface IGLShaderCreator{
+
+        /**
+         * Метод, в котором будет заполнен список параметров шейдеров
+         * @param programID (int) ID программы созданной из шейдеров
+         *                  из которой надо получить ссылки на параметры
+         * @param params (HashMap<String, Integer>) список параметров шейдеров.
+         *               Заполняется как-то вроде:<br>
+         *               params.put("ParamName", GLES20.glGetUniformLocation(programID, "ParamName"));
+         *               <br>для каждого параметра.
+         */
         void populateParameters(int programID, HashMap<String, Integer> params);
     }
 
     private Context mContext;
 
+    /**
+     * ID программы, которая создается из шейдеров
+     */
     public int programID;
 
+    /**
+     * ссылка на объект, реализующий интерфейс IGLShaderCreator
+     * @see IGLShaderCreator
+     */
     private IGLShaderCreator shaderCreator;
 
+    /**
+     * ссылка на ресурс вершинного шейдера
+     */
     private int resVertexShader;
+
+    /**
+     * ссылка на ресурс фрагментарного шейдера
+     */
     private int resFragmentShader;
 
+    /**
+     * список, хранящий параметры шейдеров
+     * и благодаря ему обеспечивается доступ к ним по имени
+     * (точнее по ключу)
+     */
     public HashMap<String, Integer> mParams;
 
     public GLShader(Context context, int resShaderVertex, int resShaderFragment){
