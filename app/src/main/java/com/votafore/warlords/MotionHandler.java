@@ -12,7 +12,8 @@ import com.votafore.warlords.glsupport.*;
 import com.votafore.warlords.glsupport.GLView;
 
 /**
- * Created by admin on 12.09.2016.
+ * @author Votafore
+ * Created on 12.09.2016.
  */
 public class MotionHandler {
 
