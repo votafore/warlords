@@ -19,8 +19,15 @@ public class CustomSurfaceView extends GLView {
     }
 
     @Override
-    protected GLShader.IGLShaderCreator getShaderCreator() {
-        return new GLShader.IGLShaderCreator() {
+    protected void init(){
+
+        /////////////////////////////
+        // обязательная часть
+
+        resVertexShader     = R.raw.shader_vertex;
+        resFragmentShader   = R.raw.shader_fragment;
+
+        mShaderCreator = new GLShader.IGLShaderCreator() {
 
             @Override
             public void populateParameters(int programID, HashMap<String, Integer> params) {
@@ -37,17 +44,10 @@ public class CustomSurfaceView extends GLView {
                 params.put("u_lightPosition", GLES20.glGetUniformLocation(programID, "u_lightPosition"));
             }
         };
-    }
 
-    @Override
-    protected void setShaderSources() {
 
-        resVertexShader     = R.raw.shader_vertex;
-        resFragmentShader   = R.raw.shader_fragment;
-    }
-
-    @Override
-    protected void setWorldParams() {
+        /////////////////////////////
+        // не обязательная часть
 
         mWorld.setBaseColor(new float[]{1f,0.5f,0.1f, 1f});
     }
