@@ -35,12 +35,12 @@ public class MeshUnit extends GLUnit {
     @Override
     public void draw(GLShader shader) {
 
-        int location_a_Position     = shader.mParams.get("a_position");
-        int location_a_Normal       = shader.mParams.get("a_normal");
-        int location_u_Color        = shader.mParams.get("u_color");
+        int location_a_Position      = shader.mParams.get("a_position");
+        int location_a_Normal        = shader.mParams.get("a_normal");
+        int location_u_Color         = shader.mParams.get("u_color");
 
-        int location_u_Camera       = shader.mParams.get("u_camera");
-        int location_u_lightPosition= shader.mParams.get("u_lightPosition");
+        int location_u_Camera        = shader.mParams.get("u_camera");
+        int location_u_lightPosition = shader.mParams.get("u_lightPosition");
 
         GLES20.glUniform4f(location_u_Color, 0f, 0.9f, 0f, 1.0f);
 
