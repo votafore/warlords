@@ -26,7 +26,7 @@ public class MeshUnit extends GLUnit {
         mContainer = new ObjectContainer();
 
         try {
-            mContainer.loadFile(mContext.getResources().openRawResource(R.raw.hqmovie));
+            mContainer.loadFile(mContext.getResources().openRawResource(R.raw.vanquish));
         } catch (IOException e) {
             e.printStackTrace();
         }

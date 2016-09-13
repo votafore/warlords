@@ -3,10 +3,12 @@ package com.votafore.warlords.glsupport;
 
 import android.content.Context;
 import android.opengl.GLES20;
+import android.opengl.GLU;
 import android.opengl.Matrix;
 import android.os.AsyncTask;
 import android.support.annotation.IntDef;
 
+import com.votafore.warlords.MeshMapTest;
 import com.votafore.warlords.MeshUnit;
 
 import java.util.ArrayList;
@@ -268,7 +270,7 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
             List<GLUnit> list = new ArrayList<>();
 
-            MeshUnit unit = new MeshUnit(mContext);
+            GLUnit unit = new MeshMapTest(mContext);
             unit.init();
 
             list.add(unit);
