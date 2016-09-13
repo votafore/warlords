@@ -258,7 +258,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public List<GLUnit> mObjects;
 
-
     private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
 
         @Override
