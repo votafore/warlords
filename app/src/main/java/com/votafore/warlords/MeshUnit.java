@@ -42,15 +42,15 @@ public class MeshUnit extends GLUnit {
         int location_u_Camera        = shader.mParams.get("u_camera");
         int location_u_lightPosition = shader.mParams.get("u_lightPosition");
 
-        GLES20.glUniform4f(location_u_Color, 0f, 0.9f, 0f, 1.0f);
+        GLES20.glUniform4f(location_u_Color, 0.4f, 0.9f, 0.5f, 1f);
 
         float[] tmpCamPosition = new float[4];
         System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
 
         Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
 
-        GLES20.glUniform4f(location_u_Camera, tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2], 1.0f);
-        GLES20.glUniform4f(location_u_lightPosition, 0f, 3f, 6f, 1.0f);
+        GLES20.glUniform3f(location_u_Camera        , tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
+        GLES20.glUniform3f(location_u_lightPosition , 1f, 3f, -0.5f);
 
         for (int i = 0; i < mContainer.list.size(); i++) {
 
@@ -60,11 +60,11 @@ public class MeshUnit extends GLUnit {
             GLES20.glVertexAttribPointer(location_a_Position, 3, GLES20.GL_FLOAT, false, 0, model.v);
             GLES20.glEnableVertexAttribArray(location_a_Position);
 
-            if(model.arr_vn.size() > 0) {
+            //if(model.arr_vn.size() > 0) {
                 model.vn.position(0);
                 GLES20.glVertexAttribPointer(location_a_Normal, 3, GLES20.GL_FLOAT, false, 0, model.vn);
                 GLES20.glEnableVertexAttribArray(location_a_Normal);
-            }
+            //}
 
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, model.faces.size()*3);
         }

@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLUnit;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.glutil.ObjectContainer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,7 +30,6 @@ public class MeshMapTest2 extends GLUnit{
     float[][]     vertices;
 
     FloatBuffer[] normalBuffers;
-    float[][]     normals;
 
     @Override
     public void init() {
@@ -44,8 +44,8 @@ public class MeshMapTest2 extends GLUnit{
         int bm_width  = bit_map.getWidth();
         int bm_height = bit_map.getHeight();
 
-        bm_width  = 50;
-        bm_height = 50;
+//        bm_width  = 50;
+//        bm_height = 50;
 
         for (int row = 0; row < bm_height; row++) {
             for (int col = 0; col < bm_width; col++) {
@@ -61,8 +61,8 @@ public class MeshMapTest2 extends GLUnit{
         bit_map.recycle();
 
         // создаем массив вершин
-        float step    = 1.0f;
-        float delitel = 2f;
+        float step    = 5.0f;
+        float delitel = 3f;
 
         float width   = step * bm_width;
         float height  = step * bm_height;
@@ -79,7 +79,6 @@ public class MeshMapTest2 extends GLUnit{
                 ];
 
         normalBuffers = new FloatBuffer[bm_height - 1];
-        normals       = new float[bm_height-1][(bm_width-1) * 2 * 3];
 
         // служебные (временые) переменные
         float[] vertex1;
@@ -89,6 +88,18 @@ public class MeshMapTest2 extends GLUnit{
         float[] curNormal;
 
         for (int row = 0; row < bm_height-1; row++) {
+
+            // (bm_width-1) * 2 = количество треугольников в ряду
+            // 3 = количество вершин
+            // 3 = количество координат для каждой вершины
+            // 4 = количество байт на каждую составляющую координаты
+            vertexBuffers[row] = ByteBuffer.allocateDirect((bm_width-1) * 2 * 3 * 3 * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
+
+            normalBuffers[row] = ByteBuffer.allocateDirect((bm_width-1) * 2 * 3 * 3 * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
 
             for (int col = 0; col < bm_width-1; col++) {
 
@@ -128,11 +139,14 @@ public class MeshMapTest2 extends GLUnit{
                 vertex2 = new float[]{vertices[row][pos+3],vertices[row][pos+4],vertices[row][pos+5]};
                 vertex3 = new float[]{vertices[row][pos+6],vertices[row][pos+7],vertices[row][pos+8]};
 
-                curNormal = getNormal(vertex1, vertex2, vertex3);
+                curNormal = ObjectContainer.getNormal(vertex1, vertex2, vertex3);
 
-                normals[row][col*6]   = curNormal[0];
-                normals[row][col*6+1] = curNormal[1];
-                normals[row][col*6+2] = curNormal[2];
+                // сохраняем нормаль для каждой (3 шт) вершины треугольника
+                for (int counter = 0; counter < 3; counter++) {
+
+                    normalBuffers[row].put(curNormal);
+                }
+
 
 
 
@@ -170,49 +184,17 @@ public class MeshMapTest2 extends GLUnit{
                 vertex2 = new float[]{vertices[row][pos+12],vertices[row][pos+13],vertices[row][pos+14]};
                 vertex3 = new float[]{vertices[row][pos+15],vertices[row][pos+16],vertices[row][pos+17]};
 
-                curNormal = getNormal(vertex1, vertex2, vertex3);
+                curNormal = ObjectContainer.getNormal(vertex1, vertex2, vertex3);
 
-                normals[row][col*6+3] = curNormal[0];
-                normals[row][col*6+4] = curNormal[1];
-                normals[row][col*6+5] = curNormal[2];
+                // сохраняем нормаль для каждой (3 шт) вершины треугольника
+                for (int counter = 0; counter < 3; counter++) {
+
+                    normalBuffers[row].put(curNormal);
+                }
             }
 
-            vertexBuffers[row] = ByteBuffer.allocateDirect(vertices[row].length * 4)
-                    .order(ByteOrder.nativeOrder())
-                    .asFloatBuffer();
-
             vertexBuffers[row].put(vertices[row]);
-
-            normalBuffers[row] = ByteBuffer.allocateDirect(normals[row].length * 4)
-                    .order(ByteOrder.nativeOrder())
-                    .asFloatBuffer();
-
-            normalBuffers[row].put(normals[row]);
         }
-    }
-
-    private float[] getNormal(float[] v1, float[] v2, float[] v3){
-
-        float[] edge1;
-        float[] edge2;
-
-        edge1 = new float[]{v2[0] - v1[0],v2[1] - v1[1],v2[2] - v1[2]};
-        edge2 = new float[]{v3[0] - v1[0],v3[1] - v1[1],v3[2] - v1[2]};
-
-        float[] normal = new float[]{
-                edge1[1] * edge2[2] - edge1[2] * edge2[1],
-                edge1[2] * edge2[0] - edge1[0] * edge2[2],
-                edge1[0] * edge2[1] - edge1[1] * edge2[0]
-        };
-
-        // нормализую длину
-        float d = (float) Math.sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
-
-        normal[0] = normal[0] / d;
-        normal[1] = normal[1] / d;
-        normal[2] = normal[2] / d;
-
-        return normal;
     }
 
     @Override
@@ -225,15 +207,15 @@ public class MeshMapTest2 extends GLUnit{
         int location_u_Camera        = shader.mParams.get("u_camera");
         int location_u_lightPosition = shader.mParams.get("u_lightPosition");
 
-        GLES20.glUniform4f(location_u_Color, 0f, 0.9f, 0f, 1.0f);
+        GLES20.glUniform4f(location_u_Color, 0.3f, 0.9f, 0f, 1.0f);
 
         float[] tmpCamPosition = new float[4];
         System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
 
         Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
 
-        GLES20.glUniform4f(location_u_Camera, tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2], 1.0f);
-        GLES20.glUniform4f(location_u_lightPosition, 0f, 3f, 6f, 1.0f);
+        GLES20.glUniform3f(location_u_Camera, tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
+        GLES20.glUniform3f(location_u_lightPosition, 0f, 3f, 6f);
 
         for (int i = 0; i < vertexBuffers.length; i++) {
 
