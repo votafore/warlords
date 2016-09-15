@@ -7,6 +7,7 @@ import android.view.MotionEvent;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.glutil.Constants;
 
 import java.util.HashMap;
 
@@ -52,7 +53,7 @@ public class CustomSurfaceView extends GLView {
         /////////////////////////////
         // не обязательная часть
 
-        mWorld.setBaseColor(new float[]{1f,0.5f,0.1f, 3f});
+        mWorld.setBaseColor(Constants.base_color);
     }
 
     ////////////////////////////////////////

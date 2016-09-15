@@ -26,7 +26,7 @@ public class MeshUnit extends GLUnit {
         mContainer = new ObjectContainer();
 
         try {
-            mContainer.loadFile(mContext.getResources().openRawResource(R.raw.mymap));
+            mContainer.loadFile(mContext.getResources().openRawResource(R.raw.vanquish));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -60,11 +60,10 @@ public class MeshUnit extends GLUnit {
             GLES20.glVertexAttribPointer(location_a_Position, 3, GLES20.GL_FLOAT, false, 0, model.v);
             GLES20.glEnableVertexAttribArray(location_a_Position);
 
-            //if(model.arr_vn.size() > 0) {
-                model.vn.position(0);
-                GLES20.glVertexAttribPointer(location_a_Normal, 3, GLES20.GL_FLOAT, false, 0, model.vn);
-                GLES20.glEnableVertexAttribArray(location_a_Normal);
-            //}
+
+            model.vn.position(0);
+            GLES20.glVertexAttribPointer(location_a_Normal, 3, GLES20.GL_FLOAT, false, 0, model.vn);
+            GLES20.glEnableVertexAttribArray(location_a_Normal);
 
             GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, model.faces.size()*3);
         }

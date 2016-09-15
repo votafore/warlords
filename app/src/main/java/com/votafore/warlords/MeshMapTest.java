@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLUnit;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.glutil.Constants;
 import com.votafore.warlords.glutil.ObjectContainer;
 
 import java.nio.ByteBuffer;
@@ -61,8 +62,8 @@ public class MeshMapTest extends GLUnit{
         bit_map.recycle();
 
         // создаем массив вершин
-        float step    = 0.8f;
-        float delitel = 2f;
+        float step    = Constants.step;
+        float delitel = Constants.delitel;
 
         float width   = step * bm_width;
         float height  = step * bm_height;
