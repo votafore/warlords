@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
+import com.votafore.warlords.glsupport.GLWorld;
 
 import java.util.HashMap;
 
@@ -16,6 +17,8 @@ public class CustomSurfaceView extends GLView {
         super(context);
 
         mHandler = new MotionHandler(context, mCamera);
+
+        mCamera.camMove(GLWorld.AXIS_Y, 3f);
     }
 
     @Override
@@ -49,7 +52,7 @@ public class CustomSurfaceView extends GLView {
         /////////////////////////////
         // не обязательная часть
 
-        mWorld.setBaseColor(new float[]{1f,0.5f,0.1f, 1f});
+        mWorld.setBaseColor(new float[]{1f,0.5f,0.1f, 3f});
     }
 
     ////////////////////////////////////////

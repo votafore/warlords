@@ -108,7 +108,7 @@ public class MotionHandler {
                         positionY = event.getY(i);
 
                         mCamera.camMove(GLWorld.AXIS_X, deltaX / 30);
-                        mCamera.camMove(GLWorld.AXIS_Z, deltaY / 30);
+                        mCamera.camMove(GLWorld.AXIS_Z, -deltaY / 30);
                     }
 
                     if (event.getPointerId(i) == mOrientationHandler) {

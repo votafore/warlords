@@ -9,6 +9,7 @@ import android.os.AsyncTask;
 import android.support.annotation.IntDef;
 
 import com.votafore.warlords.MeshMapTest;
+import com.votafore.warlords.MeshMapTest2;
 import com.votafore.warlords.MeshUnit;
 
 import java.util.ArrayList;
@@ -173,10 +174,10 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     private void initCamera(){
 
-        setScope(0.055f, 0.055f, 0.1f, 25f);
+        setScope(0.055f, 0.055f, 0.1f, 45f);
 
         camMove(GLWorld.AXIS_Y, 1f);
-        camMove(GLWorld.AXIS_Z, 3f);
+        camMove(GLWorld.AXIS_Z, 5f);
     }
 
     @Override
@@ -270,7 +271,7 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
             List<GLUnit> list = new ArrayList<>();
 
-            GLUnit unit = new MeshMapTest(mContext);
+            GLUnit unit = new MeshUnit(mContext);
             unit.init();
 
             list.add(unit);
