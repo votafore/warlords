@@ -10,6 +10,7 @@ import android.opengl.Matrix;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLUnit;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.glutil.ObjectContainer;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -29,7 +30,6 @@ public class MeshMapTest extends GLUnit{
     float[][]     vertices;
 
     FloatBuffer[] normalBuffers;
-    float[][]     normals;
 
     @Override
     public void init() {
@@ -44,8 +44,8 @@ public class MeshMapTest extends GLUnit{
         int bm_width  = bit_map.getWidth();
         int bm_height = bit_map.getHeight();
 
-//        bm_width = 10;
-//        bm_height = 10;
+//        bm_width  = 50;
+//        bm_height = 50;
 
         for (int row = 0; row < bm_height; row++) {
             for (int col = 0; col < bm_width; col++) {
@@ -55,15 +55,14 @@ public class MeshMapTest extends GLUnit{
 
                 pixel_arr[row][col] = Color.blue(bit_map.getPixel(row, col)) - middleColor;
                 pixel_arr[row][col] = pixel_arr[row][col] / 25;
-
-                //Log.v("PIXEL", String.format("Pixel color %d in (%d,%d)", pixel_arr[row][col], row, col));
             }
         }
 
         bit_map.recycle();
 
         // создаем массив вершин
-        float step    = 0.1f;
+        float step    = 0.8f;
+        float delitel = 2f;
 
         float width   = step * bm_width;
         float height  = step * bm_height;
@@ -72,13 +71,14 @@ public class MeshMapTest extends GLUnit{
 
         // создаем буферы
         vertexBuffers = new FloatBuffer[bm_height-1];
-        //vertexBuffers = new FloatBuffer[1];
-        //vertices      = new float[bm_height - 1][bm_width * 2 * 3];
-        vertices      = new float[bm_height-1][(bm_width-1) * 2 * 3];
+        vertices      = new float[bm_height-1]
+                [
+                (bm_width-1) * 2 // количество треугольников в ряду
+                        * 3      // количество вершин для треугольника
+                        * 3      // количество координат на вершину
+                ];
 
         normalBuffers = new FloatBuffer[bm_height - 1];
-        //normalBuffers = new FloatBuffer[1];
-        normals       = new float[bm_height-1][(bm_width-1) * 2 * 3];
 
         // служебные (временые) переменные
         float[] vertex1;
@@ -89,92 +89,112 @@ public class MeshMapTest extends GLUnit{
 
         for (int row = 0; row < bm_height-1; row++) {
 
-            for (int col = 0; col < bm_width; col++) {
+            // (bm_width-1) * 2 = количество треугольников в ряду
+            // 3 = количество вершин
+            // 3 = количество координат для каждой вершины
+            // 4 = количество байт на каждую составляющую координаты
+            vertexBuffers[row] = ByteBuffer.allocateDirect((bm_width-1) * 2 * 3 * 3 * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
 
-                int pos = col * 6;
+            normalBuffers[row] = ByteBuffer.allocateDirect((bm_width-1) * 2 * 3 * 3 * 4)
+                    .order(ByteOrder.nativeOrder())
+                    .asFloatBuffer();
 
-                vertices[row][pos]   = col * step - width/2;
-                vertices[row][pos+1] = pixel_arr[row][col] * (step/2);
-                vertices[row][pos+2] = row * step - height/2;
+            for (int col = 0; col < bm_width-1; col++) {
 
-                // берем данные следующего ряда
-                vertices[row][pos+3] = col * step - width/2;
-                vertices[row][pos+4] = pixel_arr[row+1][col] * (step/2);
-                vertices[row][pos+5] = (row+1) * step - height/2;
+                int pos = col * 18;
+
+                int add = 0;
+
+                // координаты вершин треугольника
+
+                // 0-0
+                vertices[row][pos+add] = col                   * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row][col]   * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = row                   * step - height/2;
+                ++add;
+
+                //1-0
+                vertices[row][pos+add] = col                   * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row+1][col] * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = (row+1)               * step - height/2;
+                ++add;
+
+                // 0-1
+                vertices[row][pos+add] = (col+1)               * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row][col+1] * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = row                   * step - height/2;
+                ++add;
 
 
-                // расчет нормалей треугольников
-                if(col == 0)
-                    // если это последний ряд
-                    continue;
-
-                vertex1 = new float[]{vertices[row][pos-6],vertices[row][pos-5],vertices[row][pos-4]};
-                vertex2 = new float[]{vertices[row][pos-3],vertices[row][pos-2],vertices[row][pos-1]};
-                vertex3 = new float[]{vertices[row][pos]  ,vertices[row][pos+1],vertices[row][pos+2]};
-
-                curNormal = getNormal(vertex1, vertex2, vertex3);
-
-                normals[row][(col-1)*6]   = curNormal[0];
-                normals[row][(col-1)*6+1] = curNormal[1];
-                normals[row][(col-1)*6+2] = curNormal[2];
-
+                // расчет нормалей треугольника
                 vertex1 = new float[]{vertices[row][pos]  ,vertices[row][pos+1],vertices[row][pos+2]};
-                vertex2 = new float[]{vertices[row][pos-3],vertices[row][pos-2],vertices[row][pos-1]};
-                vertex3 = new float[]{vertices[row][pos+3],vertices[row][pos+4],vertices[row][pos+5]};
+                vertex2 = new float[]{vertices[row][pos+3],vertices[row][pos+4],vertices[row][pos+5]};
+                vertex3 = new float[]{vertices[row][pos+6],vertices[row][pos+7],vertices[row][pos+8]};
 
-                curNormal = getNormal(vertex1, vertex2, vertex3);
+                curNormal = ObjectContainer.getNormal(vertex1, vertex2, vertex3);
 
-                normals[row][(col-1)*6+3] = curNormal[0];
-                normals[row][(col-1)*6+4] = curNormal[1];
-                normals[row][(col-1)*6+5] = curNormal[2];
+                // сохраняем нормаль для каждой (3 шт) вершины треугольника
+                for (int counter = 0; counter < 3; counter++) {
+
+                    normalBuffers[row].put(curNormal);
+                }
 
 
 
-                vertex1 = new float[]{0f, 0f, -1f};
-                vertex2 = new float[]{-1f, 0f, 1f};
-                vertex3 = new float[]{1f, 0f, 1f};
 
-                float[] testNormal = getNormal(vertex1, vertex2, vertex3);
+
+
+                // координаты вершин 2-го треугольника
+
+                // 0-1
+                vertices[row][pos+add] = (col+1)                 * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row][col+1]   * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = row                     * step - height/2;
+                ++add;
+
+                // 1-0
+                vertices[row][pos+add]  = col                     * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row+1][col]   * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = (row+1)                 * step - height/2;
+                ++add;
+
+                // 1-1
+                vertices[row][pos+add] = (col+1)                 * step - width/2;
+                ++add;
+                vertices[row][pos+add] = pixel_arr[row+1][col+1] * (step/delitel);
+                ++add;
+                vertices[row][pos+add] = (row+1)                 * step - height/2;
+                ++add;
+
+
+                // расчет нормалей треугольника
+                vertex1 = new float[]{vertices[row][pos+9] ,vertices[row][pos+10],vertices[row][pos+11]};
+                vertex2 = new float[]{vertices[row][pos+12],vertices[row][pos+13],vertices[row][pos+14]};
+                vertex3 = new float[]{vertices[row][pos+15],vertices[row][pos+16],vertices[row][pos+17]};
+
+                curNormal = ObjectContainer.getNormal(vertex1, vertex2, vertex3);
+
+                // сохраняем нормаль для каждой (3 шт) вершины треугольника
+                for (int counter = 0; counter < 3; counter++) {
+
+                    normalBuffers[row].put(curNormal);
+                }
             }
 
-            vertexBuffers[row] = ByteBuffer.allocateDirect(vertices[row].length * 4)
-                    .order(ByteOrder.nativeOrder())
-                    .asFloatBuffer();
-
             vertexBuffers[row].put(vertices[row]);
-
-            normalBuffers[row] = ByteBuffer.allocateDirect(normals[row].length * 4)
-                    .order(ByteOrder.nativeOrder())
-                    .asFloatBuffer();
-
-            normalBuffers[row].put(normals[row]);
         }
-    }
-
-    private float[] getNormal(float[] v1, float[] v2, float[] v3){
-
-        float[] edge1;
-        float[] edge2;
-
-        edge1 = new float[]{v2[0] - v1[0],v2[1] - v1[1],v2[2] - v1[2]};
-        edge2 = new float[]{v3[0] - v1[0],v3[1] - v1[1],v3[2] - v1[2]};
-
-        float[] normal = new float[]{
-                edge1[1] * edge2[2] - edge1[2] * edge2[1],
-                edge1[2] * edge2[0] - edge1[0] * edge2[2],
-                edge1[0] * edge2[1] - edge1[1] * edge2[0]
-        };
-
-        // может и не надо, но...
-        // на всякий случай нормализую длину
-
-        float d = (float) Math.sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
-
-        normal[0] = normal[0] / d;
-        normal[1] = normal[1] / d;
-        normal[2] = normal[2] / d;
-
-        return normal;
     }
 
     @Override
@@ -187,15 +207,15 @@ public class MeshMapTest extends GLUnit{
         int location_u_Camera        = shader.mParams.get("u_camera");
         int location_u_lightPosition = shader.mParams.get("u_lightPosition");
 
-        GLES20.glUniform4f(location_u_Color, 0f, 0.9f, 0f, 1.0f);
+        GLES20.glUniform4f(location_u_Color, 0.3f, 0.9f, 0f, 1.0f);
 
         float[] tmpCamPosition = new float[4];
         System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
 
         Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
 
-        GLES20.glUniform4f(location_u_Camera, tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2], 1.0f);
-        GLES20.glUniform4f(location_u_lightPosition, 0f, 3f, 6f, 1.0f);
+        GLES20.glUniform3f(location_u_Camera, tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
+        GLES20.glUniform3f(location_u_lightPosition, 0f, 3f, 6f);
 
         for (int i = 0; i < vertexBuffers.length; i++) {
 
@@ -207,7 +227,7 @@ public class MeshMapTest extends GLUnit{
             GLES20.glVertexAttribPointer(location_a_Normal, 3, GLES20.GL_FLOAT, false, 0, normalBuffers[i]);
             GLES20.glEnableVertexAttribArray(location_a_Normal);
 
-            GLES20.glDrawArrays(GLES20.GL_TRIANGLE_STRIP, 0, vertices[i].length/3);
+            GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, vertices[i].length/3);
         }
     }
 }
