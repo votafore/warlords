@@ -29,7 +29,7 @@ public class ObjectContainer {
         BufferedReader  reader;
         Model           model;
 
-        // ?
+
         float[]         point;
         int             index;
 
@@ -130,9 +130,13 @@ public class ObjectContainer {
         list.add(model);
 
 
+
         ////////////////////////////////////////
         // файл прочитан
         // создаем буферы
+
+        // массив координат вершин треугольника
+        float[][] vertices;
 
         for (Model cur_model :list) {
 
@@ -147,8 +151,7 @@ public class ObjectContainer {
             if(isTexture)
                 cur_model.vt = ByteBuffer.allocateDirect(cur_model.v_size * 2 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
-            if(isNormals)
-                cur_model.vn = ByteBuffer.allocateDirect(cur_model.v_size * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
+            cur_model.vn = ByteBuffer.allocateDirect(cur_model.v_size * 3 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 
 
             int index_v;
@@ -156,6 +159,8 @@ public class ObjectContainer {
             int index_vn;
 
             for (int i = 0; i < cur_model.faces.size(); i++) {
+
+                vertices = new float[3][3];
 
                 // буфер вершин
                 int[][] face = cur_model.faces.get(i);
@@ -169,17 +174,15 @@ public class ObjectContainer {
                     index_v = facevertex[counter];
                     if(index_v < 0){
 
-                        cur_model.v.put(cur_model.arr_v.get(-index_v-1)[0]);
-                        cur_model.v.put(cur_model.arr_v.get(-index_v-1)[1]);
-                        cur_model.v.put(cur_model.arr_v.get(-index_v-1)[2]);
+                        vertices[numVertex] = cur_model.arr_v.get(-index_v-1);
 
                     }else{
 
-                        cur_model.v.put(getVertexValueByGlobalIndex(index_v,0));
-                        cur_model.v.put(getVertexValueByGlobalIndex(index_v,1));
-                        cur_model.v.put(getVertexValueByGlobalIndex(index_v,2));
+                        vertices[numVertex] = getVertexValueByGlobalIndex(index_v);
 
                     }
+
+                    cur_model.v.put(vertices[numVertex]);
 
                     counter++;
 
@@ -187,13 +190,11 @@ public class ObjectContainer {
                         index_vt = facevertex[counter];
                         if(index_vt < 0){
 
-                            cur_model.vt.put(cur_model.arr_vt.get(-index_vt-1)[0]);
-                            cur_model.vt.put(cur_model.arr_vt.get(-index_vt-1)[1]);
+                            cur_model.vt.put(cur_model.arr_vt.get(-index_vt-1));
 
                         }else{
 
-                            cur_model.vt.put(getTextureValueByGlobalIndex(index_vt, 0));
-                            cur_model.vt.put(getTextureValueByGlobalIndex(index_vt, 1));
+                            cur_model.vt.put(getTextureValueByGlobalIndex(index_vt));
 
                         }
 
@@ -205,17 +206,22 @@ public class ObjectContainer {
 
                         if(index_vn < 0){
 
-                            cur_model.vn.put(cur_model.arr_vn.get(-index_vn-1)[0]);
-                            cur_model.vn.put(cur_model.arr_vn.get(-index_vn-1)[1]);
-                            cur_model.vn.put(cur_model.arr_vn.get(-index_vn-1)[2]);
+                            cur_model.vn.put(cur_model.arr_vn.get(-index_vn-1));
 
                         }else{
 
-                            cur_model.vn.put(getNormalValueByGlobalIndex(index_vn, 0));
-                            cur_model.vn.put(getNormalValueByGlobalIndex(index_vn, 1));
-                            cur_model.vn.put(getNormalValueByGlobalIndex(index_vn, 2));
-
+                            cur_model.vn.put(getNormalValueByGlobalIndex(index_vn));
                         }
+                    }
+                }
+
+                if(!isNormals){
+
+                    float[] normal = getNormal(vertices[0],vertices[1],vertices[2]);
+
+                    for (int num_vertices = 0; num_vertices < 3; num_vertices++) {
+
+                        cur_model.vn.put(normal);
                     }
                 }
             }
@@ -225,12 +231,11 @@ public class ObjectContainer {
     /**
      *
      * @param globalIndex глобальный индекс вершины
-     * @param x_y_z 0 - x; 1 - y; 2 - z.
      * @return
      */
-    private float getVertexValueByGlobalIndex(int globalIndex, int x_y_z) {
+    private float[] getVertexValueByGlobalIndex(int globalIndex) {
 
-        float value;
+        float[] value;
 
         int count = 0;
 
@@ -245,16 +250,16 @@ public class ObjectContainer {
                 continue;
             }
 
-            value = model.arr_v.get(globalIndex - 1)[x_y_z];
+            value = model.arr_v.get(globalIndex - 1);
             break;
         }
 
         return value;
     }
 
-    private float getTextureValueByGlobalIndex(int globalIndex, int x_y){
+    private float[] getTextureValueByGlobalIndex(int globalIndex){
 
-        float value;
+        float[] value;
 
         int count = 0;
 
@@ -269,16 +274,16 @@ public class ObjectContainer {
                 continue;
             }
 
-            value = model.arr_vt.get(globalIndex-1)[x_y];
+            value = model.arr_vt.get(globalIndex-1);
             break;
         }
 
         return value;
     }
 
-    private float getNormalValueByGlobalIndex(int globalIndex, int x_y_z){
+    private float[] getNormalValueByGlobalIndex(int globalIndex){
 
-        float value;
+        float[] value;
 
         int count = 0;
 
@@ -293,13 +298,36 @@ public class ObjectContainer {
                 continue;
             }
 
-            value = model.arr_vn.get(globalIndex-1)[x_y_z];
+            value = model.arr_vn.get(globalIndex-1);
             break;
         }
 
         return value;
     }
 
+    public static float[] getNormal(float[] v1, float[] v2, float[] v3){
+
+        float[] edge1;
+        float[] edge2;
+
+        edge1 = new float[]{v2[0] - v1[0],v2[1] - v1[1],v2[2] - v1[2]};
+        edge2 = new float[]{v3[0] - v1[0],v3[1] - v1[1],v3[2] - v1[2]};
+
+        float[] normal = new float[]{
+                edge1[1] * edge2[2] - edge1[2] * edge2[1],
+                edge1[2] * edge2[0] - edge1[0] * edge2[2],
+                edge1[0] * edge2[1] - edge1[1] * edge2[0]
+        };
+
+        // нормализую длину
+        float d = (float) Math.sqrt(normal[0]*normal[0] + normal[1]*normal[1] + normal[2]*normal[2]);
+
+        normal[0] = normal[0] / d;
+        normal[1] = normal[1] / d;
+        normal[2] = normal[2] / d;
+
+        return normal;
+    }
 
 
 
