@@ -8,7 +8,6 @@ import android.os.AsyncTask;
 import android.support.annotation.IntDef;
 
 import com.votafore.warlords.MeshMapTest;
-import com.votafore.warlords.MeshUnit;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -74,9 +73,7 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public void setBaseColor(float[] baseColor) {
 
-        for (int i = 0; i < baseColor.length; i++) {
-            mBaseColor[i] = baseColor[i];
-        }
+        System.arraycopy(baseColor, 0, mBaseColor, 0, baseColor.length);
     }
 
 
@@ -257,7 +254,7 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
 
-    public List<GLUnit> mObjects;
+    public volatile List<GLUnit> mObjects;
 
     private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
 
