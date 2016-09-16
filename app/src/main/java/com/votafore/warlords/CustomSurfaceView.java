@@ -7,7 +7,6 @@ import android.view.MotionEvent;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
-import com.votafore.warlords.glutil.Constants;
 
 import java.util.HashMap;
 
@@ -17,7 +16,7 @@ public class CustomSurfaceView extends GLView {
     public CustomSurfaceView(Context context) {
         super(context);
 
-        mHandler = new MotionHandler(context, mCamera);
+        mHandler = new MotionHandlerJoystick(context, mCamera);
 
         mCamera.camMove(GLWorld.AXIS_Y, 3f);
     }
@@ -59,7 +58,7 @@ public class CustomSurfaceView extends GLView {
     ////////////////////////////////////////
     // обработка касаний
 
-    private MotionHandler mHandler;
+    private MotionHandlerJoystick mHandler;
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {

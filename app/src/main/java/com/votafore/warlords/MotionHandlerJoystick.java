@@ -89,8 +89,13 @@ public class MotionHandlerJoystick {
 
                     if (event.getPointerId(i) == mPositionHandler) {
 
-                        deltaX = event.getX(i) - positionX;
-                        deltaY = positionY - event.getY(i);
+                        deltaX = event.getX(i) - mWidth/4;
+                        deltaY = event.getY(i) - mHeight/2;
+
+                        deltaX = Math.min(deltaX, mWidth/4);
+
+                        deltaX /= 350;
+                        deltaY /= 350;
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
                                 +" historyX: "+String.valueOf(positionX)
@@ -104,17 +109,22 @@ public class MotionHandlerJoystick {
 
                         Log.v("TEST", "delta position:");
 
-                        positionX = event.getX(i);
-                        positionY = event.getY(i);
+//                        positionX = event.getX(i);
+//                        positionY = event.getY(i);
 
-                        mCamera.camMove(GLWorld.AXIS_X, deltaX / 30);
-                        mCamera.camMove(GLWorld.AXIS_Z, -deltaY / 30);
+                        mCamera.camMove(GLWorld.AXIS_X, deltaX);
+                        mCamera.camMove(GLWorld.AXIS_Z, deltaY);
                     }
 
                     if (event.getPointerId(i) == mOrientationHandler) {
 
-                        deltaX = orientationX - event.getX(i);
-                        deltaY = orientationY - event.getY(i);
+                        deltaX = event.getX(i) - mWidth/4*3;
+                        deltaY = mHeight/2 - event.getY(i);
+
+                        deltaX = Math.max(deltaX, -mWidth/4);
+
+                        deltaX /= 350;
+                        deltaY /= 350;
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
                                 +" historyX: "+String.valueOf(orientationX)
@@ -128,14 +138,14 @@ public class MotionHandlerJoystick {
 
                         Log.v("TEST", "delta orientation:");
 
-                        orientationX = event.getX(i);
-                        orientationY = event.getY(i);
+//                        orientationX = event.getX(i);
+//                        orientationY = event.getY(i);
 
                         // при вождении по горизонтали надо вращать по оси Y
-                        mCamera.camRotate(GLWorld.AXIS_Y, deltaX / 5);
+                        mCamera.camRotate(GLWorld.AXIS_Y, -deltaX);
 
                         // при вождении по вертикали - ось X
-                        mCamera.camRotate(GLWorld.AXIS_X, deltaY / 5);
+                        mCamera.camRotate(GLWorld.AXIS_X, deltaY);
 
                     }
                 }

@@ -269,7 +269,7 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
             List<GLUnit> list = new ArrayList<>();
 
-            GLUnit unit = new MeshUnit(mContext);
+            GLUnit unit = new MeshMapTest(mContext);
             unit.init();
 
             list.add(unit);
