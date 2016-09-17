@@ -75,28 +75,26 @@ public abstract class GLView extends GLSurfaceView {
      */
     protected GLShader.IGLShaderCreator mShaderCreator;
 
-    public GLView(final Context context) {
+    public GLView(final Context context, GLWorld world, GLRenderer renderer) {
         super(context);
 
-        mContext = context;
+        mContext    = context;
+        mWorld      = world;
+        mCamera     = (ICamera)mWorld;
 
         setEGLContextClientVersion(2);
 
-        mWorld = GLWorld.getInstance(mContext);
-
-        mCamera = (ICamera)mWorld;
-
         init();
 
-        GLRenderer renderer = mWorld.getRenderer();
-
-        if(renderer == null){
-            renderer = new GLRenderer(context, resVertexShader, resFragmentShader);
-            mWorld.setRenderer(renderer);
-        }
-
-        // устанавливаем загрузчик шейдера
-        // и получение его параметров
+//        GLRenderer renderer = mWorld.getRenderer();
+//
+//        if(renderer == null){
+//            renderer = new GLRenderer(context, resVertexShader, resFragmentShader);
+//            mWorld.setRenderer(renderer);
+//        }
+//
+//        // устанавливаем загрузчик шейдера
+//        // и получение его параметров
         renderer.getShader().setShaderCreator(mShaderCreator);
 
         setRenderer(renderer);

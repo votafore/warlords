@@ -6,6 +6,7 @@ import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 
 import com.votafore.warlords.game.Instance;
+import com.votafore.warlords.glsupport.GLRenderer;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
@@ -32,17 +33,20 @@ public class GameManager {
 
     private GameManager(Context context){
 
-        mContext = context;
+        GLRenderer  mRenderer;
 
-        mSurfaceView = new GLView(mContext) {
+        mContext    = context;
+        mWorld      = new GLWorld(mContext);
+        mRenderer   = new GLRenderer(mContext, mWorld, R.raw.shader_vertex, R.raw.shader_fragment);
+
+
+
+        mSurfaceView = new GLView(mContext, mWorld, mRenderer) {
             @Override
             protected void init() {
 
                 /////////////////////////////
                 // обязательная часть
-
-                resVertexShader     = R.raw.shader_vertex;
-                resFragmentShader   = R.raw.shader_fragment;
 
                 mShaderCreator = new GLShader.IGLShaderCreator() {
 
@@ -86,7 +90,7 @@ public class GameManager {
 
 
 
-    Instance mInstance;
+    private Instance mInstance;
 
     public void setInstance(Instance instance){
         mInstance = instance;
@@ -97,6 +101,16 @@ public class GameManager {
     private GLView mSurfaceView;
 
     public GLSurfaceView getSurfaceView(){
+
         return mSurfaceView;
+    }
+
+
+
+
+    private GLWorld     mWorld;
+
+    public GLWorld getWorld(){
+        return mWorld;
     }
 }

@@ -15,11 +15,11 @@ import java.util.List;
 
 public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
-    private static GLWorld mThis;
+    //private static GLWorld mThis;
 
     private Context mContext;
 
-    private GLWorld(Context mContext) {
+    public GLWorld(Context mContext) {
         this.mContext = mContext;
 
         mPositionMatrix     = new float[16];
@@ -30,19 +30,19 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
         mObjects = new ArrayList<>();
 
-        ObjectLoader loader = new ObjectLoader();
-        loader.execute();
+//        ObjectLoader loader = new ObjectLoader();
+//        loader.execute();
 
         initCamera();
     }
 
-    public static GLWorld getInstance(Context context){
-
-        if(mThis == null)
-            mThis = new GLWorld(context);
-
-        return mThis;
-    }
+//    public static GLWorld getInstance(Context context){
+//
+//        if(mThis == null)
+//            mThis = new GLWorld(context);
+//
+//        return mThis;
+//    }
 
 
     ////////////////////////////////////////////////////////////
@@ -259,29 +259,37 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public List<GLUnit> mObjects;
 
-    private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
+//    private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
+//
+//        @Override
+//        protected List<GLUnit> doInBackground(Void... params) {
+//
+//            // загрузка объектов сцены
+//            // пока что тестовый вариант
+//
+//            List<GLUnit> list = new ArrayList<>();
+//
+//            GLUnit unit = new MeshMapTest(mContext);
+//            unit.init();
+//
+//            list.add(unit);
+//
+//            return list;
+//        }
+//
+//        @Override
+//        protected void onPostExecute(List<GLUnit> list) {
+//
+//            mObjects = list;
+//        }
+//    }
 
-        @Override
-        protected List<GLUnit> doInBackground(Void... params) {
+    public void attachObject(GLUnit unit){
+        mObjects.add(unit);
+    }
 
-            // загрузка объектов сцены
-            // пока что тестовый вариант
-
-            List<GLUnit> list = new ArrayList<>();
-
-            GLUnit unit = new MeshMapTest(mContext);
-            unit.init();
-
-            list.add(unit);
-
-            return list;
-        }
-
-        @Override
-        protected void onPostExecute(List<GLUnit> list) {
-
-            mObjects = list;
-        }
+    public void deleteObject(GLUnit unit){
+        mObjects.remove(unit);
     }
 
     ////////////////////////////////////////////////////////////
@@ -292,15 +300,15 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
 
-    public GLRenderer mRenderer;
-
-    public GLRenderer getRenderer() {
-        return mRenderer;
-    }
-
-    public void setRenderer(GLRenderer mRenderer) {
-        this.mRenderer = mRenderer;
-    }
+//    public GLRenderer mRenderer;
+//
+//    public GLRenderer getRenderer() {
+//        return mRenderer;
+//    }
+//
+//    public void setRenderer(GLRenderer mRenderer) {
+//        this.mRenderer = mRenderer;
+//    }
 
 
 }

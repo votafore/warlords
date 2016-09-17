@@ -2,6 +2,7 @@ package com.votafore.warlords.game;
 
 import android.content.Context;
 
+import com.votafore.warlords.GameManager;
 import com.votafore.warlords.glsupport.GLUnit;
 
 /**
@@ -49,6 +50,13 @@ public class Instance {
 
     public void setMap(GLUnit map){
         mMap = map;
+        mMap.init();
+
+        GameManager.getInstance(mContext).getWorld().attachObject(mMap);
+    }
+
+    public GLUnit getMap(){
+        return mMap;
     }
 
 
@@ -57,5 +65,6 @@ public class Instance {
      */
     public void startInstance(){
 
+        GameManager manager = GameManager.getInstance(mContext);
     }
 }

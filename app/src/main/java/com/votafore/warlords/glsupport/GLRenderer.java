@@ -40,9 +40,9 @@ public  class GLRenderer implements Renderer {
     private GLWorld      mWorld;
     private ICallback    mCallbackHandler;
 
-    public GLRenderer(Context context, int resVertexShader, int resFragmentShader) {
+    public GLRenderer(Context context, GLWorld world, int resVertexShader, int resFragmentShader) {
 
-        mWorld              = GLWorld.getInstance(context);
+        mWorld              = world;
         mCallbackHandler    = (ICallback)mWorld;
         mShader             = new GLShader(context, resVertexShader, resFragmentShader);
     }
