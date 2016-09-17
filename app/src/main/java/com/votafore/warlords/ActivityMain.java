@@ -24,7 +24,13 @@ public class ActivityMain extends AppCompatActivity {
                 |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 |View.SYSTEM_UI_FLAG_FULLSCREEN);
 
-        mSurfaceView = new CustomSurfaceView(this);
+
+
+        //mSurfaceView = new CustomSurfaceView(this);
+
+        GameManager manager = GameManager.getInstance(getApplicationContext());
+        mSurfaceView = manager.getSurfaceView();
+
         setContentView(mSurfaceView);
 
 

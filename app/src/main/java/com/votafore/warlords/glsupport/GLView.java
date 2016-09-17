@@ -84,6 +84,8 @@ public abstract class GLView extends GLSurfaceView {
 
         mWorld = GLWorld.getInstance(mContext);
 
+        mCamera = (ICamera)mWorld;
+
         init();
 
         GLRenderer renderer = mWorld.getRenderer();
@@ -99,8 +101,6 @@ public abstract class GLView extends GLSurfaceView {
 
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        mCamera = (ICamera)mWorld;
     }
 
 

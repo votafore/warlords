@@ -82,8 +82,8 @@ public class MotionHandlerJoystick {
 
                         deltaX = Math.min(deltaX, mWidth/4);
 
-                        deltaX /= 450;
-                        deltaY /= 450;
+                        deltaX /= 650;
+                        deltaY /= 650;
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
                                 //+" historyX: "+String.valueOf(positionX)
