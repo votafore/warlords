@@ -10,6 +10,8 @@ import com.votafore.warlords.game.Instance;
 
 public class ActivityStart extends AppCompatActivity implements View.OnClickListener {
 
+    GameManager manager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -23,7 +25,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
 
 
-        GameManager manager = GameManager.getInstance(getApplicationContext());
+        manager = GameManager.getInstance(getApplicationContext());
 
         // предполагается что будет возможность либо создать игру, либо присоединиться к созданной
         // пока что создаем игру
@@ -39,6 +41,8 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
     @Override
     public void onClick(View v) {
+
+        manager.startGame();
 
         // наступил момент, когда статус "Готов к бою" установили все
         Intent i = new Intent(this, ActivityMain.class);
