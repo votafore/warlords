@@ -4,18 +4,15 @@ package com.votafore.warlords.glsupport;
 import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.AsyncTask;
 import android.support.annotation.IntDef;
-
-import com.votafore.warlords.MeshMapTest;
-import com.votafore.warlords.MeshUnit;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
-    //private static GLWorld mThis;
+
+
 
     private Context mContext;
 
@@ -30,20 +27,8 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
         mObjects = new ArrayList<>();
 
-//        ObjectLoader loader = new ObjectLoader();
-//        loader.execute();
-
         initCamera();
     }
-
-//    public static GLWorld getInstance(Context context){
-//
-//        if(mThis == null)
-//            mThis = new GLWorld(context);
-//
-//        return mThis;
-//    }
-
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -259,30 +244,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public List<GLUnit> mObjects;
 
-//    private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
-//
-//        @Override
-//        protected List<GLUnit> doInBackground(Void... params) {
-//
-//            // загрузка объектов сцены
-//            // пока что тестовый вариант
-//
-//            List<GLUnit> list = new ArrayList<>();
-//
-//            GLUnit unit = new MeshMapTest(mContext);
-//            unit.init();
-//
-//            list.add(unit);
-//
-//            return list;
-//        }
-//
-//        @Override
-//        protected void onPostExecute(List<GLUnit> list) {
-//
-//            mObjects = list;
-//        }
-//    }
 
     public void attachObject(GLUnit unit){
         mObjects.add(unit);
@@ -291,24 +252,5 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
     public void deleteObject(GLUnit unit){
         mObjects.remove(unit);
     }
-
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    // РАЗДЕЛ ВСЯЧИНА
-    // будем хранить ссылку на рендерер т.к. он будет существовать пока
-    // существует объект GLWorld
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-
-//    public GLRenderer mRenderer;
-//
-//    public GLRenderer getRenderer() {
-//        return mRenderer;
-//    }
-//
-//    public void setRenderer(GLRenderer mRenderer) {
-//        this.mRenderer = mRenderer;
-//    }
-
 
 }

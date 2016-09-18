@@ -5,6 +5,9 @@ import android.content.Context;
 import com.votafore.warlords.GameManager;
 import com.votafore.warlords.glsupport.GLUnit;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * @author Votafore
  * Created on 17.09.2016.
@@ -46,6 +49,7 @@ public class Instance {
         mContext    = context;
         mGameID     = System.currentTimeMillis();
         mPlayerID   = creator;
+        mPlayers    = new ArrayList<>();
     }
 
     public void setMap(GLUnit map){
@@ -55,16 +59,16 @@ public class Instance {
         GameManager.getInstance(mContext).getWorld().attachObject(mMap);
     }
 
-    public GLUnit getMap(){
-        return mMap;
-    }
 
 
-    /**
-     * команда для старта игры
-     */
-    public void startInstance(){
 
-        GameManager manager = GameManager.getInstance(mContext);
+    List<Player> mPlayers;
+
+    public void addPlayer(Player player){
+
+        // на случай, если такой уже есть (правда не понятно как такое может получиться)
+        mPlayers.remove(player);
+
+        mPlayers.add(player);
     }
 }

@@ -86,15 +86,8 @@ public abstract class GLView extends GLSurfaceView {
 
         init();
 
-//        GLRenderer renderer = mWorld.getRenderer();
-//
-//        if(renderer == null){
-//            renderer = new GLRenderer(context, resVertexShader, resFragmentShader);
-//            mWorld.setRenderer(renderer);
-//        }
-//
-//        // устанавливаем загрузчик шейдера
-//        // и получение его параметров
+        // устанавливаем загрузчик шейдера
+        // и получение его параметров
         renderer.getShader().setShaderCreator(mShaderCreator);
 
         setRenderer(renderer);

@@ -4,7 +4,7 @@ package com.votafore.warlords.game;
  * @author Votafore
  * Created on 17.09.2016.
  */
-public abstract class GameProcess {
+public abstract class Player {
 
     /**
      * Переменная, хранящая количество денег

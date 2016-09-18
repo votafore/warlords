@@ -66,11 +66,12 @@ public class GLShader {
     public HashMap<String, Integer> mParams;
 
     public GLShader(Context context, int resShaderVertex, int resShaderFragment){
-        mContext = context;
-        mParams = new HashMap<>();
 
-        resVertexShader = resShaderVertex;
-        resFragmentShader = resShaderFragment;
+        mContext            = context;
+        mParams             = new HashMap<>();
+
+        resVertexShader     = resShaderVertex;
+        resFragmentShader   = resShaderFragment;
     }
 
     public void setShaderCreator(IGLShaderCreator shaderCreator) {
