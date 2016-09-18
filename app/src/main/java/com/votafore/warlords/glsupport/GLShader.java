@@ -74,10 +74,6 @@ public class GLShader {
         resFragmentShader   = resShaderFragment;
     }
 
-    public void setShaderCreator(IGLShaderCreator shaderCreator) {
-        this.shaderCreator = shaderCreator;
-    }
-
     public void createShader(){
 
         int vertexShaderId      = ShaderUtils.createShader(mContext, GLES20.GL_VERTEX_SHADER   , resVertexShader);
@@ -87,6 +83,14 @@ public class GLShader {
 
         GLES20.glUseProgram(programID);
 
-        shaderCreator.populateParameters(programID, mParams);
+        mParams.put("u_Matrix"       , GLES20.glGetUniformLocation(programID, "u_Matrix"));
+        mParams.put("u_color"        , GLES20.glGetUniformLocation(programID, "u_color"));
+
+        mParams.put("a_position"     , GLES20.glGetAttribLocation(programID, "a_position"));
+        mParams.put("a_normal"       , GLES20.glGetAttribLocation(programID, "a_normal"));
+
+        // параметры fragment шейдера
+        mParams.put("u_camera"       , GLES20.glGetUniformLocation(programID, "u_camera"));
+        mParams.put("u_lightPosition", GLES20.glGetUniformLocation(programID, "u_lightPosition"));
     }
 }

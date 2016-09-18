@@ -1,23 +1,22 @@
 package com.votafore.warlords.glsupport;
 
 
-import android.content.Context;
-import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.support.annotation.IntDef;
+
+import com.votafore.warlords.GameManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
+public class GLWorld implements GLView.ICamera {
 
 
+    private GameManager     mManager;
 
+    public GLWorld(GameManager manager) {
 
-    private Context mContext;
-
-    public GLWorld(Context mContext) {
-        this.mContext = mContext;
+        mManager    = manager;
 
         mPositionMatrix     = new float[16];
         Matrix.setIdentityM(mPositionMatrix, 0);
@@ -38,12 +37,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
     ////////////////////////////////////////////////////////////
 
     /**
-     * mBaseColor - базовый цвет
-     * в который очищается пространство при создании рундерера
-     */
-    private float[] mBaseColor = new float[]{0.5f, 0.5f, 0.5f, 1f};
-
-    /**
      * mProjectionMatrix - матрица проекции.
      */
     public float[] mProjectionMatrix   = new float[16];
@@ -55,70 +48,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
      */
     public volatile float[] mViewMatrix   = new float[16];
 
-
-
-    public void setBaseColor(float[] baseColor) {
-
-        for (int i = 0; i < baseColor.length; i++) {
-            mBaseColor[i] = baseColor[i];
-        }
-    }
-
-
-
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    // РАЗДЕЛ ОБРАБОТКИ СОБЫТИЙ РЕНДЕРЕРА
-    // GLRender.ICallback
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-
-
-    // реализация интерфейса
-    @Override
-    public void onSurfaceCreated(){
-
-        GLES20.glClearColor(mBaseColor[0],mBaseColor[1],mBaseColor[2],mBaseColor[3]);
-
-        // подготовка матрицы вида
-        positionChanged();
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height){
-
-        float left      = -mWidth/2;
-        float right     =  mWidth/2;
-        float bottom    = -mHeight/2;
-        float top       =  mHeight/2;
-        float near      =  mNear;
-        float far       =  mFar;
-
-        float ratio = (float) height / width;
-        bottom  *= ratio;
-        top     *= ratio;
-
-        if (width > height) {
-
-            bottom  = -mHeight/2;
-            top     =  mHeight/2;
-
-            ratio = (float) width / height;
-            left *= ratio;
-            right *= ratio;
-        }
-
-        Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-    }
-
-    @Override
-    public void onDrawFrame(GLShader shader) {
-
-        for (GLUnit unit : mObjects) {
-
-            unit.draw(shader);
-        }
-    }
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////

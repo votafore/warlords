@@ -50,6 +50,7 @@ public class Instance {
         mGameID     = System.currentTimeMillis();
         mPlayerID   = creator;
         mPlayers    = new ArrayList<>();
+        mObjects    = new ArrayList<>();
     }
 
     public void setMap(GLUnit map){
@@ -57,6 +58,10 @@ public class Instance {
         mMap.init();
 
         GameManager.getInstance(mContext).getWorld().attachObject(mMap);
+    }
+
+    public GLUnit getMap(){
+        return mMap;
     }
 
 
@@ -70,5 +75,14 @@ public class Instance {
         mPlayers.remove(player);
 
         mPlayers.add(player);
+    }
+
+
+
+
+    List<GLUnit> mObjects;
+
+    public List<GLUnit> getObjects(){
+        return mObjects;
     }
 }

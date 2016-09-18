@@ -5,6 +5,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 
+import com.votafore.warlords.Constants;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -33,31 +35,25 @@ public  class GLRenderer implements Renderer {
     public interface ICallback{
         void onSurfaceCreated();
         void onSurfaceChanged(int width, int height);
-        void onDrawFrame(GLShader shader);
+        void onDrawFrame();
     }
 
-    private GLShader     mShader;
-    private GLWorld      mWorld;
     private ICallback    mCallbackHandler;
 
-    public GLRenderer(Context context, GLWorld world, int resVertexShader, int resFragmentShader) {
+    public GLRenderer(ICallback callback) {
 
-        mWorld              = world;
-        mCallbackHandler    = (ICallback)mWorld;
-        mShader             = new GLShader(context, resVertexShader, resFragmentShader);
-    }
-
-    public GLShader getShader(){
-        return mShader;
+        mCallbackHandler    = callback;
     }
 
     @Override
     public void onSurfaceCreated(GL10 arg0, EGLConfig arg1) {
 
-        mCallbackHandler.onSurfaceCreated();
-        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        float[] mBaseColor = Constants.base_color;
 
-        mShader.createShader();
+        GLES20.glEnable(GLES20.GL_DEPTH_TEST);
+        GLES20.glClearColor(mBaseColor[0],mBaseColor[1],mBaseColor[2],mBaseColor[3]);
+
+        mCallbackHandler.onSurfaceCreated();
     }
 
     @Override
@@ -72,13 +68,6 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        float[] mat = new float[16];
-        Matrix.setIdentityM(mat, 0);
-
-        Matrix.multiplyMM(mat, 0, mWorld.mProjectionMatrix, 0, mWorld.mViewMatrix, 0);
-
-        GLES20.glUniformMatrix4fv(mShader.mParams.get("u_Matrix"), 1, false, mat, 0);
-
-        mCallbackHandler.onDrawFrame(mShader);
+        mCallbackHandler.onDrawFrame();
     }
 }
