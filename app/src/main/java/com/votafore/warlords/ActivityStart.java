@@ -1,6 +1,8 @@
 package com.votafore.warlords;
 
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -18,8 +20,10 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
         setContentView(R.layout.activity_start);
 
         Button btn = (Button) findViewById(R.id.btn_start);
+        Button btn_test = (Button) findViewById(R.id.btn_testwifi);
 
         btn.setOnClickListener(this);
+        btn_test.setOnClickListener(this);
 
 
 
@@ -42,10 +46,26 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
     @Override
     public void onClick(View v) {
 
-        manager.startGame();
+        switch (v.getId()){
+            case R.id.btn_start:
 
-        // наступил момент, когда статус "Готов к бою" установили все
-        Intent i = new Intent(this, ActivityMain.class);
-        startActivity(i);
+                manager.startGame();
+
+                // наступил момент, когда статус "Готов к бою" установили все
+                Intent i = new Intent(this, ActivityMain.class);
+                startActivity(i);
+
+                break;
+
+            case R.id.btn_testwifi:
+
+                ConnectivityManager con_manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
+                NetworkInfo info = con_manager.getActiveNetworkInfo();
+
+                if(!info.isConnected())
+                    return;
+
+
+        }
     }
 }

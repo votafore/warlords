@@ -104,7 +104,15 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-        //mCallbackHandler.onDrawFrame();
+
+
+        GLES20.glUniform3f(mShader.mParams.get("u_lightPosition")   , 0f  , 3f  , 6f);
+        GLES20.glUniform4f(mShader.mParams.get("u_color")           , 0.3f, 0.9f, 0f, 1.0f);
+
+        float[] tmpCamPosition = new float[4];
+        System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
+        Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
+        GLES20.glUniform3f(mShader.mParams.get("u_camera"), tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
 
         float[] mat = new float[16];
         Matrix.setIdentityM(mat, 0);
@@ -115,6 +123,9 @@ public  class GLRenderer implements Renderer {
 
         // первым делом отрисовываем карту
         mInstance.getMap().draw(mShader);
+
+        // и базу
+        mInstance.mBase.draw(mShader);
 
 
         // потом все остальные объекты сцены

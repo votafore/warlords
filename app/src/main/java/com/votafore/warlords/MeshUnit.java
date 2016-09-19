@@ -37,20 +37,16 @@ public class MeshUnit extends GLUnit {
 
         int location_a_Position      = shader.mParams.get("a_position");
         int location_a_Normal        = shader.mParams.get("a_normal");
-        int location_u_Color         = shader.mParams.get("u_color");
 
-        int location_u_Camera        = shader.mParams.get("u_camera");
-        int location_u_lightPosition = shader.mParams.get("u_lightPosition");
+        //int location_u_Camera        = shader.mParams.get("u_camera");
 
-        GLES20.glUniform4f(location_u_Color, 0.4f, 0.9f, 0.5f, 1f);
 
-        float[] tmpCamPosition = new float[4];
-        System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
-
-        Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
-
-        GLES20.glUniform3f(location_u_Camera        , tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
-        GLES20.glUniform3f(location_u_lightPosition , 1f, 3f, -0.5f);
+//        float[] tmpCamPosition = new float[4];
+//        System.arraycopy(GLWorld.position_vec, 0, tmpCamPosition, 0,4);
+//
+//        Matrix.multiplyMV(tmpCamPosition, 0, GLWorld.mPositionMatrix, 0, tmpCamPosition, 0);
+//
+//        GLES20.glUniform3f(location_u_Camera        , tmpCamPosition[0], tmpCamPosition[1], tmpCamPosition[2]);
 
         for (int i = 0; i < mContainer.list.size(); i++) {
 

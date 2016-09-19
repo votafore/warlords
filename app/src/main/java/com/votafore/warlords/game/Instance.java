@@ -3,6 +3,7 @@ package com.votafore.warlords.game;
 import android.content.Context;
 
 import com.votafore.warlords.GameManager;
+import com.votafore.warlords.MeshUnit;
 import com.votafore.warlords.glsupport.GLUnit;
 
 import java.util.ArrayList;
@@ -39,6 +40,11 @@ public class Instance {
 
 
     /**
+     * здание командного центра
+     */
+    public GLUnit mBase;
+
+    /**
      * служебные переменные
      */
 
@@ -51,6 +57,9 @@ public class Instance {
         mPlayerID   = creator;
         mPlayers    = new ArrayList<>();
         mObjects    = new ArrayList<>();
+
+        mBase       = new MeshUnit(mContext);
+        mBase.init();
     }
 
     public void setMap(GLUnit map){
