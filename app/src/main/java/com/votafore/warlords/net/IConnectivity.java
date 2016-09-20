@@ -9,4 +9,6 @@ package com.votafore.warlords.net;
 public interface IConnectivity {
 
     boolean init();
+
+    void release();
 }
