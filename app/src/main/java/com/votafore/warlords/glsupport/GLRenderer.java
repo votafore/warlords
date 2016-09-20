@@ -37,8 +37,6 @@ public  class GLRenderer implements Renderer {
         mWorld      = world;
         mInstance   = instance;
         mShader     = shader;
-
-        //mCallbackHandler    = calback;
     }
 
     @Override

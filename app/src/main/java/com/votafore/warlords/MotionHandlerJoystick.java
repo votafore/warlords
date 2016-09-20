@@ -30,18 +30,6 @@ public class MotionHandlerJoystick {
     private int mOrientationHandler;
 
 
-
-    // хранят последние обработанные значения для позиции
-    private float positionX;
-    private float positionY;
-
-    // хранят последние обработанные значения для ориентации
-    private float orientationX;
-    private float orientationY;
-
-
-
-
     private int mWidth;
     private int mHeight;
 
@@ -89,53 +77,57 @@ public class MotionHandlerJoystick {
 
                     if (event.getPointerId(i) == mPositionHandler) {
 
-                        deltaX = event.getX(i) - positionX;
-                        deltaY = positionY - event.getY(i);
+                        deltaX = event.getX(i) - mWidth/4;
+                        deltaY = event.getY(i) - mHeight/2;
+
+                        deltaX = Math.min(deltaX, mWidth/4);
+
+                        deltaX /= 650;
+                        deltaY /= 650;
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
-                                +" historyX: "+String.valueOf(positionX)
+                                //+" historyX: "+String.valueOf(positionX)
                                 +" X: "+String.valueOf(event.getX(i))
                                 +" deltaX: " + String.valueOf(deltaX));
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
-                                +" historyY: "+String.valueOf(positionY)
+                                //+" historyY: "+String.valueOf(positionY)
                                 +" Y: "+String.valueOf(event.getY(i))
                                 +" deltaY: " + String.valueOf(deltaY));
 
                         Log.v("TEST", "delta position:");
 
-                        positionX = event.getX(i);
-                        positionY = event.getY(i);
-
-                        mCamera.camMove(GLWorld.AXIS_X, deltaX / 30);
-                        mCamera.camMove(GLWorld.AXIS_Z, -deltaY / 30);
+                        mCamera.camMove(GLWorld.AXIS_X, deltaX);
+                        mCamera.camMove(GLWorld.AXIS_Z, deltaY);
                     }
 
                     if (event.getPointerId(i) == mOrientationHandler) {
 
-                        deltaX = orientationX - event.getX(i);
-                        deltaY = orientationY - event.getY(i);
+                        deltaX = event.getX(i) - mWidth/4*3;
+                        deltaY = mHeight/2 - event.getY(i);
+
+                        deltaX = Math.max(deltaX, -mWidth/4);
+
+                        deltaX /= 350;
+                        deltaY /= 350;
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
-                                +" historyX: "+String.valueOf(orientationX)
+                                //+" historyX: "+String.valueOf(orientationX)
                                 +" X: "+String.valueOf(event.getX(i))
                                 +" deltaX: " + String.valueOf(deltaX));
 
                         Log.v("TEST","pointer:"+String.valueOf(i)
-                                +" historyY: "+String.valueOf(orientationY)
+                                //+" historyY: "+String.valueOf(orientationY)
                                 +" Y: "+String.valueOf(event.getY(i))
                                 +" deltaY: " + String.valueOf(deltaY));
 
                         Log.v("TEST", "delta orientation:");
 
-                        orientationX = event.getX(i);
-                        orientationY = event.getY(i);
-
                         // при вождении по горизонтали надо вращать по оси Y
-                        mCamera.camRotate(GLWorld.AXIS_Y, deltaX / 5);
+                        mCamera.camRotate(GLWorld.AXIS_Y, -deltaX);
 
                         // при вождении по вертикали - ось X
-                        mCamera.camRotate(GLWorld.AXIS_X, deltaY / 5);
+                        mCamera.camRotate(GLWorld.AXIS_X, deltaY);
 
                     }
                 }
@@ -165,9 +157,6 @@ public class MotionHandlerJoystick {
                 // к которому надо "привязаться"
                 mOrientationHandler = event.getPointerId(event.getActionIndex());
 
-                orientationX = event.getX(event.getActionIndex());
-                orientationY = event.getY(event.getActionIndex());
-
                 Log.v("TEST","установили ИД для управления ориентацией (" + String.valueOf(mOrientationHandler) + ")");
             }
         }else{
@@ -178,9 +167,6 @@ public class MotionHandlerJoystick {
 
                 // нет "управляющего" касания
                 mPositionHandler = event.getPointerId(event.getActionIndex());
-
-                positionX = event.getX(event.getActionIndex());
-                positionY = event.getY(event.getActionIndex());
 
                 Log.v("TEST","установили ИД для управления положением (" + String.valueOf(mPositionHandler) + ")");
             }
