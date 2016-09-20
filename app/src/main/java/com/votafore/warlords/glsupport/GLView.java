@@ -54,69 +54,26 @@ public abstract class GLView extends GLSurfaceView {
      */
     protected ICamera mCamera;
 
-    /**
-     * <b>resVertexShader</b> - ссылка на ресурс вершинного шейдера.
-     * <br>Предполагается что он будет находится в каталоге ресурсов raw
-     * в виде файла *.glsl
-     */
-    protected int resVertexShader;
 
-    /**
-     * <b>resFragmentShader</b> - ссылка на ресурс фрагментарного шейдера.
-     * <br>Предполагается что он будет находится в каталоге ресурсов raw
-     * в виде файла *.glsl
-     */
-    protected int resFragmentShader;
-
-    /**
-     * <b>mShaderCreator</b> - объект, реализующий интерфейс <b>GLShader.IGLShaderCreator</b>.
-     * Является ли он экземпляром класса или это анонимный объект - не важно
-     * @see com.votafore.warlords.glsupport.GLShader.IGLShaderCreator
-     */
-    protected GLShader.IGLShaderCreator mShaderCreator;
-
-    public GLView(final Context context) {
+    public GLView(final Context context, GLWorld world, GLRenderer renderer) {
         super(context);
 
-        mContext = context;
+        mContext    = context;
+        mWorld      = world;
+        mCamera     = mWorld;
 
         setEGLContextClientVersion(2);
 
-        mWorld = GLWorld.getInstance(mContext);
-
         init();
-
-        GLRenderer renderer = mWorld.getRenderer();
-
-        if(renderer == null){
-            renderer = new GLRenderer(context, resVertexShader, resFragmentShader);
-            mWorld.setRenderer(renderer);
-        }
-
-        // устанавливаем загрузчик шейдера
-        // и получение его параметров
-        renderer.getShader().setShaderCreator(mShaderCreator);
 
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
-
-        mCamera = (ICamera)mWorld;
     }
 
 
     /**
      * в методе инициализируются переменные необходимые для дальнейшей
      * работы программы.<br>
-     * <b>Обязательно должны быть инициализированы переменные:</b>
-     * <ul>
-     * <li>resVertexShader
-     * <li>resFragmentShader
-     * <li>mShaderCreator
-     * </ul> <br>
-     * через переменную mWorld можно получить доступ к другим настройкам, но это не обязательная часть.
-     * @see #resVertexShader
-     * @see #resFragmentShader
-     * @see com.votafore.warlords.glsupport.GLShader.IGLShaderCreator
      */
     protected abstract void init();
 }

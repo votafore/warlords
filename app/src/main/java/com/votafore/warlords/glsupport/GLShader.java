@@ -66,15 +66,12 @@ public class GLShader {
     public HashMap<String, Integer> mParams;
 
     public GLShader(Context context, int resShaderVertex, int resShaderFragment){
-        mContext = context;
-        mParams = new HashMap<>();
 
-        resVertexShader = resShaderVertex;
-        resFragmentShader = resShaderFragment;
-    }
+        mContext            = context;
+        mParams             = new HashMap<>();
 
-    public void setShaderCreator(IGLShaderCreator shaderCreator) {
-        this.shaderCreator = shaderCreator;
+        resVertexShader     = resShaderVertex;
+        resFragmentShader   = resShaderFragment;
     }
 
     public void createShader(){
@@ -86,6 +83,14 @@ public class GLShader {
 
         GLES20.glUseProgram(programID);
 
-        shaderCreator.populateParameters(programID, mParams);
+        mParams.put("u_Matrix"       , GLES20.glGetUniformLocation(programID, "u_Matrix"));
+        mParams.put("u_color"        , GLES20.glGetUniformLocation(programID, "u_color"));
+
+        mParams.put("a_position"     , GLES20.glGetAttribLocation(programID, "a_position"));
+        mParams.put("a_normal"       , GLES20.glGetAttribLocation(programID, "a_normal"));
+
+        // параметры fragment шейдера
+        mParams.put("u_camera"       , GLES20.glGetUniformLocation(programID, "u_camera"));
+        mParams.put("u_lightPosition", GLES20.glGetUniformLocation(programID, "u_lightPosition"));
     }
 }

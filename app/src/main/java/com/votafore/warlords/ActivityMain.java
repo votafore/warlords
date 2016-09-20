@@ -3,7 +3,6 @@ package com.votafore.warlords;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,8 @@ import android.widget.TextView;
 
 public class ActivityMain extends AppCompatActivity {
 
-    GLSurfaceView mSurfaceView;
+    GLSurfaceView   mSurfaceView;
+    GameManager     mManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,8 +24,14 @@ public class ActivityMain extends AppCompatActivity {
                 |View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
                 |View.SYSTEM_UI_FLAG_FULLSCREEN);
 
-        mSurfaceView = new CustomSurfaceView(this);
+
+        mManager = GameManager.getInstance(getApplicationContext());
+        mSurfaceView    = mManager.getSurfaceView();
+
         setContentView(mSurfaceView);
+
+
+
 
 
         LinearLayout ll;
@@ -57,5 +63,13 @@ public class ActivityMain extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         mSurfaceView.onResume();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        ViewGroup parent = (ViewGroup) mManager.getSurfaceView().getParent();
+        parent.removeAllViews();
     }
 }

@@ -1,25 +1,22 @@
 package com.votafore.warlords.glsupport;
 
 
-import android.content.Context;
-import android.opengl.GLES20;
 import android.opengl.Matrix;
-import android.os.AsyncTask;
 import android.support.annotation.IntDef;
 
-import com.votafore.warlords.MeshMapTest;
+import com.votafore.warlords.GameManager;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
+public class GLWorld implements GLView.ICamera {
 
-    private static GLWorld mThis;
 
-    private Context mContext;
+    private GameManager     mManager;
 
-    private GLWorld(Context mContext) {
-        this.mContext = mContext;
+    public GLWorld(GameManager manager) {
+
+        mManager    = manager;
 
         mPositionMatrix     = new float[16];
         Matrix.setIdentityM(mPositionMatrix, 0);
@@ -29,20 +26,8 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
         mObjects = new ArrayList<>();
 
-        ObjectLoader loader = new ObjectLoader();
-        loader.execute();
-
         initCamera();
     }
-
-    public static GLWorld getInstance(Context context){
-
-        if(mThis == null)
-            mThis = new GLWorld(context);
-
-        return mThis;
-    }
-
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -50,12 +35,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
     // матрицы вида, проекции, базовый цвет
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
-
-    /**
-     * mBaseColor - базовый цвет
-     * в который очищается пространство при создании рундерера
-     */
-    private float[] mBaseColor = new float[]{0.5f, 0.5f, 0.5f, 1f};
 
     /**
      * mProjectionMatrix - матрица проекции.
@@ -69,68 +48,6 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
      */
     public volatile float[] mViewMatrix   = new float[16];
 
-
-
-    public void setBaseColor(float[] baseColor) {
-
-        System.arraycopy(baseColor, 0, mBaseColor, 0, baseColor.length);
-    }
-
-
-
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    // РАЗДЕЛ ОБРАБОТКИ СОБЫТИЙ РЕНДЕРЕРА
-    // GLRender.ICallback
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-
-
-    // реализация интерфейса
-    @Override
-    public void onSurfaceCreated(){
-
-        GLES20.glClearColor(mBaseColor[0],mBaseColor[1],mBaseColor[2],mBaseColor[3]);
-
-        // подготовка матрицы вида
-        positionChanged();
-    }
-
-    @Override
-    public void onSurfaceChanged(int width, int height){
-
-        float left      = -mWidth/2;
-        float right     =  mWidth/2;
-        float bottom    = -mHeight/2;
-        float top       =  mHeight/2;
-        float near      =  mNear;
-        float far       =  mFar;
-
-        float ratio = (float) height / width;
-        bottom  *= ratio;
-        top     *= ratio;
-
-        if (width > height) {
-
-            bottom  = -mHeight/2;
-            top     =  mHeight/2;
-
-            ratio = (float) width / height;
-            left *= ratio;
-            right *= ratio;
-        }
-
-        Matrix.frustumM(mProjectionMatrix, 0, left, right, bottom, top, near, far);
-    }
-
-    @Override
-    public void onDrawFrame(GLShader shader) {
-
-        for (GLUnit unit : mObjects) {
-
-            unit.draw(shader);
-        }
-    }
 
     ////////////////////////////////////////////////////////////
     ////////////////////////////////////////////////////////////
@@ -256,48 +173,13 @@ public class GLWorld implements GLRenderer.ICallback, GLView.ICamera {
 
     public volatile List<GLUnit> mObjects;
 
-    private class ObjectLoader extends AsyncTask<Void, Integer, List<GLUnit>>{
 
-        @Override
-        protected List<GLUnit> doInBackground(Void... params) {
-
-            // загрузка объектов сцены
-            // пока что тестовый вариант
-
-            List<GLUnit> list = new ArrayList<>();
-
-            GLUnit unit = new MeshMapTest(mContext);
-            unit.init();
-
-            list.add(unit);
-
-            return list;
-        }
-
-        @Override
-        protected void onPostExecute(List<GLUnit> list) {
-
-            mObjects = list;
-        }
+    public void attachObject(GLUnit unit){
+        mObjects.add(unit);
     }
 
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    // РАЗДЕЛ ВСЯЧИНА
-    // будем хранить ссылку на рендерер т.к. он будет существовать пока
-    // существует объект GLWorld
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-
-    public GLRenderer mRenderer;
-
-    public GLRenderer getRenderer() {
-        return mRenderer;
+    public void deleteObject(GLUnit unit){
+        mObjects.remove(unit);
     }
-
-    public void setRenderer(GLRenderer mRenderer) {
-        this.mRenderer = mRenderer;
-    }
-
 
 }

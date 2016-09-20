@@ -1,4 +1,4 @@
-package com.votafore.warlords.glutil;
+package com.votafore.warlords;
 
 import android.graphics.Color;
 

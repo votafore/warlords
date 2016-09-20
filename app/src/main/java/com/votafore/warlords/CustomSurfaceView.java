@@ -2,11 +2,7 @@ package com.votafore.warlords;
 
 import android.content.Context;
 import android.opengl.GLES20;
-import android.view.Gravity;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.TextView;
 
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
