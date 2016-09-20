@@ -1,6 +1,5 @@
 package com.votafore.warlords.glsupport;
 
-import android.content.Context;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
@@ -29,19 +28,6 @@ import static android.opengl.GLES20.glViewport;
 
 public  class GLRenderer implements Renderer {
 
-    /**
-     * Cодержит такие же методы как и в интерфейсе Renderer.
-     * Jни и вызываются в этих методах. Реализация этого интерфейса (класс) делает все
-     * необходимые установки и настройки рендерера и других объектов, ответственных за
-     * отображение объектов.
-     */
-//    public interface ICallback{
-//        void onSurfaceCreated();
-//        void onSurfaceChanged(int width, int height);
-//        void onDrawFrame();
-//    }
-
-    //private ICallback   mCallbackHandler;
     private GLWorld     mWorld;
     private Instance    mInstance;
     private GLShader    mShader;
@@ -63,8 +49,6 @@ public  class GLRenderer implements Renderer {
         GLES20.glEnable(GLES20.GL_DEPTH_TEST);
         GLES20.glClearColor(mBaseColor[0],mBaseColor[1],mBaseColor[2],mBaseColor[3]);
 
-        //mCallbackHandler.onSurfaceCreated();
-
         mWorld.positionChanged();
         mShader.createShader();
     }
@@ -73,8 +57,6 @@ public  class GLRenderer implements Renderer {
     public void onSurfaceChanged(GL10 arg0, int width, int height) {
 
         glViewport(0, 0, width, height);
-
-        //mCallbackHandler.onSurfaceChanged(width, height);
 
         float left      = -mWorld.mWidth/2;
         float right     =  mWorld.mWidth/2;
