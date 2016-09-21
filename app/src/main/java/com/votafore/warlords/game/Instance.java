@@ -65,8 +65,6 @@ public class Instance {
     public void setMap(GLUnit map){
         mMap = map;
         mMap.init();
-
-        GameManager.getInstance(mContext).getWorld().attachObject(mMap);
     }
 
     public GLUnit getMap(){
