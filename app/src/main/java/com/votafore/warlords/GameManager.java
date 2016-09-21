@@ -21,6 +21,7 @@ import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -139,7 +140,12 @@ public class GameManager extends BroadcastReceiver{
 
 
         mWifiP2pManager     = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
-        mWifiChannel        = mWifiP2pManager.initialize(mContext, mContext.getMainLooper(), null);
+        mWifiChannel        = mWifiP2pManager.initialize(mContext, mContext.getMainLooper(), new WifiP2pManager.ChannelListener() {
+            @Override
+            public void onChannelDisconnected() {
+                Log.v(TAG, "канал отключен");
+            }
+        });
     }
 
 
@@ -226,7 +232,15 @@ public class GameManager extends BroadcastReceiver{
             case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
 
                 Log.v(TAG, "изменилось подключение");
-                //Toast.makeText(mContext, "изменилось подключение", Toast.LENGTH_SHORT).show();
+
+                mWifiP2pManager.requestConnectionInfo(mWifiChannel, new WifiP2pManager.ConnectionInfoListener() {
+                    @Override
+                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
+
+                        InetAddress address = info.groupOwnerAddress;
+                    }
+                });
+
                 break;
             case WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION:
 

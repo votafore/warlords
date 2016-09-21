@@ -5,10 +5,16 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
 import com.votafore.warlords.game.Instance;
+
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Enumeration;
 
 public class ActivityStart extends AppCompatActivity implements View.OnClickListener {
 
@@ -26,6 +32,24 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
         btn_test.setOnClickListener(this);
 
 
+
+        try {
+            //Loop through all the network interface devices
+            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
+                NetworkInterface networkInterface = enumeration.nextElement();
+                //Loop through all the ip addresses of the network interface devices
+                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumerationIpAddr.nextElement();
+                    //Filter out loopback address and other irrelevant ip addresses
+                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+                        //Print the device ip address in to the text view
+                        btn_test.setText(inetAddress.getHostAddress());
+                    }
+                }
+            }
+        } catch (SocketException e) {
+            Log.e("ERROR:", e.toString());
+        }
 
 
 
@@ -59,11 +83,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
             case R.id.btn_testwifi:
 
-                ConnectivityManager con_manager = (ConnectivityManager) getSystemService(CONNECTIVITY_SERVICE);
-                NetworkInfo info = con_manager.getActiveNetworkInfo();
 
-                if(!info.isConnected())
-                    return;
 
 
         }
