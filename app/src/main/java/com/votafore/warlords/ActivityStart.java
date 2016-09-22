@@ -33,23 +33,23 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
 
 
-        try {
-            //Loop through all the network interface devices
-            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
-                NetworkInterface networkInterface = enumeration.nextElement();
-                //Loop through all the ip addresses of the network interface devices
-                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumerationIpAddr.nextElement();
-                    //Filter out loopback address and other irrelevant ip addresses
-                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-                        //Print the device ip address in to the text view
-                        btn_test.setText(inetAddress.getHostAddress());
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            Log.e("ERROR:", e.toString());
-        }
+//        try {
+//            //Loop through all the network interface devices
+//            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
+//                NetworkInterface networkInterface = enumeration.nextElement();
+//                //Loop through all the ip addresses of the network interface devices
+//                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
+//                    InetAddress inetAddress = enumerationIpAddr.nextElement();
+//                    //Filter out loopback address and other irrelevant ip addresses
+//                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+//                        //Print the device ip address in to the text view
+//                        btn_test.setText(inetAddress.getHostAddress());
+//                    }
+//                }
+//            }
+//        } catch (SocketException e) {
+//            Log.e("ERROR:", e.toString());
+//        }
 
 
 
@@ -83,9 +83,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
             case R.id.btn_testwifi:
 
-
-
-
+                manager.getInstance().stopGame();
         }
     }
 }

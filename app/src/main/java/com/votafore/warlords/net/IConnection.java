@@ -6,9 +6,9 @@ package com.votafore.warlords.net;
  * interface for network
  */
 
-public interface IConnectivity {
+public interface IConnection {
 
-    boolean init();
-
+    void init();
+    void sendMessage();
     void release();
 }

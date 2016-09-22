@@ -64,6 +64,9 @@ public class GameManager extends BroadcastReceiver{
         mInstance = instance;
     }
 
+    public Instance getInstance(){
+        return mInstance;
+    }
 
 
     private GLView mSurfaceView;
