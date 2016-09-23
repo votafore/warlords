@@ -402,12 +402,6 @@ public class Instance implements IClient, IServer {
 //     */
 //    public GLUnit mBase;
 
-
-
-
-
-
-
 //    /**
 //     * карта выбранная для текущего боя
 //     */
