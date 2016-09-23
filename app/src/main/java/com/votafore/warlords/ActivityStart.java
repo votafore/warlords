@@ -61,7 +61,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
         Instance inst = new Instance(getApplicationContext(), 0);
 
         // типа мы выбрали карту
-        inst.setMap(new MeshMapTest(getApplicationContext()));
+        //inst.setMap(new MeshMapTest(getApplicationContext()));
 
         // сказали что "... вот такие параметры боя..."
         manager.setInstance(inst);
@@ -83,7 +83,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
             case R.id.btn_testwifi:
 
-                manager.getInstance().stopGame();
+                //manager.getInstance().stopGame();
         }
     }
 }

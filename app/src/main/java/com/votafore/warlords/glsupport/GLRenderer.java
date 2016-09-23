@@ -102,18 +102,18 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glUniformMatrix4fv(mShader.mParams.get("u_Matrix"), 1, false, mat, 0);
 
-        // первым делом отрисовываем карту
-        mInstance.getMap().draw(mShader);
-
-        // и базу
-        mInstance.mBase.draw(mShader);
-
-
-        // потом все остальные объекты сцены
-        List<GLUnit> objects = mInstance.getObjects();
-
-        for (GLUnit curr_obj : objects) {
-            curr_obj.draw(mShader);
-        }
+//        // первым делом отрисовываем карту
+//        mInstance.getMap().draw(mShader);
+//
+//        // и базу
+//        mInstance.mBase.draw(mShader);
+//
+//
+//        // потом все остальные объекты сцены
+//        List<GLUnit> objects = mInstance.getObjects();
+//
+//        for (GLUnit curr_obj : objects) {
+//            curr_obj.draw(mShader);
+//        }
     }
 }

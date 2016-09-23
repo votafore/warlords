@@ -20,7 +20,7 @@
         </activity>
         <activity android:name=".ActivityStart">
         </activity>
-        <activity android:name=".ActivityTestSocket">
+        <activity android:name=".ActivityTestSocketClient">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

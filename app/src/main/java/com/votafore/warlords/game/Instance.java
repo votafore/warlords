@@ -1,12 +1,13 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.votafore.warlords.net.IClient2;
 import com.votafore.warlords.net.IServer2;
 import com.votafore.warlords.net.wifi.CMWifiClient;
 import com.votafore.warlords.net.wifi.CMWifiServer;
-import com.votafore.warlords.net.ISocketCallback;
+import com.votafore.warlords.net.ISocketListener;
 
 /**
  * @author Votafore
@@ -49,10 +50,12 @@ import com.votafore.warlords.net.ISocketCallback;
 public class Instance implements IClient2, IServer2 {
 
     // виды соединения между игроками
-    private static final int TYPE_WIFI      = 157;
-    private static final int TYPE_BLUETOOTH = 846;
-    private static final int TYPE_LOCAL     = 699;
+    public static final int TYPE_WIFI      = 157;
+    public static final int TYPE_BLUETOOTH = 846;
+    public static final int TYPE_LOCAL     = 699;
 
+
+    private String TAG = "MSOCKET_Instance";
 
 
     /**
@@ -71,13 +74,10 @@ public class Instance implements IClient2, IServer2 {
 //
 //        mBase       = new MeshUnit(mContext);
 //        mBase.init();
-//
-//        // это сервер - если ид текущего игрока и ид создалеля игры одинаковые.
-//        mPlayerID = creator; // потом заменять на реального игрока
-//
-//        boolean isServer = mPlayerID == mCreatorID;
-//
-        createConnection(TYPE_WIFI);
+
+        mIsServer = false;
+
+        Log.v(TAG, "создали объект Instance");
 
     }
 
@@ -87,9 +87,15 @@ public class Instance implements IClient2, IServer2 {
     /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
     /*****************************************************************************************************************/
 
-    //////////////////////////////////////
-    // КЛИЕНТСКАЯ ЧАСТЬ
-    //////////////////////////////////////
+    /**
+     * для этих возможностей класс и реализует интерфейсы IClient и IServer
+     */
+
+
+
+
+    /*****************************************************************************************************************/
+    /****************************************************** CLIENT ***************************************************/
 
     /**
      * что бы клиент мог отправлять сообщения серверу
@@ -109,6 +115,8 @@ public class Instance implements IClient2, IServer2 {
         // создаем описание команды
         String cmd = "create_object";
 
+        Log.v(TAG,"Клиент: отправка сообщения: " + cmd);
+
         // отправляем команду на сервер
         mServer.handleCommand(cmd);
     }
@@ -117,17 +125,31 @@ public class Instance implements IClient2, IServer2 {
      * клиент может получать сообщения от сервера (асинхронные... т.е. из другого потока)
      */
 
+
+
     @Override
     public void onMessageReceived(String msg){
 
         // TODO: обработка сообщения сервера
+        Log.v(TAG, "Клиент: получено сообщение сервера: " + msg);
+    }
+
+    @Override
+    public void release(){
+
+        // сигнал от сервера
+        // при при получении (по каким-то причинам)
+        // надо нормально закрыть соединение
+
+        Log.v(TAG, "Клиент: поступил сигнал release от сервера");
+
     }
 
 
-
+    /*****************************************************************************************************************/
+    /************************************************ LOCAL CLIENT ***************************************************/
 
     //////////////////////////////////////
-    // ЧАСТЬ ЛОКАЛЬНОГО КЛИЕНТА
     // это когда сервер на этом же девайсе
     // ведь тогда не надо работать по сети
     //////////////////////////////////////
@@ -139,7 +161,7 @@ public class Instance implements IClient2, IServer2 {
      * сокет шлет полученные сообщения
      */
 
-    private ISocketCallback mSocketListener;
+    private ISocketListener mSocketListener;
 
     /**
      * он получает сообщения как обычный клиент
@@ -154,6 +176,8 @@ public class Instance implements IClient2, IServer2 {
 
     public void someLocalClientFunc(){
 
+        Log.v(TAG, "Локальный клиент: отправка сообщения серверу");
+
         // создаем описание команды
         String cmd = "create_object";
 
@@ -161,15 +185,8 @@ public class Instance implements IClient2, IServer2 {
         mSocketListener.onObtainMessage(cmd);
     }
 
-
-
-
-
-
-
-    //////////////////////////////////////
-    // СЕРВЕРНАЯ ЧАСТЬ
-    //////////////////////////////////////
+    /*****************************************************************************************************************/
+    /************************************************** SERVER *******************************************************/
 
     /**
      * что бы сервер мог отправлять ответ (сообщения) клиенту
@@ -185,6 +202,8 @@ public class Instance implements IClient2, IServer2 {
 
     public void someServerFunc(){
 
+        Log.v(TAG, "Сервер: отправка сообщения клиенту");
+
         // формируем ответ клиенту
         String response = "server response";
 
@@ -199,12 +218,169 @@ public class Instance implements IClient2, IServer2 {
     public void handleCommand(String command){
 
         // TODO: обработка команды клиента
+        Log.v(TAG,"Сервер: Получили сообщение: " + command);
+    }
+
+    @Override
+    public void connect(){
+
+        // просто заглушка
+        Log.v(TAG,"Сервер: вызов настройки подключения к серверу (connect)");
+    }
+
+    @Override
+    public void disconnect(){
+
+        // тоже заглушка
+        Log.v(TAG,"Сервер: вызов отключения от сервера (disconnect)");
+    }
+
+    /*****************************************************************************************************************/
+    /************************************************** дополнительные функции ***************************************/
+
+    private void createConnection(){
+
+        switch(mConnectionType){
+            case TYPE_WIFI:
+
+                if(mIsServer){
+
+                    Log.v(TAG, "создали Wi-Fi подключение сервера (клиент)");
+
+                    CMWifiClient client = new CMWifiClient(this);
+
+                    mClient             = client;
+                    mSocketListener     = client;
+
+                }else{
+
+                    Log.v(TAG, "создали Wi-Fi подключение клиента (сервер)");
+
+                    mServer = new CMWifiServer(this);
+                }
+
+                break;
+
+            case TYPE_BLUETOOTH:
+
+                // создаем и настраиваем объекты для работы по Bluetooth
+
+                break;
+            case TYPE_LOCAL:
+
+                // создаем и настраиваем объекты для работы без соединений
+                // т.е. на прямую, но через установленные интерфейсы
+
+//                mServer = new CMLocal(this, this);
+//                mServer.connect();
+        }
+    }
+
+
+    // TODO: разобраться нужен ли слушатель для подключения сокета.
+
+
+
+
+
+
+
+
+
+    /*****************************************************************************************************************/
+    /*****************************************************************************************************************/
+    /********************************************** СОЗДАНИЕ И НАСТРОЙКА ОБЪЕКТА INSTANCE ****************************/
+
+
+    /**
+     * пользователь может указать тип соединения
+     * с другими игроками
+     */
+    private int mConnectionType;
+
+    public void setConnectionType(int connectionType) {
+        mConnectionType = connectionType;
+
+        Log.v(TAG,"Инстанс: установили тип подключения");
+    }
+
+
+    /**
+     * объект хранит ID текущего игрока и игрока создавшего инстанс
+     * Это позволяет:
+     * - определить это сервер или нет
+     * - контролировать управление объектами
+     */
+
+    public boolean mIsServer;
+
+    private int mOwnerID;
+    private int mPlayerID;
+
+
+    public void setOwnerID(int id){
+
+        mOwnerID = id;
+
+        mIsServer = mOwnerID == mPlayerID;
+
+        Log.v(TAG,"Инстанс: установили mOwnerID");
+    }
+
+    public void setPlayerID(int id){
+
+        mPlayerID = id;
+
+        mIsServer = mOwnerID == mPlayerID;
+
+        Log.v(TAG,"Инстанс: установили mPlayerID");
+    }
+
+
+    /**
+     * у Instance есть свой жизненный цикл
+     * его надо стартануть для запуска процесса
+     * и остановить в конце
+     */
+
+    public void startInstance(){
+
+        Log.v(TAG, "********************** ЗАПУСК ********************");
+
+        createConnection();
+
+        // для того, что бы подключение начало работать его надо не только создать
+        // а и подключить
+        if(mServer != null) {
+            Log.v(TAG, "Инстанс: установка связи с сервером (connect)");
+            mServer.connect();
+        }
+
+        Log.v(TAG, "***************** ЗАПУСК (КОНЕЦ) ******************");
+    }
+
+    public void stopInstance(){
+
+        Log.v(TAG, "********************** ОСТАНОВКА ********************");
+
+        if(mIsServer){
+            Log.v(TAG, "Инстанс: остановка имитатора клиента (сторона сервера)");
+            mClient.release();
+        }else{
+            Log.v(TAG, "Инстанс: остановка имитатора сервера (сторона клиента)");
+            mServer.disconnect();
+        }
+
+        Log.v(TAG, "********************** ОСТАНОВКА (КОНЕЦ) ********************");
     }
 
 
 
 
-//    /**
+
+
+
+    //    /**
 //     * типа ID игры (боя)
 //     */
 //    private long mGameID;
@@ -383,66 +559,5 @@ public class Instance implements IClient2, IServer2 {
     //////////////////////////////////
     // служебный раздел
     //////////////////////////////////
-
-    private void createConnection(int type){
-
-        switch(type){
-            case TYPE_WIFI:
-
-                boolean isServer = false;
-
-                if(isServer){
-
-                    CMWifiClient client = new CMWifiClient(this);
-
-                    mClient             = client;
-                    mSocketListener     = client;
-
-                }else{
-
-                    mServer = new CMWifiServer(this);
-                }
-
-
-
-//                if(mPlayerID == mCreatorID){
-//
-//                    // игра создана на текущем девайсе
-//                    // он будет сервером
-//
-//                    CMWifiForClient2 conn;
-//
-//                    conn = new CMWifiForClient2(this);
-//                    conn.connect();
-//
-//                    mServer = conn;
-//                }else{
-//
-//                    // создаем подключение клиента
-//
-//                    CMWifiForClient2 conn;
-//
-//                    conn = new CMWifiForClient2(this);
-//                    conn.connect();
-//
-//                    mServer = conn;
-//                }
-
-                break;
-
-            case TYPE_BLUETOOTH:
-
-                // создаем и настраиваем объекты для работы по Bluetooth
-
-                break;
-            case TYPE_LOCAL:
-
-                // создаем и настраиваем объекты для работы без соединений
-                // т.е. на прямую, но через установленные интерфейсы
-
-//                mServer = new CMLocal(this, this);
-//                mServer.connect();
-        }
-    }
 
 }
