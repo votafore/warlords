@@ -1,6 +1,5 @@
 package com.votafore.warlords;
 
-import android.graphics.Color;
 
 /**
  * @author Votafore
