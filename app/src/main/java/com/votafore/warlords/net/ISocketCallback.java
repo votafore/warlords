@@ -1,4 +1,4 @@
-package com.votafore.warlords.tests;
+package com.votafore.warlords.net;
 
 
 public interface ISocketCallback {

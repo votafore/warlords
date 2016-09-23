@@ -1,13 +1,20 @@
-package com.votafore.warlords.tests;
+package com.votafore.warlords.net.wifi;
 
 
-public class CMWifiServer implements IClient,ISocketCallback{
+import com.votafore.warlords.game.Instance;
+import com.votafore.warlords.net.IClient2;
+import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.ISocketCallback;
 
-    private IServer mServer;
+public class CMWifiClient implements IClient2,ISocketCallback {
 
-    public CMWifiServer(IServer server){
+    private IServer2 mServer;
+    private IClient2 mLocalClient;
 
-        mServer = server;
+    public CMWifiClient(Instance instance){
+
+        mLocalClient  = instance;
+        mServer       = instance;
     }
 
     @Override
@@ -18,6 +25,10 @@ public class CMWifiServer implements IClient,ISocketCallback{
         ////////////////////
 
         // берем список подключений и рассылаем параметры
+
+
+        // и не забываем о локальном клиенте
+        mLocalClient.onMessageReceived("");
     }
 
 

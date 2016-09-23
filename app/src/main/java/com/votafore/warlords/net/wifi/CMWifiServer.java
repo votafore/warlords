@@ -1,11 +1,15 @@
-package com.votafore.warlords.tests;
+package com.votafore.warlords.net.wifi;
 
 
-public class CMWifiClient implements IServer,ISocketCallback {
+import com.votafore.warlords.net.IClient2;
+import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.ISocketCallback;
 
-    private IClient mClient;
+public class CMWifiServer implements IServer2,ISocketCallback {
 
-    public CMWifiClient(IClient client){
+    private IClient2 mClient;
+
+    public CMWifiServer(IClient2 client){
 
         mClient = client;
     }

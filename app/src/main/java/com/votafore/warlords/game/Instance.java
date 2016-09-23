@@ -1,20 +1,12 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.votafore.warlords.MeshUnit;
-import com.votafore.warlords.glsupport.GLUnit;
-import com.votafore.warlords.net.CMLocal;
-import com.votafore.warlords.net.wifi.CMWifiForClient2;
-import com.votafore.warlords.net.IClient;
-import com.votafore.warlords.net.IConnection;
-import com.votafore.warlords.net.IServer;
-import com.votafore.warlords.net.wifi.SocketConnection;
-import com.votafore.warlords.net.wifi.SocketConnection2;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.votafore.warlords.net.IClient2;
+import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.wifi.CMWifiClient;
+import com.votafore.warlords.net.wifi.CMWifiServer;
+import com.votafore.warlords.net.ISocketCallback;
 
 /**
  * @author Votafore
@@ -54,12 +46,162 @@ import java.util.List;
  * его и в процессе игры (далее) будет учавствовать только этот он.
  */
 
-public class Instance implements IClient, IServer{
+public class Instance implements IClient2, IServer2 {
 
     // виды соединения между игроками
     private static final int TYPE_WIFI      = 157;
     private static final int TYPE_BLUETOOTH = 846;
     private static final int TYPE_LOCAL     = 699;
+
+
+
+    /**
+     * служебные переменные
+     */
+    Context mContext;
+
+
+    public Instance(Context context, int creator){
+
+        mContext    = context;
+//        mGameID     = System.currentTimeMillis();
+//        mCreatorID  = creator;
+//        mPlayers    = new ArrayList<>();
+//        mObjects    = new ArrayList<>();
+//
+//        mBase       = new MeshUnit(mContext);
+//        mBase.init();
+//
+//        // это сервер - если ид текущего игрока и ид создалеля игры одинаковые.
+//        mPlayerID = creator; // потом заменять на реального игрока
+//
+//        boolean isServer = mPlayerID == mCreatorID;
+//
+        createConnection(TYPE_WIFI);
+
+    }
+
+
+
+    /*****************************************************************************************************************/
+    /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
+    /*****************************************************************************************************************/
+
+    //////////////////////////////////////
+    // КЛИЕНТСКАЯ ЧАСТЬ
+    //////////////////////////////////////
+
+    /**
+     * что бы клиент мог отправлять сообщения серверу
+     * ему нужен соответствующий объект (представитель... имитатор) сервера
+     */
+
+    private IServer2 mServer;
+
+
+    /**
+     * клиент может отправлять сообщения серверу
+     * точнее команды
+     */
+
+    public void someClientFunc(){
+
+        // создаем описание команды
+        String cmd = "create_object";
+
+        // отправляем команду на сервер
+        mServer.handleCommand(cmd);
+    }
+
+    /**
+     * клиент может получать сообщения от сервера (асинхронные... т.е. из другого потока)
+     */
+
+    @Override
+    public void onMessageReceived(String msg){
+
+        // TODO: обработка сообщения сервера
+    }
+
+
+
+
+    //////////////////////////////////////
+    // ЧАСТЬ ЛОКАЛЬНОГО КЛИЕНТА
+    // это когда сервер на этом же девайсе
+    // ведь тогда не надо работать по сети
+    //////////////////////////////////////
+
+    /**
+     * он ведет себя как сокет, который отправляет полученное сообщение
+     * серверной части Connection Manager Wi-Fi
+     * для этого нужен ISocketListener - объект, которому
+     * сокет шлет полученные сообщения
+     */
+
+    private ISocketCallback mSocketListener;
+
+    /**
+     * он получает сообщения как обычный клиент
+     * метод для этого уже есть в разделе КЛИЕНТ
+     */
+
+    /**
+     * он может отправлять сообщения
+     * имитируя работу по сети (имитируя работу сокета)
+     * хотя на самом деле это локально
+     */
+
+    public void someLocalClientFunc(){
+
+        // создаем описание команды
+        String cmd = "create_object";
+
+        // отправляем команду на сервер
+        mSocketListener.onObtainMessage(cmd);
+    }
+
+
+
+
+
+
+
+    //////////////////////////////////////
+    // СЕРВЕРНАЯ ЧАСТЬ
+    //////////////////////////////////////
+
+    /**
+     * что бы сервер мог отправлять ответ (сообщения) клиенту
+     * ему нужен соответствющий объект (имитатор)
+     */
+
+    private IClient2 mClient;
+
+
+    /**
+     * сервер может отправлять сообщения клиенту
+     */
+
+    public void someServerFunc(){
+
+        // формируем ответ клиенту
+        String response = "server response";
+
+        mClient.onMessageReceived(response);
+    }
+
+    /**
+     * сервер должен уметь обрабатывать команды клиента
+     */
+
+    @Override
+    public void handleCommand(String command){
+
+        // TODO: обработка команды клиента
+    }
+
+
 
 
 //    /**
@@ -83,34 +225,13 @@ public class Instance implements IClient, IServer{
 //     * здание командного центра
 //     */
 //    public GLUnit mBase;
-//
-//    /**
-//     * служебные переменные
-//     */
-//
-//    Context mContext;
-//
-//
-//    public Instance(Context context, int creator){
-//
-//        mContext    = context;
-//        mGameID     = System.currentTimeMillis();
-//        mCreatorID  = creator;
-//        mPlayers    = new ArrayList<>();
-//        mObjects    = new ArrayList<>();
-//
-//        mBase       = new MeshUnit(mContext);
-//        mBase.init();
-//
-//        // это сервер - если ид текущего игрока и ид создалеля игры одинаковые.
-//        mPlayerID = creator; // потом заменять на реального игрока
-//
-//        boolean isServer = mPlayerID == mCreatorID;
-//
-//        createConnection(TYPE_WIFI);
-//    }
-//
-//
+
+
+
+
+
+
+
 //    /**
 //     * карта выбранная для текущего боя
 //     */
@@ -259,15 +380,31 @@ public class Instance implements IClient, IServer{
 //
 //
 //
-//    //////////////////////////////////
-//    // служебный раздел
-//    //////////////////////////////////
-//
-//    private void createConnection(int type){
-//
-//        switch(type){
-//            case TYPE_WIFI:
-//
+    //////////////////////////////////
+    // служебный раздел
+    //////////////////////////////////
+
+    private void createConnection(int type){
+
+        switch(type){
+            case TYPE_WIFI:
+
+                boolean isServer = false;
+
+                if(isServer){
+
+                    CMWifiClient client = new CMWifiClient(this);
+
+                    mClient             = client;
+                    mSocketListener     = client;
+
+                }else{
+
+                    mServer = new CMWifiServer(this);
+                }
+
+
+
 //                if(mPlayerID == mCreatorID){
 //
 //                    // игра создана на текущем девайсе
@@ -290,22 +427,22 @@ public class Instance implements IClient, IServer{
 //
 //                    mServer = conn;
 //                }
-//
-//                break;
-//
-//            case TYPE_BLUETOOTH:
-//
-//                // создаем и настраиваем объекты для работы по Bluetooth
-//
-//                break;
-//            case TYPE_LOCAL:
-//
-//                // создаем и настраиваем объекты для работы без соединений
-//                // т.е. на прямую, но через установленные интерфейсы
-//
+
+                break;
+
+            case TYPE_BLUETOOTH:
+
+                // создаем и настраиваем объекты для работы по Bluetooth
+
+                break;
+            case TYPE_LOCAL:
+
+                // создаем и настраиваем объекты для работы без соединений
+                // т.е. на прямую, но через установленные интерфейсы
+
 //                mServer = new CMLocal(this, this);
 //                mServer.connect();
-//        }
-//    }
+        }
+    }
 
 }
