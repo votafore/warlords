@@ -3,8 +3,8 @@ package com.votafore.warlords.game;
 import android.content.Context;
 import android.util.Log;
 
-import com.votafore.warlords.net.IClient2;
-import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.IClient;
+import com.votafore.warlords.net.IServer;
 import com.votafore.warlords.net.wifi.CMWifiClient;
 import com.votafore.warlords.net.wifi.CMWifiServer;
 import com.votafore.warlords.net.ISocketListener;
@@ -47,7 +47,7 @@ import com.votafore.warlords.net.ISocketListener;
  * его и в процессе игры (далее) будет учавствовать только этот он.
  */
 
-public class Instance implements IClient2, IServer2 {
+public class Instance implements IClient, IServer {
 
     // виды соединения между игроками
     public static final int TYPE_WIFI      = 157;
@@ -102,7 +102,7 @@ public class Instance implements IClient2, IServer2 {
      * ему нужен соответствующий объект (представитель... имитатор) сервера
      */
 
-    private IServer2 mServer;
+    private IServer mServer;
 
 
     /**
@@ -193,7 +193,7 @@ public class Instance implements IClient2, IServer2 {
      * ему нужен соответствющий объект (имитатор)
      */
 
-    private IClient2 mClient;
+    private IClient mClient;
 
 
     /**

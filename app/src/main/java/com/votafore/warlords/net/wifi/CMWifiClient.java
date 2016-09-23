@@ -3,8 +3,8 @@ package com.votafore.warlords.net.wifi;
 import android.util.Log;
 
 import com.votafore.warlords.game.Instance;
-import com.votafore.warlords.net.IClient2;
-import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.IClient;
+import com.votafore.warlords.net.IServer;
 import com.votafore.warlords.net.ISocketListener;
 
 import java.io.IOException;
@@ -13,10 +13,18 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class CMWifiClient implements IClient2,ISocketListener {
+/**
+ * @author Votafore
+ * Created on 24.09.2016
+ *
+ * Connection manager for Wi-Fi
+ * для серверной части
+ */
 
-    private IServer2 mServer;
-    private IClient2 mLocalClient;
+public class CMWifiClient implements IClient,ISocketListener {
+
+    private IServer mServer;
+    private IClient mLocalClient;
 
 
     private String TAG = "MSOCKET_CMWifiClient";
@@ -48,7 +56,7 @@ public class CMWifiClient implements IClient2,ISocketListener {
         ////////////////////
 
         // берем список подключений и рассылаем параметры
-        for (SocketConnection3 connection : mSocketConnectionList) {
+        for (SocketConnection connection : mSocketConnectionList) {
 
             Log.v(TAG, "IClient: отправляем сообщение через сокет");
             connection.sendMessage(msg);
@@ -100,14 +108,14 @@ public class CMWifiClient implements IClient2,ISocketListener {
     }
 
     @Override
-    public void onSocketConnected(SocketConnection3 connection){
+    public void onSocketConnected(SocketConnection connection){
 
         Log.v(TAG, "ISocketListener: получили новое подключение. добавляем в список");
         mSocketConnectionList.add(connection);
     }
 
     @Override
-    public void onSocketDisconnected(SocketConnection3 connection){
+    public void onSocketDisconnected(SocketConnection connection){
 
         Log.v(TAG, "ISocketListener: подключение закрыто. удаляем из списка");
         mSocketConnectionList.remove(connection);
@@ -117,7 +125,7 @@ public class CMWifiClient implements IClient2,ISocketListener {
     /*******************************************************************************************************/
     /**************************************** СЕРВЕРНАЯ ЧАСТЬ СОКЕТОВ **************************************/
 
-    private volatile List<SocketConnection3>    mSocketConnectionList;
+    private volatile List<SocketConnection>    mSocketConnectionList;
     private Thread                              mWorkThread;
     private ServerSocket                        mServerSocket;
 
@@ -150,7 +158,7 @@ public class CMWifiClient implements IClient2,ISocketListener {
                         Log.v(TAG, "Поток сервера: есть входящее подключение");
 
                         Log.v(TAG, "Поток сервера: создаем SocketConnection3");
-                        SocketConnection3 connection = new SocketConnection3(socket, CMWifiClient.this);
+                        SocketConnection connection = new SocketConnection(socket, CMWifiClient.this);
 
                         onSocketConnected(connection);
 

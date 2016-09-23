@@ -2,23 +2,31 @@ package com.votafore.warlords.net.wifi;
 
 import android.util.Log;
 
-import com.votafore.warlords.net.IClient2;
-import com.votafore.warlords.net.IServer2;
+import com.votafore.warlords.net.IClient;
+import com.votafore.warlords.net.IServer;
 import com.votafore.warlords.net.ISocketListener;
 
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
-public class CMWifiServer implements IServer2, ISocketListener {
+/**
+ * @author Votafore
+ * Created on 24.09.2016
+ *
+ * Connection manager for Wi-Fi
+ * для клиентской части
+ */
 
-    private IClient2            mClient;
-    private SocketConnection3   mConnection;
+public class CMWifiServer implements IServer, ISocketListener {
+
+    private IClient mClient;
+    private SocketConnection mConnection;
 
 
     private String TAG = "MSOCKET_CMWifiServer";
 
-    public CMWifiServer(IClient2 client) {
+    public CMWifiServer(IClient client) {
 
         Log.v(TAG, "создаем объект CMWifiServer");
 
@@ -44,7 +52,7 @@ public class CMWifiServer implements IServer2, ISocketListener {
 
                 try {
                     socket      = new Socket(InetAddress.getByName(mServerIP), mServerPort);
-                    mConnection = new SocketConnection3(socket, CMWifiServer.this);
+                    mConnection = new SocketConnection(socket, CMWifiServer.this);
 
                     Log.v(TAG, "IServer2: создали SocketConnection3");
 
@@ -93,12 +101,12 @@ public class CMWifiServer implements IServer2, ISocketListener {
     }
 
     @Override
-    public void onSocketConnected(SocketConnection3 connection){
+    public void onSocketConnected(SocketConnection connection){
         Log.v(TAG, "ISocketListener: onSocketConnected");
     }
 
     @Override
-    public void onSocketDisconnected(SocketConnection3 connection){
+    public void onSocketDisconnected(SocketConnection connection){
         Log.v(TAG, "ISocketListener: onSocketDisconnected");
     }
 
@@ -107,4 +115,7 @@ public class CMWifiServer implements IServer2, ISocketListener {
 
     public String   mServerIP;
     public int      mServerPort;
+
+
+    // TODO: иногда получается создать сокет, но в SocketConnection не получается получить входящий поток
 }
