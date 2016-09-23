@@ -8,8 +8,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.votafore.warlords.net.CMWifiForClient;
-import com.votafore.warlords.net.CMWifiForServer;
+import com.votafore.warlords.net.wifi.CMWifiForClient;
+import com.votafore.warlords.net.wifi.CMWifiForServer;
 import com.votafore.warlords.net.IClient;
 import com.votafore.warlords.net.IConnection;
 

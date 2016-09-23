@@ -10,4 +10,5 @@ package com.votafore.warlords.net;
 public interface IClient {
 
     void onMessageReceive(int ID);
+    void onConnectionChange(boolean connected);
 }
