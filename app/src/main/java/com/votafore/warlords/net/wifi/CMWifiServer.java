@@ -1,5 +1,7 @@
 package com.votafore.warlords.net.wifi;
 
+import android.os.AsyncTask;
+import android.os.Handler;
 import android.util.Log;
 
 import com.votafore.warlords.net.IClient;
@@ -20,9 +22,11 @@ import java.net.Socket;
 
 public class CMWifiServer implements IServer, ISocketListener {
 
-    private IClient mClient;
+    private IClient          mClient;
     private SocketConnection mConnection;
 
+    private String           mServerIP;
+    private int              mServerPort;
 
     private String TAG = "MSOCKET_CMWifiServer";
 
@@ -30,10 +34,23 @@ public class CMWifiServer implements IServer, ISocketListener {
 
         Log.v(TAG, "создаем объект CMWifiServer");
 
-        mClient = client;
+        mClient     = client;
+        mServerIP   = "192.168.0.101";
+        mServerPort = 6000;
 
-        mServerIP       = "192.168.0.101";
-        mServerPort     = 6000;
+
+        mHandler = new Handler();
+    }
+
+    public CMWifiServer(IClient client, InetAddress ip, int port) {
+
+        Log.v(TAG, "создаем объект CMWifiServer");
+
+        mClient     = client;
+        mServerIP   = ip.getHostName();
+        mServerPort = port;
+
+        mHandler = new Handler();
     }
 
     /*******************************************************************************************************/
@@ -52,11 +69,9 @@ public class CMWifiServer implements IServer, ISocketListener {
 
                 try {
                     socket      = new Socket(InetAddress.getByName(mServerIP), mServerPort);
-                    mConnection = new SocketConnection(socket, CMWifiServer.this);
+                    mConnection = new SocketConnection(socket, mHandler, CMWifiServer.this);
 
                     Log.v(TAG, "IServer2: создали SocketConnection3");
-
-                    onSocketConnected(mConnection);
 
                 } catch (IOException e) {
                     Log.v(TAG, "IServer2: НЕ создали SocketConnection3");
@@ -95,9 +110,15 @@ public class CMWifiServer implements IServer, ISocketListener {
     /**************************************** SOCKET LISTENER **********************************************/
 
     @Override
-    public void onObtainMessage(String msg){
+    public void onObtainMessage(final String msg){
         Log.v(TAG, "ISocketListener: (onObtainMessage) отправляем полученное сообщение сервера клиенту ");
-        mClient.onMessageReceived(msg);
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mClient.onMessageReceived(msg);
+            }
+        });
     }
 
     @Override
@@ -111,11 +132,16 @@ public class CMWifiServer implements IServer, ISocketListener {
     }
 
 
-    /****************************************** возможно не самые нужные переменные *******************/
 
-    public String   mServerIP;
-    public int      mServerPort;
 
 
     // TODO: иногда получается создать сокет, но в SocketConnection не получается получить входящий поток
+
+    /******************************** пока тестирую ****************************************/
+
+    /**
+     * пытаюсь навести порядок в потоках
+     * хочу что бы все функции GameManager не выполнялись другими потоками напрямую
+     */
+    private Handler mHandler;
 }

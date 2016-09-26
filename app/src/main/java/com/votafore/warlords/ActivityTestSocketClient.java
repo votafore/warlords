@@ -41,8 +41,8 @@ public class ActivityTestSocketClient extends AppCompatActivity implements View.
         btn_close.setEnabled(false);
         btn_response.setEnabled(false);
 
-        mInstance = new Instance(this, 0);
-        mInstance.setConnectionType(Instance.TYPE_WIFI);
+//        mInstance = new Instance(this, 0);
+//        mInstance.setConnectionType(Instance.TYPE_WIFI);
     }
 
     @Override

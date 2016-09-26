@@ -1,5 +1,6 @@
 package com.votafore.warlords.net.wifi;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.votafore.warlords.game.Instance;
@@ -126,10 +127,10 @@ public class CMWifiClient implements IClient,ISocketListener {
     /**************************************** СЕРВЕРНАЯ ЧАСТЬ СОКЕТОВ **************************************/
 
     private volatile List<SocketConnection>    mSocketConnectionList;
-    private Thread                              mWorkThread;
-    private ServerSocket                        mServerSocket;
+    private Thread                             mWorkThread;
+    public ServerSocket                        mServerSocket;
 
-    private int                                 mServerPort = 6000;
+    private int                                mServerPort = 6000;
 
     private void startServer(){
 
@@ -158,7 +159,7 @@ public class CMWifiClient implements IClient,ISocketListener {
                         Log.v(TAG, "Поток сервера: есть входящее подключение");
 
                         Log.v(TAG, "Поток сервера: создаем SocketConnection3");
-                        SocketConnection connection = new SocketConnection(socket, CMWifiClient.this);
+                        SocketConnection connection = new SocketConnection(socket, new Handler(), CMWifiClient.this);
 
                         onSocketConnected(connection);
 

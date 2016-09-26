@@ -63,8 +63,7 @@ public class Instance implements IClient, IServer {
      */
     Context mContext;
 
-
-    public Instance(Context context, int creator){
+    public Instance(Context context) {
 
         mContext    = context;
 //        mGameID     = System.currentTimeMillis();
@@ -82,7 +81,6 @@ public class Instance implements IClient, IServer {
     }
 
 
-
     /*****************************************************************************************************************/
     /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
     /*****************************************************************************************************************/
@@ -90,8 +88,6 @@ public class Instance implements IClient, IServer {
     /**
      * для этих возможностей класс и реализует интерфейсы IClient и IServer
      */
-
-
 
 
     /*****************************************************************************************************************/
@@ -124,7 +120,6 @@ public class Instance implements IClient, IServer {
     /**
      * клиент может получать сообщения от сервера (асинхронные... т.е. из другого потока)
      */
-
 
 
     @Override
@@ -280,13 +275,6 @@ public class Instance implements IClient, IServer {
     // TODO: разобраться нужен ли слушатель для подключения сокета.
 
 
-
-
-
-
-
-
-
     /*****************************************************************************************************************/
     /*****************************************************************************************************************/
     /********************************************** СОЗДАНИЕ И НАСТРОЙКА ОБЪЕКТА INSTANCE ****************************/
@@ -309,6 +297,8 @@ public class Instance implements IClient, IServer {
      * объект хранит ID текущего игрока и игрока создавшего инстанс
      * Это позволяет:
      * - определить это сервер или нет
+     * (совпадает ли ИД текущего игрока (mPlayerID) с ИД игрока,
+     * создавшего инстанс (mOwnerID))
      * - контролировать управление объектами
      */
 
@@ -373,191 +363,4 @@ public class Instance implements IClient, IServer {
 
         Log.v(TAG, "********************** ОСТАНОВКА (КОНЕЦ) ********************");
     }
-
-
-
-
-
-
-
-    //    /**
-//     * типа ID игры (боя)
-//     */
-//    private long mGameID;
-//
-//    /**
-//     * ID текущего игрока
-//     */
-//    private int mPlayerID;
-//
-//    /**
-//     * ID игрока, создавшего инстанс
-//     */
-//    private int mCreatorID;
-//
-//
-//
-//    /**
-//     * здание командного центра
-//     */
-//    public GLUnit mBase;
-
-
-
-
-
-
-
-//    /**
-//     * карта выбранная для текущего боя
-//     */
-//    private GLUnit mMap;
-//
-//    public void setMap(GLUnit map){
-//        mMap = map;
-//        mMap.init();
-//    }
-//
-//    public GLUnit getMap(){
-//        return mMap;
-//    }
-//
-//
-//
-//
-//
-//
-//    List<Player> mPlayers;
-//
-//    public void addPlayer(Player player){
-//
-//        // на случай, если такой уже есть (правда не понятно как такое может получиться)
-//        mPlayers.remove(player);
-//
-//        mPlayers.add(player);
-//    }
-//
-//
-//
-//
-//    List<GLUnit> mObjects;
-//
-//    public List<GLUnit> getObjects(){
-//        return mObjects;
-//    }
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//
-//    //////////////////////////////////
-//    // клиентская часть
-//    //////////////////////////////////
-//
-//    /**
-//     * клиентская часть (отправляющая запросы)
-//     */
-//    private IConnection mClientConnectivity;
-//
-//
-//
-//
-//
-//    /**
-//     * клиентская часть (имитирующая работу сервера)
-//     * (отправляющая запросы)
-//     */
-//
-//    private IServer mServer;
-//
-//    // получение сообщений от сервера
-//    @Override
-//    public void onMessageReceive(int ID) {
-//        Log.v("MSOCKET", "onServerMessageReceive: получено сообщение от сервера");
-//    }
-//
-//    @Override
-//    public void onConnectionChange(boolean connected) {
-//
-//    }
-//
-//
-//
-//
-//
-//    private SocketConnection2.IConnectionListener mConnectionListener;
-//
-//
-//
-//
-//
-//
-//
-//    //////////////////////////////////
-//    // серверная часть
-//    //////////////////////////////////
-//
-//    /**
-//     * серверная часть (принимающая управление объектами и синхр. остальные)
-//     */
-//    private IConnection mServerConnectivity;
-//
-//
-//
-//
-//
-//
-//    private List<ObjectServerInfo> mObjectServerInfoList;
-//
-//    private class ObjectServerInfo{
-//
-//        private int mLastID; // IDы всех объектов (инкрементируется при создании объектов)
-//
-//        int      ID;      // ID объекта
-//        int      ownerID; // ID игрока
-//        //public GLUnit   object;  // думаю тут все понятно
-//    }
-//
-//
-//
-//    @Override
-//    public void addUnit(){
-//
-//        ObjectServerInfo newObj;
-//
-//        newObj          = new ObjectServerInfo();
-//        newObj.ID       = 0;
-//        newObj.ownerID  = 0;
-//
-//        if(mObjectServerInfoList.size() > 0)
-//            // увеличиваем значение ID из последнего объекта
-//            newObj.ID = mObjectServerInfoList.get(mObjectServerInfoList.size()-1).ID+1;
-//
-//        mObjectServerInfoList.add(newObj);
-//    }
-//
-//    @Override
-//    public void connect() {
-//
-//    }
-//
-//    @Override
-//    public void disconnect() {
-//
-//    }
-//
-//
-//
-//
-//
-    //////////////////////////////////
-    // служебный раздел
-    //////////////////////////////////
-
 }

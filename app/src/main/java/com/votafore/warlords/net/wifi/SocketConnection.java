@@ -1,5 +1,6 @@
 package com.votafore.warlords.net.wifi;
 
+import android.os.Handler;
 import android.util.Log;
 
 import com.votafore.warlords.net.ISocketListener;
@@ -8,6 +9,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.io.StreamCorruptedException;
 import java.net.Socket;
 
 /**
@@ -37,21 +39,19 @@ public class SocketConnection {
 
     private ISocketListener mListener;
 
+    private Handler mHandler;
+
     private String TAG = "MSOCKET_Connection3";
 
-    public SocketConnection(final Socket socket, ISocketListener listener){
+    public SocketConnection(final Socket socket, Handler handler, ISocketListener listener) throws IOException{
 
         mSocket   = socket;
         mListener = listener;
+        mHandler  =  handler;
 
-        try {
-            mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-            Log.v(TAG, "получили входящий поток сокета");
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.v(TAG, "НЕ получили входящий поток сокета");
-            return;
-        }
+
+        mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+        Log.v(TAG, "получили входящий поток сокета");
 
         // при создании соединения стартует поток
         mThread = new Thread(new Runnable() {
@@ -73,7 +73,13 @@ public class SocketConnection {
                         try {
 
                             mSocket.close();
-                            mListener.onSocketDisconnected(SocketConnection.this);
+
+                            mHandler.post(new Runnable() {
+                                @Override
+                                public void run() {
+                                    mListener.onSocketDisconnected(SocketConnection.this);
+                                }
+                            });
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -85,12 +91,26 @@ public class SocketConnection {
                     // при получении сообщения отправляем другое сообщение
                     // в основной поток сервера
 
-                    mListener.onObtainMessage(msg);
+                    final String message = msg;
+
+                    mHandler.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            mListener.onObtainMessage(message);
+                        }
+                    });
                 }
             }
         });
 
         mThread.start();
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onSocketConnected(SocketConnection.this);
+            }
+        });
     }
 
     public void close(){
@@ -107,6 +127,13 @@ public class SocketConnection {
         if(!mThread.isInterrupted()){
             mThread.interrupt();
         }
+
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                mListener.onSocketDisconnected(SocketConnection.this);
+            }
+        });
     }
 
     public void sendMessage(String msg){

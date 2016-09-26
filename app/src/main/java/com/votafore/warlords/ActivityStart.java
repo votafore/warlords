@@ -11,6 +11,9 @@ import android.widget.Button;
 
 import com.votafore.warlords.game.Instance;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
@@ -33,38 +36,46 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
 
 
 
-        try {
-            //Loop through all the network interface devices
-            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
-                NetworkInterface networkInterface = enumeration.nextElement();
-                //Loop through all the ip addresses of the network interface devices
-                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
-                    InetAddress inetAddress = enumerationIpAddr.nextElement();
-                    //Filter out loopback address and other irrelevant ip addresses
-                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-                        //Print the device ip address in to the text view
-                        btn_test.setText(inetAddress.getHostAddress());
-                    }
-                }
-            }
-        } catch (SocketException e) {
-            Log.e("ERROR:", e.toString());
-        }
+//        try {
+//            //Loop through all the network interface devices
+//            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
+//                NetworkInterface networkInterface = enumeration.nextElement();
+//                //Loop through all the ip addresses of the network interface devices
+//                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
+//                    InetAddress inetAddress = enumerationIpAddr.nextElement();
+//                    //Filter out loopback address and other irrelevant ip addresses
+//                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
+//                        //Print the device ip address in to the text view
+//                        btn_test.setText(inetAddress.getHostAddress());
+//                    }
+//                }
+//            }
+//        } catch (SocketException e) {
+//            Log.e("ERROR:", e.toString());
+//        }
 
 
-
-        manager = GameManager.getInstance(getApplicationContext());
-
-        // предполагается что будет возможность либо создать игру, либо присоединиться к созданной
-        // пока что создаем игру
-
-        Instance inst = new Instance(getApplicationContext(), 0);
-
-        // типа мы выбрали карту
-        //inst.setMap(new MeshMapTest(getApplicationContext()));
-
-        // сказали что "... вот такие параметры боя..."
-        manager.setInstance(inst);
+//        manager = GameManager.getInstance();
+//
+//        // предполагается что будет возможность либо создать игру, либо присоединиться к созданной
+//        // пока что создаем игру
+//
+//        Instance inst = new Instance(getApplicationContext());
+//
+//        // типа мы выбрали карту
+//        //inst.setMap(new MeshMapTest(getApplicationContext()));
+//
+//        // установили ИД игрока, создавшего инстанс
+//        inst.setPlayerID(0);
+//
+//        // установили ИД игрока, подключившегося к инстансу
+//        inst.setOwnerID(2);
+//
+//        // еще типа указали вид подключения и создели его
+//        // и запустили его (подключились)
+//
+//        // сказали что "... вот такие параметры боя..."
+//        manager.setInstance(inst);
     }
 
     @Override
@@ -73,7 +84,7 @@ public class ActivityStart extends AppCompatActivity implements View.OnClickList
         switch (v.getId()){
             case R.id.btn_start:
 
-                manager.startGame();
+                manager.startGame(this);
 
                 // наступил момент, когда статус "Готов к бою" установили все
                 Intent i = new Intent(this, ActivityMain.class);
