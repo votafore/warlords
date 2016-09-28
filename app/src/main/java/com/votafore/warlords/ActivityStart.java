@@ -1,100 +1,62 @@
 package com.votafore.warlords;
 
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
 
-import com.votafore.warlords.game.Instance;
-
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-
-public class ActivityStart extends AppCompatActivity implements View.OnClickListener {
+public class ActivityStart extends AppCompatActivity {
 
     GameManager manager;
+
+    Toolbar mToolbar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        Button btn = (Button) findViewById(R.id.btn_start);
-        Button btn_test = (Button) findViewById(R.id.btn_testwifi);
-
-        btn.setOnClickListener(this);
-        btn_test.setOnClickListener(this);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
 
 
-//        try {
-//            //Loop through all the network interface devices
-//            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
-//                NetworkInterface networkInterface = enumeration.nextElement();
-//                //Loop through all the ip addresses of the network interface devices
-//                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
-//                    InetAddress inetAddress = enumerationIpAddr.nextElement();
-//                    //Filter out loopback address and other irrelevant ip addresses
-//                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-//                        //Print the device ip address in to the text view
-//                        btn_test.setText(inetAddress.getHostAddress());
-//                    }
-//                }
-//            }
-//        } catch (SocketException e) {
-//            Log.e("ERROR:", e.toString());
-//        }
+        manager = GameManager.getInstance(this);
 
+        RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
-//        manager = GameManager.getInstance();
-//
-//        // предполагается что будет возможность либо создать игру, либо присоединиться к созданной
-//        // пока что создаем игру
-//
-//        Instance inst = new Instance(getApplicationContext());
-//
-//        // типа мы выбрали карту
-//        //inst.setMap(new MeshMapTest(getApplicationContext()));
-//
-//        // установили ИД игрока, создавшего инстанс
-//        inst.setPlayerID(0);
-//
-//        // установили ИД игрока, подключившегося к инстансу
-//        inst.setOwnerID(2);
-//
-//        // еще типа указали вид подключения и создели его
-//        // и запустили его (подключились)
-//
-//        // сказали что "... вот такие параметры боя..."
-//        manager.setInstance(inst);
+        serverList.setHasFixedSize(true);
+        serverList.setItemAnimator(new DefaultItemAnimator());
+        serverList.setLayoutManager(new LinearLayoutManager(this));
+
+        serverList.setAdapter(manager.getAdapter());
+
     }
 
     @Override
-    public void onClick(View v) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_gamelist, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        switch (v.getId()){
-            case R.id.btn_start:
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-                manager.startGame(this);
+        switch(item.getItemId()){
+            case R.id.refresh:
 
-                // наступил момент, когда статус "Готов к бою" установили все
-                Intent i = new Intent(this, ActivityMain.class);
-                startActivity(i);
-
+                manager.discoverServers(this);
                 break;
 
-            case R.id.btn_testwifi:
+            case R.id.new_game:
 
-                //manager.getInstance().stopGame();
+                break;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 }

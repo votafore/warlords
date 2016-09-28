@@ -54,10 +54,10 @@ public class ActivityTestSocketClient extends AppCompatActivity implements View.
                 btn_close.setEnabled(true);
                 btn_response.setEnabled(true);
 
-                mInstance.setOwnerID(0);
-                mInstance.setPlayerID(0);
-
-                mInstance.startInstance();
+//                mInstance.setOwnerID(0);
+//                mInstance.setPlayerID(0);
+//
+//                mInstance.startInstance();
 
                 break;
             case R.id.btn_start_client:
@@ -65,10 +65,10 @@ public class ActivityTestSocketClient extends AppCompatActivity implements View.
                 btn_close.setEnabled(true);
                 btn_response.setEnabled(true);
 
-                mInstance.setOwnerID(0);
-                mInstance.setPlayerID(1);
-
-                mInstance.startInstance();
+//                mInstance.setOwnerID(0);
+//                mInstance.setPlayerID(1);
+//
+//                mInstance.startInstance();
 
                 break;
             case R.id.btn_close:
@@ -76,19 +76,19 @@ public class ActivityTestSocketClient extends AppCompatActivity implements View.
                 btn_close.setEnabled(false);
                 btn_response.setEnabled(false);
 
-                if(mInstance != null)
-                    mInstance.stopInstance();
+//                if(mInstance != null)
+//                    mInstance.stopInstance();
 
                 break;
 
             case R.id.response:
 
-                if(mInstance.mIsServer){
-                    mInstance.someServerFunc();
-                    mInstance.someLocalClientFunc();
-                }else {
-                    mInstance.someClientFunc();
-                }
+//                if(mInstance.mIsServer){
+//                    mInstance.someServerFunc();
+//                    mInstance.someLocalClientFunc();
+//                }else {
+//                    mInstance.someClientFunc();
+//                }
         }
     }
 }

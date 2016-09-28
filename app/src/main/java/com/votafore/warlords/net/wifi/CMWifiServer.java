@@ -7,6 +7,7 @@ import android.util.Log;
 import com.votafore.warlords.net.IClient;
 import com.votafore.warlords.net.IServer;
 import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.test.TestConnectionManager;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -23,10 +24,10 @@ import java.net.Socket;
 public class CMWifiServer implements IServer, ISocketListener {
 
     private IClient          mClient;
-    private SocketConnection mConnection;
+    //private SocketConnection mConnection;
 
-    private String           mServerIP;
-    private int              mServerPort;
+//    private String           mServerIP;
+//    private int              mServerPort;
 
     private String TAG = "MSOCKET_CMWifiServer";
 
@@ -35,23 +36,24 @@ public class CMWifiServer implements IServer, ISocketListener {
         Log.v(TAG, "создаем объект CMWifiServer");
 
         mClient     = client;
-        mServerIP   = "192.168.0.101";
-        mServerPort = 6000;
+//        mServerIP   = "192.168.0.101";
+//        mServerPort = 6000;
 
 
         mHandler = new Handler();
     }
 
-    public CMWifiServer(IClient client, InetAddress ip, int port) {
 
-        Log.v(TAG, "создаем объект CMWifiServer");
+    /*******************************************************************************************************/
+    /***************************************** для работы по сети ******************************************/
 
-        mClient     = client;
-        mServerIP   = ip.getHostName();
-        mServerPort = port;
+    TestConnectionManager mConnectionManager;
 
-        mHandler = new Handler();
+    public void setConnectionManager(TestConnectionManager manager){
+        mConnectionManager = manager;
     }
+
+
 
     /*******************************************************************************************************/
     /************************************************** SERVER *********************************************/
@@ -59,76 +61,78 @@ public class CMWifiServer implements IServer, ISocketListener {
     @Override
     public void connect() {
 
-        Log.v(TAG, "IServer2: connect");
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                Socket socket;
-
-                try {
-                    socket      = new Socket(InetAddress.getByName(mServerIP), mServerPort);
-                    mConnection = new SocketConnection(socket, mHandler, CMWifiServer.this);
-
-                    Log.v(TAG, "IServer2: создали SocketConnection3");
-
-                } catch (IOException e) {
-                    Log.v(TAG, "IServer2: НЕ создали SocketConnection3");
-                    e.printStackTrace();
-                }
-            }
-        }).start();
+//        Log.v(TAG, "IServer2: connect");
+//
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//
+//                Socket socket;
+//
+//                try {
+//                    socket      = new Socket(InetAddress.getByName(mServerIP), mServerPort);
+//                    mConnection = new SocketConnection(socket, mHandler, CMWifiServer.this);
+//
+//                    Log.v(TAG, "IServer2: создали SocketConnection3");
+//
+//                } catch (IOException e) {
+//                    Log.v(TAG, "IServer2: НЕ создали SocketConnection3");
+//                    e.printStackTrace();
+//                }
+//            }
+//        }).start();
     }
 
     @Override
     public void disconnect(){
 
-        Log.v(TAG, "IServer2: disconnect");
-
-        if(mConnection == null)
-            return;
-
-        mConnection.close();
-        Log.v(TAG, "IServer2: закрыли сокет");
-
-        onSocketDisconnected(mConnection);
+//        Log.v(TAG, "IServer2: disconnect");
+//
+//        if(mConnection == null)
+//            return;
+//
+//        mConnection.close();
+//        Log.v(TAG, "IServer2: закрыли сокет");
+//
+//        onSocketDisconnected(mConnection);
     }
 
     @Override
     public void handleCommand(String command) {
 
-        ////////////////////
-        // ОТПРАВКА СООБЩЕНИЯ
-        ////////////////////
+        mConnectionManager.sendMessage(command);
 
-        Log.v(TAG, "IServer2: отправляем сообщение серверу");
-        mConnection.sendMessage(command);
+//        ////////////////////
+//        // ОТПРАВКА СООБЩЕНИЯ
+//        ////////////////////
+//
+//        Log.v(TAG, "IServer2: отправляем сообщение серверу");
+//        mConnection.sendMessage(command);
     }
 
     /*******************************************************************************************************/
     /**************************************** SOCKET LISTENER **********************************************/
 
     @Override
-    public void onObtainMessage(final String msg){
-        Log.v(TAG, "ISocketListener: (onObtainMessage) отправляем полученное сообщение сервера клиенту ");
-
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                mClient.onMessageReceived(msg);
-            }
-        });
+    public void onObtainMessage(SocketConnection connection, final String msg){
+//        Log.v(TAG, "ISocketListener: (onObtainMessage) отправляем полученное сообщение сервера клиенту ");
+//
+//        mHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mClient.onMessageReceived(msg);
+//            }
+//        });
     }
 
     @Override
     public void onSocketConnected(SocketConnection connection){
-        Log.v(TAG, "ISocketListener: onSocketConnected");
+        //Log.v(TAG, "ISocketListener: onSocketConnected");
     }
 
     @Override
     public void onSocketDisconnected(SocketConnection connection){
-        Log.v(TAG, "ISocketListener: onSocketDisconnected");
+        //Log.v(TAG, "ISocketListener: onSocketDisconnected");
     }
 
 
@@ -136,7 +140,8 @@ public class CMWifiServer implements IServer, ISocketListener {
 
 
     // TODO: иногда получается создать сокет, но в SocketConnection не получается получить входящий поток
-
+    // TODO: возможно стоит разработать механизм контролирующий ответы сервера (точнее их наличие)
+    // сверять что отправлено и что получено
     /******************************** пока тестирую ****************************************/
 
     /**

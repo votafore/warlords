@@ -7,21 +7,25 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
+                android:background="#cecece"
     tools:context="com.votafore.warlords.ActivityStart">
 
-    <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="START"
-        android:id="@+id/btn_start"
-        android:layout_centerVertical="true"
-        android:layout_centerHorizontal="true" />
-
-    <Button
-        android:text="@string/test_wifi"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_servers"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:id="@+id/btn_testwifi"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true" />
+        android:layout_height="match_parent"
+        android:layout_below="@+id/appBarLayout"/>
+
+    <android.support.design.widget.AppBarLayout
+        android:id="@+id/appBarLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+    </android.support.design.widget.AppBarLayout>
+
 </RelativeLayout>

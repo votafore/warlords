@@ -1,12 +1,12 @@
-package com.votafore.warlords.net.wifi;
+package com.votafore.warlords.test;
 
 import android.os.Handler;
 import android.util.Log;
 
 import com.votafore.warlords.game.Instance;
+import com.votafore.warlords.net.*;
 import com.votafore.warlords.net.IClient;
-import com.votafore.warlords.net.IServer;
-import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.net.wifi.SocketConnection;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -16,25 +16,22 @@ import java.util.List;
 
 /**
  * @author Votafore
- * Created on 24.09.2016
- *
- * Connection manager for Wi-Fi
- * для серверной части
+ * Created on 29.09.2016.
  */
 
-public class CMWifiClient implements IClient,ISocketListener {
+public class TestServerConnection implements IClient, ISocketListener {
 
-    private IServer mServer;
-    private IClient mLocalClient;
+    private com.votafore.warlords.net.IServer mServer;
+    //private IClient mLocalClient;
 
 
     private String TAG = "MSOCKET_CMWifiClient";
 
-    public CMWifiClient(Instance instance){
+    public TestServerConnection(){
 
         Log.v(TAG, "создем объект CMWifiClient");
 
-        mLocalClient  = instance;
+        //mLocalClient  = instance;
         //mServer       = instance;
 
         mSocketConnectionList = new ArrayList<>();
@@ -52,49 +49,49 @@ public class CMWifiClient implements IClient,ISocketListener {
     @Override
     public void onMessageReceived(String msg) {
 
-        ////////////////////
-        // РАССЫЛКА СООБЩЕНИЯ
-        ////////////////////
-
-        // берем список подключений и рассылаем параметры
-        for (SocketConnection connection : mSocketConnectionList) {
-
-            Log.v(TAG, "IClient: отправляем сообщение через сокет");
-            connection.sendMessage(msg);
-        }
-
-
-        Log.v(TAG, "IClient: отправляем сообщение локальному клиенту");
-        // и не забываем о локальном клиенте
-        mLocalClient.onMessageReceived(msg);
+//        ////////////////////
+//        // РАССЫЛКА СООБЩЕНИЯ
+//        ////////////////////
+//
+//        // берем список подключений и рассылаем параметры
+//        for (SocketConnection connection : mSocketConnectionList) {
+//
+//            Log.v(TAG, "IClient: отправляем сообщение через сокет");
+//            connection.sendMessage(msg);
+//        }
+//
+//
+//        Log.v(TAG, "IClient: отправляем сообщение локальному клиенту");
+//        // и не забываем о локальном клиенте
+//        //mLocalClient.onMessageReceived(msg);
     }
 
     @Override
     public void release(){
 
-        Log.v(TAG, "IClient: получили release - закрываем подключения к серверу, сворачиваем сервер");
-
-        // свернуться если сервер вызвал этот метод
-
-        while(mSocketConnectionList.size() > 0){
-
-            Log.v(TAG, "IClient: закрытие сокета");
-            mSocketConnectionList.get(0).close();
-
-            Log.v(TAG, "IClient: удаление сокета из списка подключений");
-            mSocketConnectionList.remove(0);
-        }
-
-        try {
-            mServerSocket.close();
-            Log.v(TAG, "IClient: закрыли сокет сервера");
-        } catch (IOException e) {
-            Log.v(TAG, "IClient: НЕ закрыли сокет сервера");
-            e.printStackTrace();
-        }
-
-        mWorkThread.interrupt();
-        Log.v(TAG, "IClient: поток сервера остановлен");
+//        Log.v(TAG, "IClient: получили release - закрываем подключения к серверу, сворачиваем сервер");
+//
+//        // свернуться если сервер вызвал этот метод
+//
+//        while(mSocketConnectionList.size() > 0){
+//
+//            Log.v(TAG, "IClient: закрытие сокета");
+//            mSocketConnectionList.get(0).close();
+//
+//            Log.v(TAG, "IClient: удаление сокета из списка подключений");
+//            mSocketConnectionList.remove(0);
+//        }
+//
+//        try {
+//            mServerSocket.close();
+//            Log.v(TAG, "IClient: закрыли сокет сервера");
+//        } catch (IOException e) {
+//            Log.v(TAG, "IClient: НЕ закрыли сокет сервера");
+//            e.printStackTrace();
+//        }
+//
+//        mWorkThread.interrupt();
+//        Log.v(TAG, "IClient: поток сервера остановлен");
 
     }
 
@@ -126,9 +123,9 @@ public class CMWifiClient implements IClient,ISocketListener {
     /*******************************************************************************************************/
     /**************************************** СЕРВЕРНАЯ ЧАСТЬ СОКЕТОВ **************************************/
 
-    private volatile List<SocketConnection>    mSocketConnectionList;
+    private volatile List<SocketConnection> mSocketConnectionList;
     private Thread                             mWorkThread;
-    public ServerSocket                        mServerSocket;
+    public ServerSocket mServerSocket;
 
     private int                                mServerPort = 6000;
 
@@ -159,7 +156,7 @@ public class CMWifiClient implements IClient,ISocketListener {
                         Log.v(TAG, "Поток сервера: есть входящее подключение");
 
                         Log.v(TAG, "Поток сервера: создаем SocketConnection3");
-                        SocketConnection connection = new SocketConnection(socket, new Handler(), CMWifiClient.this);
+                        SocketConnection connection = new SocketConnection(socket, new Handler(), TestServerConnection.this);
 
                         onSocketConnected(connection);
 
@@ -175,10 +172,4 @@ public class CMWifiClient implements IClient,ISocketListener {
         Log.v(TAG, "Часть сервера: запускаем поток сервера");
         mWorkThread.start();
     }
-
-
-    /*************************** обработка отключения и подключения клиентов *******************************/
-
-
-
 }
