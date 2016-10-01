@@ -17,7 +17,7 @@ import java.util.List;
  * Created on 26.09.2016.
  */
 
-public class ConnectionManager2 implements ISocketListener, IChanel{
+public class ConnectionManager2 implements ISocketListener{
 
     public List<IConnection>    mConnections;
     private EndPoint            mClient;
@@ -39,7 +39,7 @@ public class ConnectionManager2 implements ISocketListener, IChanel{
     /********************************* IChanel ***********************************/
     /*****************************************************************************/
 
-    @Override
+
     public void sendCommand(String command){
 
         Log.v(GameManager.TAG, "ConnectionManager2: sendCommand(). Отправка команды");
@@ -50,7 +50,7 @@ public class ConnectionManager2 implements ISocketListener, IChanel{
         }
     }
 
-    @Override
+
     public void close(){
 
         Log.v(GameManager.TAG, "ConnectionManager2: close(). закрытие сокетов");
@@ -125,13 +125,13 @@ public class ConnectionManager2 implements ISocketListener, IChanel{
 
     /****************************** реализация наблюдателей  **********************/
 
-    private List<IChanelObserver> mObservers;
-
-    public void registerObserver(IChanelObserver observer){
-        mObservers.add(observer);
-    }
-
-    public void unregisterObserver(IChanelObserver observer){
-        mObservers.remove(observer);
-    }
+//    private List<IChanelObserver> mObservers;
+//
+//    public void registerObserver(IChanelObserver observer){
+//        mObservers.add(observer);
+//    }
+//
+//    public void unregisterObserver(IChanelObserver observer){
+//        mObservers.remove(observer);
+//    }
 }
