@@ -1,6 +1,7 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
+import android.os.Trace;
 import android.util.Log;
 
 import com.votafore.warlords.GameManager;
@@ -40,8 +41,10 @@ public class Instance extends EndPoint {
     private Context mContext;
 
     public Instance(Context context){
+        Trace.beginSection("Instance");
         mContext = context;
         Log.v(GameManager.TAG, "Instance");
+        Trace.endSection();
     }
 
 

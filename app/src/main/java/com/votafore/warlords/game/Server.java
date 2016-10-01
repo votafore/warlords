@@ -54,10 +54,10 @@ public class Server extends EndPoint{
 
         JSONObject cmd;
 
-        JSONObject response = new JSONObject();
-
         try {
             cmd = new JSONObject(command);
+
+            JSONObject response = new JSONObject();
 
             switch (cmd.getString("type")){
                 case "InstanceInfo":
@@ -73,17 +73,18 @@ public class Server extends EndPoint{
 
             }
 
+            Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+            if(!response.toString().isEmpty()){
+                mConnectionManager2.sendCommand(response.toString());
+                return;
+            }
+
         } catch (JSONException e) {
             Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. Ошибка: " + e.getMessage());
             e.printStackTrace();
         }
 
-
         Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
-        if(!response.toString().isEmpty()){
-            mConnectionManager2.sendCommand(response.toString());
-            return;
-        }
         mConnectionManager2.sendCommand("response");
     }
 

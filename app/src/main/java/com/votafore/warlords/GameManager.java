@@ -266,6 +266,8 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
 
+        Trace.beginSection("GameManager_setupClient");
+
         final AdderClientSocket clientAdder;
 
         mInstance       = new Instance(context);
@@ -286,6 +288,7 @@ public class GameManager {
         Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
 
         mClient = mInstance;
+        Trace.endSection();
     }
 
     private void addConnection(SocketConnectionAdder adder, InetAddress address, int port){

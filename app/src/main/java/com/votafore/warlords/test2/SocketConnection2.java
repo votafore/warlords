@@ -115,6 +115,7 @@ public class SocketConnection2 implements IConnection {
         mThread.start();
     }
 
+    @Override
     public void close(){
 
         Log.v(GameManager.TAG, "SocketConnection2: close()");

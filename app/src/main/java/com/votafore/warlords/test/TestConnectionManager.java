@@ -81,8 +81,6 @@ public class TestConnectionManager implements ISocketListener{
 
                     Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - есть SocketConnection");
 
-                    onSocketConnected(con);
-
                     Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - соединение добавлено");
 
                 } catch (IOException e) {
@@ -99,10 +97,13 @@ public class TestConnectionManager implements ISocketListener{
 
         while(mConnections.size() > 0){
 
-            mConnections.get(0).close();
-            //mConnections.remove(0);
-
             Log.v(GameManager.TAG, "TestConnectionManager: close(). 1 соединение закрыто");
+
+            try {
+                mConnections.get(0).close();
+            } catch (IndexOutOfBoundsException e) {
+                e.printStackTrace();
+            }
         }
     }
 

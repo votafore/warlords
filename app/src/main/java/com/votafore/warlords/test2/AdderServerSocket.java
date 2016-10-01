@@ -50,9 +50,9 @@ public class AdderServerSocket extends SocketConnectionAdder {
 
                         Socket socket = mServerSocket.accept();
 
-                        final SocketConnection2 connection = new SocketConnection2(socket, mHandler, mManager);
+                        Log.v(GameManager.TAG, "AdderServerSocket: addConnection(). Поток сокета - есть входящее подключение, настраиваем его");
 
-                        Log.v(GameManager.TAG, "AdderServerSocket: addConnection(). Поток сокета - есть входящее подключение, сохраняем его");
+                        final SocketConnection2 connection = new SocketConnection2(socket, mHandler, mManager);
 
                         mManager.store(connection);
 

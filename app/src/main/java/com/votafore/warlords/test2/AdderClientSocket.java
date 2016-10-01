@@ -1,6 +1,7 @@
 package com.votafore.warlords.test2;
 
 import android.os.Handler;
+import android.os.Trace;
 import android.util.Log;
 
 import com.votafore.warlords.GameManager;
@@ -39,7 +40,10 @@ public class AdderClientSocket extends SocketConnectionAdder {
 
                 try {
                     socket      = new Socket(serverIP, mServerPort);
-                    final SocketConnection2 mConnection = new SocketConnection2(socket, mHandler, mManager);
+
+                    Log.v(GameManager.TAG, "AdderClientSocket: addConnection(). Поток сокета - есть сокет. настраиваем подключение");
+
+                    SocketConnection2 mConnection = new SocketConnection2(socket, mHandler, mManager);
 
                     Log.v(GameManager.TAG, "AdderClientSocket: addConnection(). Поток сокета - есть SocketConnection2");
 
