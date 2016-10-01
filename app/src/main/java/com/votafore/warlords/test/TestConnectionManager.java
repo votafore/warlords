@@ -1,8 +1,10 @@
 package com.votafore.warlords.test;
 
 import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
+import com.votafore.warlords.GameManager;
 import com.votafore.warlords.net.ISocketListener;
 import com.votafore.warlords.net.wifi.SocketConnection;
 
@@ -26,7 +28,9 @@ public class TestConnectionManager implements ISocketListener{
     public TestConnectionManager(){
 
         mConnections    = new ArrayList<>();
-        mHandler        = new Handler();
+        mHandler        = new Handler(Looper.getMainLooper());
+
+        Log.v(GameManager.TAG, "TestConnectionManager:");
     }
 
 
@@ -37,6 +41,7 @@ public class TestConnectionManager implements ISocketListener{
 
     public void  setListener(ISocketListener listener){
         mListener = listener;
+        Log.v(GameManager.TAG, "TestConnectionManager: setListener() установлен кастомных слушатель");
     }
 
 
@@ -46,44 +51,58 @@ public class TestConnectionManager implements ISocketListener{
     /***************** пока не интерфейс, но возможно им будет *******************/
     /*****************************************************************************/
 
+
     public void sendMessage(String msg){
+
+        Log.v(GameManager.TAG, "TestConnectionManager: sendMessage(). Отправка сообщения");
+
         for (SocketConnection connection : mConnections) {
-            Log.v("GAMESERVICE","отослали запрос");
+            Log.v(GameManager.TAG, "TestConnectionManager: sendMessage(). Отправка сообщения - 1 отправляется");
             connection.sendMessage(msg);
         }
     }
 
     public void addConnection(final InetAddress adress, final int port){
 
-        Log.v("GAMESERVICE","добавляем подключение");
+        Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения");
 
         new Thread(new Runnable() {
             @Override
             public void run() {
 
+                Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - запущен");
+
                 try {
                     Socket socket = new Socket(adress, port);
-                    Log.v("GAMESERVICE","сокет есть");
+
+                    Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - есть сокет");
+
                     SocketConnection con = new SocketConnection(socket, mHandler, TestConnectionManager.this);
+
+                    Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - есть SocketConnection");
+
+                    onSocketConnected(con);
+
+                    Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - соединение добавлено");
+
                 } catch (IOException e) {
-                    Log.v("GAMESERVICE","добавляем подключение - ошибка");
-                    Log.v("GAMESERVICE",e.getMessage());
                     e.printStackTrace();
+                    Log.v(GameManager.TAG, "TestConnectionManager: addConnection(). Добавление подключения. Поток создания - ошибка: " + e.getMessage());
                 }
             }
         }).start();
     }
 
-    public void closeConnection(SocketConnection connection){
-        connection.close();
-    }
+    public void close(){
 
-    public void closeAll(){
+        Log.v(GameManager.TAG, "TestConnectionManager: close().");
 
         while(mConnections.size() > 0){
 
             mConnections.get(0).close();
-            mConnections.remove(0);
+            //mConnections.remove(0);
+
+            Log.v(GameManager.TAG, "TestConnectionManager: close(). 1 соединение закрыто");
         }
     }
 
@@ -94,6 +113,8 @@ public class TestConnectionManager implements ISocketListener{
     @Override
     public void onObtainMessage(SocketConnection connection, String msg) {
 
+        Log.v(GameManager.TAG, "TestConnectionManager: onObtainMessage().");
+
         if(mListener != null)
             mListener.onObtainMessage(connection, msg);
     }
@@ -101,7 +122,8 @@ public class TestConnectionManager implements ISocketListener{
     @Override
     public void onSocketConnected(SocketConnection connection) {
 
-        Log.v("GAMESERVICE","подключение добавлено");
+        Log.v(GameManager.TAG, "TestConnectionManager: onSocketConnected().");
+
         mConnections.add(connection);
 
         if(mListener != null)
@@ -110,6 +132,9 @@ public class TestConnectionManager implements ISocketListener{
 
     @Override
     public void onSocketDisconnected(SocketConnection connection) {
+
+        Log.v(GameManager.TAG, "TestConnectionManager: onSocketDisconnected().");
+
         mConnections.remove(connection);
 
         if(mListener != null)

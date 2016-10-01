@@ -4,38 +4,34 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.opengl.GLSurfaceView;
+import android.os.Trace;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.RecyclerView.Adapter;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
 import com.votafore.warlords.game.Server;
 import com.votafore.warlords.glsupport.GLRenderer;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
-import com.votafore.warlords.net.IClient;
-import com.votafore.warlords.net.IServer;
 import com.votafore.warlords.net.ISocketListener;
-import com.votafore.warlords.net.wifi.CMWifiClient;
-import com.votafore.warlords.net.wifi.CMWifiServer;
 import com.votafore.warlords.net.wifi.SocketConnection;
 import com.votafore.warlords.test.TestConnectionManager;
-
-import junit.framework.Test;
+import com.votafore.warlords.test.ConnectionManager2;
+import com.votafore.warlords.test2.AdderClientSocket;
+import com.votafore.warlords.test2.AdderServerSocket;
+import com.votafore.warlords.test2.SocketConnectionAdder;
 
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.w3c.dom.Text;
 
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +40,7 @@ import java.util.List;
  * @author Votafore
  * Created on 17.09.2016.
  */
-public class GameManager {//extends BroadcastReceiver{
+public class GameManager {
 
     private static volatile GameManager mThis;
 
@@ -58,6 +54,8 @@ public class GameManager {//extends BroadcastReceiver{
 
     private GameManager(Context context){
 
+        Log.v(TAG, "GameManager: вызвали конструктор");
+
         ISocketListener mCustomListener;
 
         mWorld = new GLWorld(this);
@@ -67,34 +65,34 @@ public class GameManager {//extends BroadcastReceiver{
         mDiscoveryListener    = new NsdManager.DiscoveryListener() {
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.v(TAG, "onStartDiscoveryFailed");
+                Log.v(TAG, "NsdManager.DiscoveryListener: onStartDiscoveryFailed");
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.v(TAG, "onStopDiscoveryFailed");
+                Log.v(TAG, "NsdManager.DiscoveryListener: onStopDiscoveryFailed");
             }
 
             @Override
             public void onDiscoveryStarted(String serviceType) {
-                Log.v(TAG, "onDiscoveryStarted");
+                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStarted");
             }
 
             @Override
             public void onDiscoveryStopped(String serviceType) {
-                Log.v(TAG, "onDiscoveryStopped");
+                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStopped");
 
                 // как только прекратили искать (5 сек. ожидания)
                 // посылаем запрос на информацию о созданных инстансах
 
-                Log.v(TAG, "поиск остановлен, рассылаем запросы");
+                Log.v(TAG, "NsdManager.DiscoveryListener: рассылаем запросы");
 
                 // при отправке запроса:
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
 
-                        Log.v(TAG, "поток рассылки запросов запущен");
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - запущен");
 
                         // отправляем запрос на информацию об инстансе
                         try {
@@ -105,13 +103,18 @@ public class GameManager {//extends BroadcastReceiver{
                             query.put("type"     , "InstanceInfo");
                             query.put("command"  , "get");
 
+                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - отправляем запрос");
+
                             mConnectionManager.sendMessage(query.toString());
 
                         } catch (JSONException e) {
+
+                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов, создание запроса: " + e.getMessage());
+
                             e.printStackTrace();
                         }
 
-                        Log.v(TAG, "ждем ответы (5 сек)");
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - ждем ответы (5 сек)");
 
                         // ждем ответы 5 сек
                         long end = System.currentTimeMillis() + 5 * 1000;
@@ -124,9 +127,10 @@ public class GameManager {//extends BroadcastReceiver{
                             }
                         }
 
-                        Log.v(TAG, "закрываем все соединения");
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - закрываем все соединения");
+
                         // закрываем соединение(я)
-                        mConnectionManager.closeAll();
+                        mConnectionManager.close();
                     }
                 }).start();
             }
@@ -134,17 +138,25 @@ public class GameManager {//extends BroadcastReceiver{
             @Override
             public void onServiceFound(NsdServiceInfo serviceInfo) {
 
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
+
                 if(!serviceInfo.getServiceName().contains(mServiceName))
                     return;
 
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. пытаемся подключиться к сервису");
                 mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
                     @Override
                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        Log.v(TAG, "onResolveFailed");
+                        Log.v(TAG, "NsdManager.ResolveListener: onResolveFailed. не удалось подключиться к сервису");
                     }
 
                     @Override
                     public void onServiceResolved(NsdServiceInfo serviceInfo) {
+
+                        Log.v(TAG, "NsdManager.ResolveListener: onServiceResolved. добавляем соединение");
+                        Log.v(TAG, "хост: " + serviceInfo.getHost().toString());
+                        Log.v(TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
+
                         mConnectionManager.addConnection(serviceInfo.getHost(), serviceInfo.getPort());
                     }
                 });
@@ -152,18 +164,27 @@ public class GameManager {//extends BroadcastReceiver{
 
             @Override
             public void onServiceLost(NsdServiceInfo serviceInfo) {
-                Log.v(TAG, "onServiceLost");
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceLost. закрываем соединения");
+
+                mConnectionManager.close();
+
+
+                mClientManager.close();
+
+                if(mServerManager != null)
+                    mServerManager.close();
             }
         };
         mRegistrationListener = new NsdManager.RegistrationListener() {
             @Override
             public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                Log.v(TAG, "NsdManager.RegistrationListener: onRegistrationFailed");
 
             }
 
             @Override
             public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-
+                Log.v(TAG, "NsdManager.RegistrationListener: onUnregistrationFailed");
             }
 
             @Override
@@ -171,18 +192,20 @@ public class GameManager {//extends BroadcastReceiver{
 
                 // актуализация имени сервиса
                 mServiceName = serviceInfo.getServiceName();
+
+                Log.v(TAG, "NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
             }
 
             @Override
             public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-
+                Log.v(TAG, "NsdManager.RegistrationListener: onServiceUnregistered");
             }
         };
         mCustomListener       = new ISocketListener() {
             @Override
             public void onObtainMessage(SocketConnection connection, String msg) {
 
-                Log.v(TAG, "получили ответ");
+                Log.v(TAG, "ISocketListener: onObtainMessage(). есть ответ от сервера");
 
                 JSONObject response;
 
@@ -191,6 +214,8 @@ public class GameManager {//extends BroadcastReceiver{
 
                     switch(response.getString("type")){
                         case "InstanceInfo":
+
+                            Log.v(TAG, "ISocketListener: onObtainMessage(). это инфа о созданном инстансе");
 
                             InstanceContainer instanceInfo;
 
@@ -203,6 +228,7 @@ public class GameManager {//extends BroadcastReceiver{
                             instanceInfo.mPort         = connection.getPort();
 
                             mInstances.add(instanceInfo);
+                            Log.v(TAG, "ISocketListener: onObtainMessage(). Добавили информацию об инстансе в список");
 
                             mAdapter.notifyItemInserted(mInstances.size()-1);
 
@@ -210,6 +236,7 @@ public class GameManager {//extends BroadcastReceiver{
                     }
 
                 } catch (JSONException e) {
+                    Log.v(TAG, "ISocketListener: onObtainMessage(). обработка ответа сервера. Ошибка: " + e.getMessage());
                     e.printStackTrace();
                     return;
                 }
@@ -217,12 +244,12 @@ public class GameManager {//extends BroadcastReceiver{
 
             @Override
             public void onSocketConnected(SocketConnection connection) {
-
+                Log.v(TAG, "ISocketListener: onSocketConnected().");
             }
 
             @Override
             public void onSocketDisconnected(SocketConnection connection) {
-
+                Log.v(TAG, "ISocketListener: onSocketDisconnected().");
             }
         };
 
@@ -237,40 +264,40 @@ public class GameManager {//extends BroadcastReceiver{
         // настройка клиентской части
         //////////////////////////////////////////////////
 
-        mInstance   = new Instance(context);
-        mClient     = mInstance;
+        Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
 
+        final AdderClientSocket clientAdder;
 
+        mInstance       = new Instance(context);
+        mClientManager  = new ConnectionManager2(mInstance);
+        clientAdder     = new AdderClientSocket(mClientManager);
 
-        final TestConnectionManager mConnectionManagerForCustomServer;
-
-        mConnectionManagerForCustomServer = new TestConnectionManager();
+        mInstance.setConnectionManager2(mClientManager);
 
         mAdapter.setListener(new ClickListener() {
             @Override
             public void onClick(int position) {
 
                 InstanceContainer item = mInstances.get(position);
-
-                mConnectionManagerForCustomServer.closeAll();
-                mConnectionManagerForCustomServer.addConnection(item.mAddress, item.mPort);
+                addConnection(clientAdder, item.mAddress, item.mPort);
             }
         });
 
+        Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
 
-        CMWifiServer customServer;
+        mClient = mInstance;
+    }
 
-        customServer = new CMWifiServer(mClient);
-        customServer.setConnectionManager(mConnectionManagerForCustomServer);
+    private void addConnection(SocketConnectionAdder adder, InetAddress address, int port){
 
-        mCustomServer = customServer;
+        Log.v(TAG, "GameManager: addConnection(). Выбрали игру. Закрываем временные подключения, запускаем подключателя клиентов (добавляем соединение в него)");
 
-        mInstance.setServer(mCustomServer);
+        mClientManager.close();
+        adder.addConnection(address, port);
     }
 
 
-
-    private String TAG = "GAMESERVICE";
+    public static String TAG = "TEST";
 
 
     /*************************************************************************************************/
@@ -316,12 +343,11 @@ public class GameManager {//extends BroadcastReceiver{
      * Они ниже
      */
 
-    private IServer mServer;
-    private IClient mCustomClient;
+    private EndPoint mServer;
+    private ConnectionManager2 mServerManager;
 
-
-    private IClient mClient;
-    private IServer mCustomServer;
+    private EndPoint mClient;
+    private ConnectionManager2 mClientManager;
 
 
     /*************************************************************************************************/
@@ -397,13 +423,13 @@ public class GameManager {//extends BroadcastReceiver{
     /**
      * имя сервиса (или хотя бы как оно должно выглядеть)
      */
-    private String mServiceName = "Warlords";
+    public String mServiceName = "Warlords";
 
 
     /**
      * протокол - транспорт сервиса
      */
-    private String mServiceType = "_http._tcp.";
+    public String mServiceType = "_http._tcp.";
 
 
 
@@ -421,14 +447,14 @@ public class GameManager {//extends BroadcastReceiver{
 //        mCustomClient = client;
 
         // создаем сервис для автоматического подключения пользователей
-        NsdServiceInfo info;
-
-        info = new NsdServiceInfo();
-        info.setServiceName(mServiceName);
-        info.setServiceType(mServiceType);
-        //info.setPort(client.mServerSocket.getLocalPort());
-
-        mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+//        NsdServiceInfo info;
+//
+//        info = new NsdServiceInfo();
+//        info.setServiceName(mServiceName);
+//        info.setServiceType(mServiceType);
+//        //info.setPort(client.mServerSocket.getLocalPort());
+//
+//        mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
 
 
@@ -437,8 +463,15 @@ public class GameManager {//extends BroadcastReceiver{
      */
     public void stopBroadcastService(){
 
+        Log.v(TAG, "GameManager: stopBroadcastService()");
+
         // отменяем регистрацию (трансляцию) сервиса в сети
-        mNsdManager.unregisterService(mRegistrationListener);
+        try {
+            mNsdManager.unregisterService(mRegistrationListener);
+        } catch (IllegalArgumentException e) {
+            Log.v(TAG, "GameManager: stopBroadcastService(). Ошибка - " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
 
@@ -447,9 +480,67 @@ public class GameManager {//extends BroadcastReceiver{
      */
     public void createServer(){
 
-        Server server = new Server();
+        Log.v(TAG, "GameManager: createServer()");
 
-        mServer = server;
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - запущен");
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** настройка сервера перед запуском ******************");
+
+                // настройка серверной части
+                Server server;
+                final AdderServerSocket serverAdder;
+
+                server          = new Server();
+                mServerManager  = new ConnectionManager2(server);
+                serverAdder     = new AdderServerSocket(mServerManager);
+
+                server.setConnectionManager2(mServerManager);
+
+                serverAdder.addConnection();
+
+                mServer = server;
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** сервер создан ******************");
+
+                // дадим ненмого времени на подключение сервера сокетов
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - ждем 1 секунду");
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - идем дальше. настраиваем регистрацию сервиса.");
+
+                // регистрация сервиса для автоподключения
+                NsdServiceInfo info;
+
+                info = new NsdServiceInfo();
+                info.setServiceName(mServiceName);
+                info.setServiceType(mServiceType);
+                info.setPort(serverAdder.getPort());
+                //info.setPort(58000);
+
+                //Log.v(TAG, "включаем транслящию сервиса. port: " + String.valueOf(serverAdder.getPort()));
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverAdder.getPort()));
+                //Log.v(TAG, "включаем транслящию сервиса. port: 58000");
+
+                mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+            }
+        }).start();
+
+//        Log.v(TAG, "включаем транслящию сервиса. port: 58000");
+//        mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+    }
+
+    public void stopServer(){
+
+        Log.v(TAG, "GameManager: stopServer(). закрываем подключения сервера");
+        mServerManager.close();
     }
 
 
@@ -462,7 +553,7 @@ public class GameManager {//extends BroadcastReceiver{
      */
     public void discoverServers(Context context){
 
-        Log.v(TAG, "запускаем поиск серверов (вызов функции)");
+        Log.v(TAG, "GameManager: discoverServers().");
 
         mInstances = new ArrayList<>();
         mAdapter.notifyDataSetChanged();
@@ -471,15 +562,16 @@ public class GameManager {//extends BroadcastReceiver{
             @Override
             public void run() {
 
-                Log.v(TAG, "запускаем поиск серверов (запуск потока)");
+                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - запущен. Начинаем поиск");
+
                 // начинаем поиск сервисов
                 mNsdManager.discoverServices(mServiceType, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
 
-                long end = System.currentTimeMillis() + 5 * 1000;
+                long end = System.currentTimeMillis() + 15 * 1000;
 
                 while(System.currentTimeMillis() < end){
 
-                    Log.v(TAG, "ждем 5 сек");
+                    Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - ждем 15 сек");
 
                     try {
                         Thread.sleep(end - System.currentTimeMillis());
@@ -488,11 +580,18 @@ public class GameManager {//extends BroadcastReceiver{
                     }
                 }
 
-                Log.v(TAG, "останавливаем поиск");
+                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - останавливаем поиск");
                 // останавливаем поиск сервисов
                 mNsdManager.stopServiceDiscovery(mDiscoveryListener);
             }
         }).start();
+    }
+
+
+    public void stopServiceDiscovery(){
+
+        Log.v(TAG, "GameManager: stopServiceDiscovery().");
+        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
     }
 
 
@@ -607,5 +706,18 @@ public class GameManager {//extends BroadcastReceiver{
     /************************************** раздел еще в разработке **********************************/
 
 
+    public void someFunc(){
+
+        Log.v(TAG, "GameManager: someFunc(). произвольная функция инстанса");
+
+        mInstance.someFunc();
+    }
+
+    public void stopClient(){
+
+        Log.v(TAG, "GameManager: stopClient(). остановка клиента");
+
+        mClientManager.close();
+    }
 
 }

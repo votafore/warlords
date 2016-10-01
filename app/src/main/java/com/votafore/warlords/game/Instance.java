@@ -3,11 +3,7 @@ package com.votafore.warlords.game;
 import android.content.Context;
 import android.util.Log;
 
-import com.votafore.warlords.net.IClient;
-import com.votafore.warlords.net.IServer;
-import com.votafore.warlords.net.wifi.CMWifiClient;
-import com.votafore.warlords.net.wifi.CMWifiServer;
-import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.GameManager;
 
 /**
  * @author Votafore
@@ -39,66 +35,28 @@ import com.votafore.warlords.net.ISocketListener;
  * его и в процессе игры (далее) будет учавствовать только этот он.
  */
 
-public class Instance implements IClient {
+public class Instance extends EndPoint {
 
-    private String TAG = "MSOCKET_Instance";
+    private Context mContext;
 
-
-    /**
-     * служебные переменные
-     */
-    Context mContext;
-
-    public Instance(Context context) {
-
-        mContext    = context;
-
-        Log.v(TAG, "создали объект Instance");
-
+    public Instance(Context context){
+        mContext = context;
+        Log.v(GameManager.TAG, "Instance");
     }
 
 
-    /*****************************************************************************************************************/
-    /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
-    /*****************************************************************************************************************/
-
-    /**
-     * для этих возможностей класс и реализует интерфейсы IClient и IServer
-     */
-
-
-    /*****************************************************************************************************************/
-    /****************************************************** CLIENT ***************************************************/
-
-    /**
-     * ссылка на представителя сервера (им может быть и реальный сервер)
-     */
-    IServer mServer;
-
-    public void setServer(IServer server){
-        mServer = server;
-    }
-
-
-    /**
-     * клиент может получать сообщения от сервера (асинхронные... т.е. из другого потока)
-     */
-    @Override
-    public void onMessageReceived(String msg){
-
-        // TODO: обработка сообщения сервера
-        Log.v(TAG, "Клиент: получено сообщение сервера: " + msg);
-    }
 
     @Override
-    public void release(){
+    public void execute(String command) {
 
-        // сигнал от сервера
-        // при получении (по каким-то причинам)
-        // надо нормально закрыть соединение
-
-        Log.v(TAG, "Клиент: поступил сигнал release от сервера");
-
+        // принимаем и обрабатываем данные от сервера
+        Log.v(GameManager.TAG, "Instance: execute(). получили команду от сервера");
     }
 
+    public void someFunc(){
+
+        Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
+
+        mConnectionManager2.sendCommand("test command");
+    }
 }

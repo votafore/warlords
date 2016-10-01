@@ -1,8 +1,12 @@
 package com.votafore.warlords.game;
 
-import com.votafore.warlords.net.IClient;
-import com.votafore.warlords.net.IServer;
-import com.votafore.warlords.test.TestServerConnection;
+
+import android.util.Log;
+
+import com.votafore.warlords.GameManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Votafore
@@ -11,7 +15,7 @@ import com.votafore.warlords.test.TestServerConnection;
  * серверная часть игры
  */
 
-public class Server implements IServer{
+public class Server extends EndPoint{
 
 
 
@@ -26,12 +30,11 @@ public class Server implements IServer{
     /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
     /*****************************************************************************************************************/
 
-    IClient mClient;
-
-    public void setClient(IClient client){
-        mClient = client;
-    }
-
+//    private Agent mClient;
+//
+//    public void setClient(Agent client){
+//        mClient = client;
+//    }
 
 
     /*****************************************************************************************************************/
@@ -40,19 +43,48 @@ public class Server implements IServer{
 
 
     @Override
-    public void handleCommand(String command) {
+    public void execute(String command) {
 
-        // сообщение полученное от одного получат все
-        mClient.onMessageReceived(command);
+        Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ");
+
+        // обработка сообщения
+
+        // рассылка остальным
+        //mClient.onEndPointResponded(command);
+
+        JSONObject cmd;
+
+        JSONObject response = new JSONObject();
+
+        try {
+            cmd = new JSONObject(command);
+
+            switch (cmd.getString("type")){
+                case "InstanceInfo":
+
+                    if(cmd.getString("command").equals("get")){
+
+                        response.put("type"         , "InstanceInfo");
+                        response.put("map"          , android.R.drawable.btn_star);
+                        response.put("creatorID"    , 125);
+                        response.put("creatorName"  , "Andrew");
+                    }
+                    break;
+
+            }
+
+        } catch (JSONException e) {
+            Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. Ошибка: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+
+        Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+        if(!response.toString().isEmpty()){
+            mConnectionManager2.sendCommand(response.toString());
+            return;
+        }
+        mConnectionManager2.sendCommand("response");
     }
 
-    @Override
-    public void connect() {
-
-    }
-
-    @Override
-    public void disconnect() {
-
-    }
 }
