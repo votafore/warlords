@@ -9,14 +9,10 @@
     <item android:title="new game"
           android:id="@+id/new_game"
           android:icon="@android:drawable/ic_menu_add"/>
-    <item android:title="create server"
-          android:id="@+id/create_server"/>
     <item android:title="stop server"
           android:id="@+id/stop_server"/>
     <item android:title="call someFunc()"
           android:id="@+id/call_someFunc"/>
     <item android:title="stop client"
           android:id="@+id/stop_client"/>
-    <item android:title="хватит искать"
-          android:id="@+id/stop_discovery"/>
 </menu>

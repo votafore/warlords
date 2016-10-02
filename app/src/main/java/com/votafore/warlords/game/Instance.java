@@ -60,6 +60,8 @@ public class Instance extends EndPoint {
 
         Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
 
-        mConnectionManager2.sendCommand("test command");
+        //mConnectionManager2.sendCommand("test command");
+
+        mChanel.sendCommand("test command");
     }
 }

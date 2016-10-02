@@ -20,18 +20,13 @@ import com.votafore.warlords.glsupport.GLRenderer;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
-import com.votafore.warlords.net.ISocketListener;
-import com.votafore.warlords.net.wifi.SocketConnection;
-import com.votafore.warlords.test.TestConnectionManager;
-import com.votafore.warlords.test.ConnectionManager2;
-import com.votafore.warlords.test2.AdderClientSocket;
-import com.votafore.warlords.test2.AdderServerSocket;
-import com.votafore.warlords.test2.SocketConnectionAdder;
+import com.votafore.warlords.net.ConnectionChanel;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +38,10 @@ import java.util.List;
 public class GameManager {
 
     private static volatile GameManager mThis;
+
+
+
+
 
     static GameManager getInstance(Context context){
 
@@ -56,12 +55,12 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: вызвали конструктор");
 
-        ISocketListener mCustomListener;
-
         mWorld = new GLWorld(this);
         mWorld.camMove(GLWorld.AXIS_Y, 3f);
 
+        Log.v(TAG, "GameManager: пытаемся получить NsdManager");
         mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+
         mDiscoveryListener    = new NsdManager.DiscoveryListener() {
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
@@ -105,7 +104,9 @@ public class GameManager {
 
                             Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - отправляем запрос");
 
-                            mConnectionManager.sendMessage(query.toString());
+                            //mConnectionManager.sendMessage(query.toString());
+
+                            clientChanel.sendCommand(query.toString());
 
                         } catch (JSONException e) {
 
@@ -130,7 +131,10 @@ public class GameManager {
                         Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - закрываем все соединения");
 
                         // закрываем соединение(я)
-                        mConnectionManager.close();
+                        //mConnectionManager.close();
+
+                        clientChanel.close();
+
                     }
                 }).start();
             }
@@ -157,7 +161,9 @@ public class GameManager {
                         Log.v(TAG, "хост: " + serviceInfo.getHost().toString());
                         Log.v(TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
-                        mConnectionManager.addConnection(serviceInfo.getHost(), serviceInfo.getPort());
+                        //mConnectionManager.addConnection(serviceInfo.getHost(), serviceInfo.getPort());
+
+                        clientChanel.getConnectionAppend().addConnection(serviceInfo.getHost(), serviceInfo.getPort());
                     }
                 });
             }
@@ -166,13 +172,14 @@ public class GameManager {
             public void onServiceLost(NsdServiceInfo serviceInfo) {
                 Log.v(TAG, "NsdManager.DiscoveryListener: onServiceLost. закрываем соединения");
 
-                mConnectionManager.close();
+                // думаю что все подключения закрывать не обязательно
+                //mConnectionManager.close();
 
 
-                mClientManager.close();
+                //mClientManager.close();
 
-                if(mServerManager != null)
-                    mServerManager.close();
+//                if(mServerManager != null)
+//                    mServerManager.close();
             }
         };
         mRegistrationListener = new NsdManager.RegistrationListener() {
@@ -201,63 +208,12 @@ public class GameManager {
                 Log.v(TAG, "NsdManager.RegistrationListener: onServiceUnregistered");
             }
         };
-        mCustomListener       = new ISocketListener() {
-            @Override
-            public void onObtainMessage(SocketConnection connection, String msg) {
 
-                Log.v(TAG, "ISocketListener: onObtainMessage(). есть ответ от сервера");
 
-                JSONObject response;
 
-                try {
-                    response = new JSONObject(msg);
-
-                    switch(response.getString("type")){
-                        case "InstanceInfo":
-
-                            Log.v(TAG, "ISocketListener: onObtainMessage(). это инфа о созданном инстансе");
-
-                            InstanceContainer instanceInfo;
-
-                            instanceInfo = new InstanceContainer();
-                            instanceInfo.mResMap       = response.getInt("map");
-                            instanceInfo.mCreator      = response.getInt("creatorID");
-                            instanceInfo.mCreatorName  = response.getString("creatorName");
-
-                            instanceInfo.mAddress      = connection.getHost();
-                            instanceInfo.mPort         = connection.getPort();
-
-                            mInstances.add(instanceInfo);
-                            Log.v(TAG, "ISocketListener: onObtainMessage(). Добавили информацию об инстансе в список");
-
-                            mAdapter.notifyItemInserted(mInstances.size()-1);
-
-                            break;
-                    }
-
-                } catch (JSONException e) {
-                    Log.v(TAG, "ISocketListener: onObtainMessage(). обработка ответа сервера. Ошибка: " + e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-            }
-
-            @Override
-            public void onSocketConnected(SocketConnection connection) {
-                Log.v(TAG, "ISocketListener: onSocketConnected().");
-            }
-
-            @Override
-            public void onSocketDisconnected(SocketConnection connection) {
-                Log.v(TAG, "ISocketListener: onSocketDisconnected().");
-            }
-        };
-
-        mConnectionManager.setListener(mCustomListener);
 
         mInstances  = new ArrayList<>();
         mAdapter    = new GameServerAdapter();
-
 
 
         //////////////////////////////////////////////////
@@ -268,20 +224,73 @@ public class GameManager {
 
         Trace.beginSection("GameManager_setupClient");
 
-        final AdderClientSocket clientAdder;
-
         mInstance       = new Instance(context);
-        mClientManager  = new ConnectionManager2(mInstance);
-        clientAdder     = new AdderClientSocket(mClientManager);
 
-        mInstance.setConnectionManager2(mClientManager);
+        clientChanel = new ConnectionChanel();
+        clientChanel.setupAppend(ConnectionChanel.TYPE_FOR_CLIENT);
+
+        mInstance.setChanel(clientChanel);
+
+        final ConnectionChanel.IObserver observer;
+
+        observer = new ConnectionChanel.IObserver() {
+            @Override
+            public void notifyObserver(String message) {
+
+                Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
+
+                JSONObject response;
+
+                try {
+                    response = new JSONObject(message);
+
+                    switch(response.getString("type")){
+                        case "InstanceInfo":
+
+                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
+
+                            InstanceContainer instanceInfo;
+
+                            instanceInfo = new InstanceContainer();
+                            instanceInfo.mResMap       = response.getInt("map");
+                            instanceInfo.mCreator      = response.getInt("creatorID");
+                            instanceInfo.mCreatorName  = response.getString("creatorName");
+
+                            instanceInfo.mAddress      = InetAddress.getByName(response.getString("host"));
+                            instanceInfo.mPort         = response.getInt("port");
+
+                            mInstances.add(instanceInfo);
+                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). Добавили информацию об инстансе в список");
+
+                            mAdapter.notifyItemInserted(mInstances.size()-1);
+
+                            break;
+                    }
+
+                } catch (JSONException e) {
+                    Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). обработка ответа сервера. Ошибка: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                } catch (UnknownHostException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
+
+        clientChanel.registerObserver(observer);
+
+
 
         mAdapter.setListener(new ClickListener() {
             @Override
             public void onClick(int position) {
 
                 InstanceContainer item = mInstances.get(position);
-                addConnection(clientAdder, item.mAddress, item.mPort);
+
+                clientChanel.getConnectionAppend().addConnection(item.mAddress, item.mPort);
+                clientChanel.unregisterObserver(observer);
+
+                clientChanel.registerObserver(mInstance);
             }
         });
 
@@ -289,14 +298,7 @@ public class GameManager {
 
         mClient = mInstance;
         Trace.endSection();
-    }
 
-    private void addConnection(SocketConnectionAdder adder, InetAddress address, int port){
-
-        Log.v(TAG, "GameManager: addConnection(). Выбрали игру. Закрываем временные подключения, запускаем подключателя клиентов (добавляем соединение в него)");
-
-        mClientManager.close();
-        adder.addConnection(address, port);
     }
 
 
@@ -347,10 +349,20 @@ public class GameManager {
      */
 
     private EndPoint mServer;
-    private ConnectionManager2 mServerManager;
 
     private EndPoint mClient;
-    private ConnectionManager2 mClientManager;
+
+
+
+    /**
+     * связь клиента и сервера происходит благодаря каналам связи (для клиента свой, для сервера - свой)
+     * пользователь канала подключается к нему как наблюдатель (ну и не только) что бы получать
+     * входящие сообщения.
+     *
+     * кроме клиента или сервера каналом могут пользоваться и другие объекты
+     */
+    private ConnectionChanel clientChanel;
+    private ConnectionChanel serverChanel;
 
 
     /*************************************************************************************************/
@@ -392,7 +404,6 @@ public class GameManager {
     public void stopGame(){
 
     }
-
 
     /*************************************************************************************************/
     /*********************************** РАБОТА ПО СЕТИ В ЭТОМ КЛАССЕ ********************************/
@@ -438,31 +449,8 @@ public class GameManager {
 
     /******************************* создание собственного сервиса (и сервера) ***********************/
 
-
     /**
-     * запускаем наш сервис в мир
-     * что бы его увидели и могли подключиться
-     */
-    public void startBroadcastService(){
-
-//        // создаем сервер подключений (сокетов)
-//        CMWifiClient client = new CMWifiClient(null);
-//        mCustomClient = client;
-
-        // создаем сервис для автоматического подключения пользователей
-//        NsdServiceInfo info;
-//
-//        info = new NsdServiceInfo();
-//        info.setServiceName(mServiceName);
-//        info.setServiceType(mServiceType);
-//        //info.setPort(client.mServerSocket.getLocalPort());
-//
-//        mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
-    }
-
-
-    /**
-     * останавливаем сервис
+     * останавливаем трансляцию сервиса
      */
     public void stopBroadcastService(){
 
@@ -480,6 +468,9 @@ public class GameManager {
 
     /**
      * создаем сервер
+     *
+     * запускаем наш сервис в мир
+     * что бы его увидели и могли подключиться
      */
     public void createServer(){
 
@@ -495,15 +486,15 @@ public class GameManager {
 
                 // настройка серверной части
                 Server server;
-                final AdderServerSocket serverAdder;
-
                 server          = new Server();
-                mServerManager  = new ConnectionManager2(server);
-                serverAdder     = new AdderServerSocket(mServerManager);
 
-                server.setConnectionManager2(mServerManager);
+                serverChanel = new ConnectionChanel();
+                serverChanel.setupAppend(ConnectionChanel.TYPE_FOR_SERVER);
+                serverChanel.getConnectionAppend().addConnection();
 
-                serverAdder.addConnection();
+                server.setChanel(serverChanel);
+
+                serverChanel.registerObserver(server);
 
                 mServer = server;
 
@@ -512,7 +503,7 @@ public class GameManager {
                 // дадим ненмого времени на подключение сервера сокетов
                 Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - ждем 1 секунду");
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(5000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -525,25 +516,22 @@ public class GameManager {
                 info = new NsdServiceInfo();
                 info.setServiceName(mServiceName);
                 info.setServiceType(mServiceType);
-                info.setPort(serverAdder.getPort());
-                //info.setPort(58000);
+                info.setPort(serverChanel.getPort());
 
-                //Log.v(TAG, "включаем транслящию сервиса. port: " + String.valueOf(serverAdder.getPort()));
-                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverAdder.getPort()));
-                //Log.v(TAG, "включаем транслящию сервиса. port: 58000");
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverChanel.getPort()));
 
                 mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
             }
         }).start();
 
-//        Log.v(TAG, "включаем транслящию сервиса. port: 58000");
-//        mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
     }
 
     public void stopServer(){
 
         Log.v(TAG, "GameManager: stopServer(). закрываем подключения сервера");
-        mServerManager.close();
+
+        serverChanel.close();
+        serverChanel.clearObservers();
     }
 
 
@@ -589,23 +577,6 @@ public class GameManager {
             }
         }).start();
     }
-
-
-    public void stopServiceDiscovery(){
-
-        Log.v(TAG, "GameManager: stopServiceDiscovery().");
-        mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-    }
-
-
-    /**
-     * контейнер подключений
-     */
-    private TestConnectionManager mConnectionManager = new TestConnectionManager();
-
-
-
-
 
 
     /***************************** отображение найденных игр (серверов) ******************************/
@@ -720,7 +691,8 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: stopClient(). остановка клиента");
 
-        mClientManager.close();
+        clientChanel.close();
+        clientChanel.clearObservers();
     }
 
 }

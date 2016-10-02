@@ -90,36 +90,12 @@ public class ActivityStart extends AppCompatActivity {
 
                 manager.createServer();
 
-//                NsdServiceInfo info;
-//
-//                info = new NsdServiceInfo();
-//                info.setServiceName(manager.mServiceName);
-//                info.setServiceType(manager.mServiceType);
-//
-//                try {
-//                    ServerSocket sock = new ServerSocket(0);
-//
-//                    info.setPort(sock.getLocalPort());
-//
-//                    sock.close();
-//
-//                    mNsdManager = (NsdManager) getSystemService(NSD_SERVICE);
-//
-//                    Log.v("GAMESERVICE", "включаем транслящию сервиса. port: " + String.valueOf(info.getPort()));
-//                    mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, this);
-//
-//                } catch (IOException e) {
-//                    e.printStackTrace();
-//                }
-
                 break;
 
             case R.id.stop_server:
 
                 manager.stopBroadcastService();
                 manager.stopServer();
-
-                //mNsdManager.unregisterService(this);
 
                 break;
 
@@ -131,12 +107,6 @@ public class ActivityStart extends AppCompatActivity {
             case R.id.stop_client:
 
                 manager.stopClient();
-                break;
-
-            case R.id.stop_discovery:
-
-                manager.stopServiceDiscovery();
-
                 break;
         }
 

@@ -1,4 +1,4 @@
-package com.votafore.warlords.test2;
+package com.votafore.warlords.net;
 
 
 public interface IConnection {

@@ -1,14 +1,19 @@
 package com.votafore.warlords.game;
 
-import com.votafore.warlords.test.ConnectionManager2;
+import com.votafore.warlords.net.ConnectionChanel;
 
 
-public abstract class EndPoint {
+public abstract class EndPoint implements ConnectionChanel.IObserver{
 
-    protected ConnectionManager2 mConnectionManager2;
+    protected ConnectionChanel mChanel;
 
-    public void setConnectionManager2(ConnectionManager2 manager2){
-        mConnectionManager2 = manager2;
+    public void setChanel(ConnectionChanel chanel){
+        mChanel = chanel;
+    }
+
+    @Override
+    public void notifyObserver(String message){
+        execute(message);
     }
 
     public abstract void execute(String command);
