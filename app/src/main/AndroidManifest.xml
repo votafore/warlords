@@ -19,13 +19,13 @@
         <activity android:name=".ActivityMain">
         </activity>
         <activity android:name=".ActivityStart">
-        </activity>
-        <activity android:name=".ActivityTestSocketClient">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+        </activity>
+        <activity android:name=".ActivityTestSocketClient">
         </activity>
     </application>
 

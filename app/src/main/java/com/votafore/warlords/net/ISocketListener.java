@@ -1,10 +1,10 @@
 package com.votafore.warlords.net;
 
 
-import com.votafore.warlords.net.wifi.SocketConnection;
 
 public interface ISocketListener {
-    void onObtainMessage(String msg);
-    void onSocketConnected(SocketConnection connection);
-    void onSocketDisconnected(SocketConnection connection);
+
+    void onIncommingCommandReceived(IConnection connection, String message);
+    void onSocketConnected(IConnection connection);
+    void onSocketDisconnected(IConnection connection);
 }

@@ -1,27 +1,31 @@
 package com.votafore.warlords;
 
-import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.net.wifi.WpsInfo;
-import android.net.wifi.p2p.WifiP2pConfig;
-import android.net.wifi.p2p.WifiP2pDevice;
-import android.net.wifi.p2p.WifiP2pDeviceList;
-import android.net.wifi.p2p.WifiP2pInfo;
-import android.net.wifi.p2p.WifiP2pManager;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.opengl.GLSurfaceView;
+import android.os.Trace;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.widget.Toast;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
+import com.votafore.warlords.game.Server;
 import com.votafore.warlords.glsupport.GLRenderer;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.SocketConnection;
 
-import java.net.InetAddress;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,13 +34,11 @@ import java.util.List;
  * @author Votafore
  * Created on 17.09.2016.
  */
-public class GameManager extends BroadcastReceiver{
+public class GameManager {
 
-    private static GameManager mThis;
+    private static volatile GameManager mThis;
 
-    private Context mContext;
-
-    public static GameManager getInstance(Context context){
+    static GameManager getInstance(Context context){
 
         if(mThis == null)
             mThis = new GameManager(context);
@@ -44,58 +46,320 @@ public class GameManager extends BroadcastReceiver{
         return mThis;
     }
 
-    private GameManager(Context context)throws RuntimeException{
+    private GameManager(Context context){
 
-        mContext    = context;
-        mWorld      = new GLWorld(this);
+        Log.v(TAG, "GameManager: вызвали конструктор");
 
+        mWorld = new GLWorld(this);
         mWorld.camMove(GLWorld.AXIS_Y, 3f);
 
-        subscribeWifiStateChange();
+        Log.v(TAG, "GameManager: пытаемся получить NsdManager");
+        mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+
+        mDiscoveryListener    = new NsdManager.DiscoveryListener() {
+            @Override
+            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
+                Log.v(TAG, "NsdManager.DiscoveryListener: onStartDiscoveryFailed");
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
+                Log.v(TAG, "NsdManager.DiscoveryListener: onStopDiscoveryFailed");
+            }
+
+            @Override
+            public void onDiscoveryStarted(String serviceType) {
+                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStarted");
+            }
+
+            @Override
+            public void onDiscoveryStopped(String serviceType) {
+                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStopped");
+
+                // как только прекратили искать (5 сек. ожидания)
+                // посылаем запрос на информацию о созданных инстансах
+
+                Log.v(TAG, "NsdManager.DiscoveryListener: рассылаем запросы");
+
+                // при отправке запроса:
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - запущен");
+
+                        // отправляем запрос на информацию об инстансе
+                        try {
+
+                            JSONObject query = new JSONObject();
+
+                            query.put("clientID" , 0);
+                            query.put("type"     , "InstanceInfo");
+                            query.put("command"  , "get");
+
+                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - отправляем запрос");
+
+                            //mConnectionManager.sendMessage(query.toString());
+
+                            clientChanel.sendCommand(query.toString());
+
+                        } catch (JSONException e) {
+
+                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов, создание запроса: " + e.getMessage());
+
+                            e.printStackTrace();
+                        }
+
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - ждем ответы (5 сек)");
+
+                        // ждем ответы 5 сек
+                        long end = System.currentTimeMillis() + 5 * 1000;
+                        while(System.currentTimeMillis() < end){
+
+                            try {
+                                Thread.sleep(end - System.currentTimeMillis());
+                            } catch (InterruptedException e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - закрываем все соединения");
+
+                        // закрываем соединение(я)
+                        //mConnectionManager.close();
+
+                        clientChanel.close();
+
+                    }
+                }).start();
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo serviceInfo) {
+
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
+
+                if(!serviceInfo.getServiceName().contains(mServiceName))
+                    return;
+
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. пытаемся подключиться к сервису");
+                mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
+                    @Override
+                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                        Log.v(TAG, "NsdManager.ResolveListener: onResolveFailed. не удалось подключиться к сервису");
+                    }
+
+                    @Override
+                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
+
+                        Log.v(TAG, "NsdManager.ResolveListener: onServiceResolved. добавляем соединение");
+                        Log.v(TAG, "хост: " + serviceInfo.getHost().toString());
+                        Log.v(TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
+
+                        clientChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
+                    }
+                });
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo serviceInfo) {
+                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceLost. закрываем соединения");
+
+                // думаю что все подключения закрывать не обязательно
+                //mConnectionManager.close();
+
+
+                //mClientManager.close();
+
+//                if(mServerManager != null)
+//                    mServerManager.close();
+            }
+        };
+        mRegistrationListener = new NsdManager.RegistrationListener() {
+            @Override
+            public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                Log.v(TAG, "NsdManager.RegistrationListener: onRegistrationFailed");
+
+            }
+
+            @Override
+            public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                Log.v(TAG, "NsdManager.RegistrationListener: onUnregistrationFailed");
+            }
+
+            @Override
+            public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+
+                // актуализация имени сервиса
+                mServiceName = serviceInfo.getServiceName();
+
+                Log.v(TAG, "NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
+            }
+
+            @Override
+            public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+                Log.v(TAG, "NsdManager.RegistrationListener: onServiceUnregistered");
+            }
+        };
+
+
+
+
+        mInstances  = new ArrayList<>();
+        mAdapter    = new GameServerAdapter();
+
+
+        //////////////////////////////////////////////////
+        // настройка клиентской части
+        //////////////////////////////////////////////////
+
+        Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
+
+        Trace.beginSection("GameManager_setupClient");
+
+        mInstance       = new Instance(context);
+
+        clientChanel = new ConnectionChanel();
+        clientChanel.setupAppend(ConnectionChanel.TYPE_FOR_CLIENT);
+
+        mInstance.setChanel(clientChanel);
+
+        final ConnectionChanel.IObserver observer;
+
+        observer = new ConnectionChanel.IObserver() {
+            @Override
+            public void notifyObserver(SocketConnection connection, String message) {
+
+                Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
+
+                JSONObject response;
+
+                try {
+                    response = new JSONObject(message);
+
+                    switch(response.getString("type")){
+                        case "InstanceInfo":
+
+                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
+
+                            InstanceContainer instanceInfo;
+
+                            instanceInfo = new InstanceContainer();
+                            instanceInfo.mResMap       = response.getInt("map");
+                            instanceInfo.mCreator      = response.getInt("creatorID");
+                            instanceInfo.mCreatorName  = response.getString("creatorName");
+
+                            instanceInfo.mAddress      = connection.getHost();
+                            instanceInfo.mPort         = connection.getPort();
+
+                            mInstances.add(instanceInfo);
+                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). Добавили информацию об инстансе в список");
+
+                            mAdapter.notifyItemInserted(mInstances.size()-1);
+
+                            break;
+                    }
+
+                } catch (JSONException e) {
+                    Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). обработка ответа сервера. Ошибка: " + e.getMessage());
+                    e.printStackTrace();
+                    return;
+                }
+            }
+        };
+
+        clientChanel.registerObserver(observer);
+
+
+
+        mAdapter.setListener(new ClickListener() {
+            @Override
+            public void onClick(int position) {
+
+                InstanceContainer item = mInstances.get(position);
+
+                clientChanel.getConnectionAppend().addConnection(item.mAddress, item.mPort);
+                clientChanel.unregisterObserver(observer);
+
+                clientChanel.registerObserver(mInstance);
+            }
+        });
+
+        Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
+
+        mClient = mInstance;
+        Trace.endSection();
+
     }
 
 
+    public static String TAG = "TEST";
 
 
+    /*************************************************************************************************/
+    /*********************************** ОСНОВНЫЕ ОБЪЕКТЫ СИСТЕМЫ ************************************/
+    /*************************************************************************************************/
 
+    /**
+     * должен быть объект, определяющий параметры игры
+     */
     private Instance mInstance;
 
-    public void setInstance(Instance instance){
-        mInstance = instance;
-    }
-
-    public Instance getInstance(){
-        return mInstance;
-    }
-
-
+    /**
+     * объект для отрисовки 3D мира
+     * создаем заранее
+     */
     private GLView mSurfaceView;
 
-    public GLSurfaceView getSurfaceView(){
+    /**
+     * 3D мир
+     * управление камерой
+     */
+    private GLWorld     mWorld;
+
+
+    GLSurfaceView getSurfaceView(){
         return mSurfaceView;
     }
 
 
 
 
-    private GLWorld     mWorld;
+    /******************************** для взаимодействия Клиент - Сервер *****************************/
 
-    public GLWorld getWorld(){
-        return mWorld;
-    }
+    private EndPoint mServer;
 
-
+    private EndPoint mClient;
 
 
 
+    /**
+     * связь клиента и сервера происходит благодаря каналам связи (для клиента свой, для сервера - свой)
+     * пользователь канала подключается к нему как наблюдатель (ну и не только) что бы получать
+     * входящие сообщения.
+     *
+     * кроме клиента или сервера каналом могут пользоваться и другие объекты
+     */
+    private ConnectionChanel clientChanel;
+    private ConnectionChanel serverChanel;
 
 
-    public void startGame(){
+    /*************************************************************************************************/
+    /*********************************** УПРАВЛЕНИЕ ИГРОВЫМ ПРОЦЕССОМ ********************************/
+    /*************************************************************************************************/
 
-        GLShader   mShader     = new GLShader(mContext, R.raw.shader_vertex, R.raw.shader_fragment);
+    //??????????????
+
+    /**
+     * запускаем игру
+     */
+
+    void startGame(Context context){
+
+        GLShader   mShader     = new GLShader(context, R.raw.shader_vertex, R.raw.shader_fragment);
         GLRenderer mRenderer   = new GLRenderer(mWorld, mInstance, mShader);
 
-        mSurfaceView = new GLView(mContext, mWorld, mRenderer) {
+        mSurfaceView = new GLView(context, mWorld, mRenderer) {
             @Override
             protected void init() {
 
@@ -112,145 +376,305 @@ public class GameManager extends BroadcastReceiver{
     }
 
 
-
-    //////////////////////////////////////
-    // РАЗДЕЛ РАБОТЫ С WI-FI
-    // реакция на изменение состояния
-    //////////////////////////////////////
-
-    private WifiP2pManager          mWifiP2pManager;
-    private WifiP2pManager.Channel  mWifiChannel;
-
     /**
-     * подписываемся на событие изменения статуса Wi-Fi
+     * прекращаем игру
      */
-    private void subscribeWifiStateChange(){
 
-        IntentFilter intentFilter;
+    public void stopGame(){
 
-        // Indicates a change in the Wi-Fi P2P status.
-        // Indicates a change in the list of available peers.
-        // Indicates the state of Wi-Fi P2P connectivity has changed.
-        // Indicates this device's details have changed.
-
-        intentFilter = new IntentFilter();
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);
-        intentFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);
-
-        mContext.registerReceiver(this, intentFilter);
-
-
-        mWifiP2pManager     = (WifiP2pManager) mContext.getSystemService(Context.WIFI_P2P_SERVICE);
-        mWifiChannel        = mWifiP2pManager.initialize(mContext, mContext.getMainLooper(), new WifiP2pManager.ChannelListener() {
-            @Override
-            public void onChannelDisconnected() {
-                Log.v(TAG, "канал отключен");
-            }
-        });
     }
 
+    /*************************************************************************************************/
+    /*********************************** РАБОТА ПО СЕТИ В ЭТОМ КЛАССЕ ********************************/
+    /*************************************************************************************************/
 
-    private String TAG = "TEST_WIFI";
 
     /**
-     * обработка изменения состояния wi-fi
-     * @param context
-     * @param intent
+     * объект для поиска\создания сервиса, позволяющего
+     * автоматически создать сеть для игры между игроками
      */
-    @Override
-    public void onReceive(Context context, Intent intent) {
+    private NsdManager mNsdManager;
 
-        switch (intent.getAction()){
-            case WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION:
 
-                Log.v(TAG, "изменилось состояние");
 
-                int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-                if (state == WifiP2pManager.WIFI_P2P_STATE_ENABLED) {
 
-                    mWifiP2pManager.discoverPeers(mWifiChannel, new WifiP2pManager.ActionListener() {
-                        @Override
-                        public void onSuccess() {
+    /******************************* вспомогательные объекты и переменные ****************************/
 
-                            Log.v(TAG, "Запуск поиска пиров: успешно");
-                        }
+    /**
+     * слушатель для начала и остановки поиска сервиса, а так же
+     * для реакции на событие нахождения сервиса.
+     */
+    private NsdManager.DiscoveryListener mDiscoveryListener;
 
-                        @Override
-                        public void onFailure(int reason) {
 
-                            Log.v(TAG, "Запуск поиска пиров: ошибка");
-                        }
-                    });
-                }
+    /**
+     * слушатель для регистрации сервиса и отмены его регистрации
+     */
+    private NsdManager.RegistrationListener mRegistrationListener;
 
-                break;
-            case WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION:
 
-                Log.v(TAG, "изменились пиры");
+    /**
+     * имя сервиса (или хотя бы как оно должно выглядеть)
+     */
+    public String mServiceName = "Warlords";
 
-                mWifiP2pManager.requestPeers(mWifiChannel, new WifiP2pManager.PeerListListener() {
-                    @Override
-                    public void onPeersAvailable(WifiP2pDeviceList peers) {
 
-                        int count = peers.getDeviceList().size();
+    /**
+     * протокол - транспорт сервиса
+     */
+    public String mServiceType = "_http._tcp.";
 
-                        if(count == 0)
-                            return;
 
-                        Log.v(TAG, String.format("найдены пиры: %s", count));
 
-                        List<WifiP2pDevice> list_peers = new ArrayList();
-                        list_peers.clear();
-                        list_peers.addAll(peers.getDeviceList());
+    /******************************* создание собственного сервиса (и сервера) ***********************/
 
-                        WifiP2pDevice  device = list_peers.get(0);
+    /**
+     * останавливаем трансляцию сервиса
+     */
+    public void stopBroadcastService(){
 
-                        WifiP2pConfig config;
+        Log.v(TAG, "GameManager: stopBroadcastService()");
 
-                        config = new WifiP2pConfig();
-                        config.deviceAddress = device.deviceAddress;
-                        config.wps.setup = WpsInfo.PBC;
-
-                        Log.v(TAG, "попытка подключения к пиру");
-                        mWifiP2pManager.connect(mWifiChannel, config, new WifiP2pManager.ActionListener() {
-                            @Override
-                            public void onSuccess() {
-
-                                Log.v(TAG, "подключение к пиру: успешно");
-                            }
-
-                            @Override
-                            public void onFailure(int reason) {
-
-                                Log.v(TAG, "подключение к пиру: fail");
-                            }
-                        });
-
-                    }
-                });
-
-                break;
-            case WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION:
-
-                Log.v(TAG, "изменилось подключение");
-
-                mWifiP2pManager.requestConnectionInfo(mWifiChannel, new WifiP2pManager.ConnectionInfoListener() {
-                    @Override
-                    public void onConnectionInfoAvailable(WifiP2pInfo info) {
-
-                        InetAddress address = info.groupOwnerAddress;
-                    }
-                });
-
-                break;
-            case WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION:
-
-                Log.v(TAG, "изменились параметры уст-ва");
-                //Toast.makeText(mContext, "изменились параметры уст-ва", Toast.LENGTH_SHORT).show();
-
-                WifiP2pDevice device = intent.getParcelableExtra(WifiP2pManager.EXTRA_WIFI_P2P_DEVICE);
+        // отменяем регистрацию (трансляцию) сервиса в сети
+        try {
+            mNsdManager.unregisterService(mRegistrationListener);
+        } catch (IllegalArgumentException e) {
+            Log.v(TAG, "GameManager: stopBroadcastService(). Ошибка - " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+
+    /**
+     * создаем сервер
+     *
+     * запускаем наш сервис в мир
+     * что бы его увидели и могли подключиться
+     */
+    public void createServer(){
+
+        Log.v(TAG, "GameManager: createServer()");
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - запущен");
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** настройка сервера перед запуском ******************");
+
+                // настройка серверной части
+                Server server;
+                server          = new Server();
+
+                serverChanel = new ConnectionChanel();
+                serverChanel.setupAppend(ConnectionChanel.TYPE_FOR_SERVER);
+                serverChanel.getConnectionAppend().addConnection();
+
+                server.setChanel(serverChanel);
+
+                serverChanel.registerObserver(server);
+
+                mServer = server;
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** сервер создан ******************");
+
+                // дадим ненмого времени на подключение сервера сокетов
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - ждем 1 секунду");
+                try {
+                    Thread.sleep(5000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - идем дальше. настраиваем регистрацию сервиса.");
+
+                // регистрация сервиса для автоподключения
+                NsdServiceInfo info;
+
+                info = new NsdServiceInfo();
+                info.setServiceName(mServiceName);
+                info.setServiceType(mServiceType);
+                info.setPort(serverChanel.getPort());
+
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverChanel.getPort()));
+
+                mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+            }
+        }).start();
+
+    }
+
+    public void stopServer(){
+
+        Log.v(TAG, "GameManager: stopServer(). закрываем подключения сервера");
+
+        if(serverChanel == null)
+            return;
+
+        serverChanel.close();
+        serverChanel.clearObservers();
+    }
+
+
+    /********************************** поиск созданных сервисов *************************************/
+
+
+    /**
+     * запускаем поиск игр (сервисов для подключения)
+     * созданных другими игроками
+     */
+    public void discoverServers(Context context){
+
+        Log.v(TAG, "GameManager: discoverServers().");
+
+        mInstances = new ArrayList<>();
+        mAdapter.notifyDataSetChanged();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - запущен. Начинаем поиск");
+
+                // начинаем поиск сервисов
+                mNsdManager.discoverServices(mServiceType, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
+
+                long end = System.currentTimeMillis() + 15 * 1000;
+
+                while(System.currentTimeMillis() < end){
+
+                    Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - ждем 15 сек");
+
+                    try {
+                        Thread.sleep(end - System.currentTimeMillis());
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+
+                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - останавливаем поиск");
+                // останавливаем поиск сервисов
+                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+            }
+        }).start();
+    }
+
+
+    /***************************** отображение найденных игр (серверов) ******************************/
+
+    /**
+     * список созданных игр (найденных)
+     */
+    private List<InstanceContainer> mInstances;
+
+
+    /**
+     * контейнер, для хранения информации об инстансе
+     */
+    private class InstanceContainer{
+
+        public String       mAddress;
+        public int          mPort;
+
+
+        public int          mResMap;
+        public int          mCreator;
+        public String       mCreatorName;
+    }
+
+
+
+    private GameServerAdapter mAdapter;
+
+    GameServerAdapter getAdapter(){
+        return mAdapter;
+    }
+
+    interface ClickListener{
+        void onClick(int position);
+    }
+
+    class GameServerAdapter extends RecyclerView.Adapter<GameServerAdapter.Holder>{
+
+        ClickListener mListener;
+
+        public void setListener(ClickListener listener){
+            mListener = listener;
+        }
+
+        @Override
+        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
+
+            View v = View.inflate(parent.getContext(), R.layout.item_found_game, null);
+            return new Holder(v);
+        }
+
+        @Override
+        public void onBindViewHolder(Holder holder, int position) {
+
+            InstanceContainer item = mInstances.get(position);
+
+            holder.mImageView.setImageResource(item.mResMap);
+            holder.mOwnerName.setText(item.mCreatorName);
+            holder.mPlayerCount.setText("undefined");
+        }
+
+        @Override
+        public int getItemCount() {
+
+            return mInstances.size();
+        }
+
+        public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener{
+
+            public ImageView    mImageView;
+            public TextView     mOwnerName;
+            public TextView     mPlayerCount;
+
+            public Holder(View itemView) {
+                super(itemView);
+
+                mImageView      = (ImageView) itemView.findViewById(R.id.map_thumbnail);
+                mOwnerName      = (TextView) itemView.findViewById(R.id.owner_name);
+                mPlayerCount    = (TextView) itemView.findViewById(R.id.player_count);
+
+                itemView.setOnClickListener(this);
+            }
+
+            @Override
+            public void onClick(View v) {
+                mListener.onClick(getAdapterPosition());
+            }
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+    /************************************** раздел еще в разработке **********************************/
+
+
+    public void someFunc(){
+
+        Log.v(TAG, "GameManager: someFunc(). произвольная функция инстанса");
+
+        mInstance.someFunc();
+    }
+
+    public void stopClient(){
+
+        Log.v(TAG, "GameManager: stopClient(). остановка клиента");
+
+        clientChanel.close();
+        clientChanel.clearObservers();
+    }
+
 }

@@ -1,89 +1,115 @@
 package com.votafore.warlords;
 
-import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
-import android.view.View;
-import android.widget.Button;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
 
-import com.votafore.warlords.game.Instance;
+import java.io.IOException;
+import java.net.ServerSocket;
 
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.Enumeration;
-
-public class ActivityStart extends AppCompatActivity implements View.OnClickListener {
+public class ActivityStart extends AppCompatActivity {
 
     GameManager manager;
+
+    Toolbar mToolbar;
+
+
+//    NsdManager mNsdManager;
+//
+//    @Override
+//    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+//        Log.v("GAMESERVICE", "onRegistrationFailed");
+//    }
+//
+//    @Override
+//    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+//        Log.v("GAMESERVICE", "onUnregistrationFailed");
+//    }
+//
+//    @Override
+//    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+//        Log.v("GAMESERVICE", "onServiceRegistered. Имя сервиса: " + serviceInfo.getServiceName());
+//    }
+//
+//    @Override
+//    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+//        Log.v("GAMESERVICE", "onServiceUnregistered");
+//    }
+
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        Button btn = (Button) findViewById(R.id.btn_start);
-        Button btn_test = (Button) findViewById(R.id.btn_testwifi);
-
-        btn.setOnClickListener(this);
-        btn_test.setOnClickListener(this);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
 
 
 
-//        try {
-//            //Loop through all the network interface devices
-//            for (Enumeration<NetworkInterface> enumeration = NetworkInterface.getNetworkInterfaces(); enumeration.hasMoreElements();) {
-//                NetworkInterface networkInterface = enumeration.nextElement();
-//                //Loop through all the ip addresses of the network interface devices
-//                for (Enumeration<InetAddress> enumerationIpAddr = networkInterface.getInetAddresses(); enumerationIpAddr.hasMoreElements();) {
-//                    InetAddress inetAddress = enumerationIpAddr.nextElement();
-//                    //Filter out loopback address and other irrelevant ip addresses
-//                    if (!inetAddress.isLoopbackAddress() && inetAddress.getAddress().length == 4) {
-//                        //Print the device ip address in to the text view
-//                        btn_test.setText(inetAddress.getHostAddress());
-//                    }
-//                }
-//            }
-//        } catch (SocketException e) {
-//            Log.e("ERROR:", e.toString());
-//        }
+        manager = GameManager.getInstance(this);
 
+        RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
+        serverList.setHasFixedSize(true);
+        serverList.setItemAnimator(new DefaultItemAnimator());
+        serverList.setLayoutManager(new LinearLayoutManager(this));
 
-        manager = GameManager.getInstance(getApplicationContext());
+        serverList.setAdapter(manager.getAdapter());
 
-        // предполагается что будет возможность либо создать игру, либо присоединиться к созданной
-        // пока что создаем игру
-
-        Instance inst = new Instance(getApplicationContext(), 0);
-
-        // типа мы выбрали карту
-        //inst.setMap(new MeshMapTest(getApplicationContext()));
-
-        // сказали что "... вот такие параметры боя..."
-        manager.setInstance(inst);
+        //mNsdManager = (NsdManager) getSystemService(NSD_SERVICE);
     }
 
     @Override
-    public void onClick(View v) {
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_gamelist, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
 
-        switch (v.getId()){
-            case R.id.btn_start:
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
 
-                manager.startGame();
+        switch(item.getItemId()){
+            case R.id.refresh:
 
-                // наступил момент, когда статус "Готов к бою" установили все
-                Intent i = new Intent(this, ActivityMain.class);
-                startActivity(i);
+                manager.discoverServers(this);
+                break;
+
+            case R.id.new_game:
+
+                manager.createServer();
 
                 break;
 
-            case R.id.btn_testwifi:
+            case R.id.stop_server:
 
-                //manager.getInstance().stopGame();
+                manager.stopBroadcastService();
+                manager.stopServer();
+
+                break;
+
+            case R.id.call_someFunc:
+
+                manager.someFunc();
+
+                break;
+            case R.id.stop_client:
+
+                manager.stopClient();
+                break;
         }
+
+        return super.onOptionsItemSelected(item);
     }
 }
