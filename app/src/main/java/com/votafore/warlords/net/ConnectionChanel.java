@@ -36,7 +36,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
      * интерфейс
      */
     public interface IObserver{
-        void notifyObserver(String message);
+        void notifyObserver(SocketConnection connection, String message);
     }
 
     private List<IObserver> mObservers;
@@ -87,7 +87,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
         for (IObserver observer : mObservers) {
             Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение. отправляем сообщение подписчику");
-            observer.notifyObserver(message);
+            observer.notifyObserver((SocketConnection) connection, message);
         }
     }
 
@@ -153,17 +153,24 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                     }
 
                     @Override
-                    public void addConnection(final InetAddress serverIP, final int mServerPort) {
+                    public void addConnection(final String serverIP, final int mServerPort) {
 
                         new Thread(new Runnable() {
                             @Override
                             public void run() {
 
-                                try {
-                                    Socket socket      = new Socket(serverIP, mServerPort);
-                                    SocketConnection mConnection = new SocketConnection(socket, mHandler, ConnectionChanel.this);
+                                String ip = serverIP.substring(0,1).equals("/") ? serverIP.substring(1) : serverIP;
 
+                                Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. запущен");
+
+                                try {
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем сокет");
+                                    Socket socket      = new Socket(InetAddress.getByName(ip), mServerPort);
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем подключение");
+                                    SocketConnection mConnection = new SocketConnection(socket, mHandler, ConnectionChanel.this);
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. все создано");
                                 } catch (IOException e) {
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. ошибка - " + e.getMessage());
                                     e.printStackTrace();
                                 }
                             }
@@ -200,10 +207,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                                 try {
                                     mServerSocket = new ServerSocket(0);
 
-                                    mHost = mServerSocket.getInetAddress();
                                     mPort = mServerSocket.getLocalPort();
-
-                                    Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - есть сервер");
 
                                 } catch (IOException e) {
                                     Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - создание сервера. Ошибка: " + e.getMessage());
@@ -233,7 +237,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                     }
 
                     @Override
-                    public void addConnection(InetAddress serverIP, int mServerPort) {
+                    public void addConnection(String serverIP, int mServerPort) {
 
                     }
 
@@ -297,19 +301,14 @@ public class ConnectionChanel implements IChanel, ISocketListener {
         }
 
         public abstract void addConnection();
-        public abstract void addConnection(final InetAddress serverIP, final int mServerPort);
+        public abstract void addConnection(final String serverIP, final int mServerPort);
         public abstract void stop();
     }
 
 
 
     /***********************  только для сервера ***********************/
-    private InetAddress mHost;
     private int         mPort;
-
-    public InetAddress getHost(){
-        return mHost;
-    }
 
     public int getPort(){
         return mPort;

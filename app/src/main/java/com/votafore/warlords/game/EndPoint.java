@@ -1,6 +1,7 @@
 package com.votafore.warlords.game;
 
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.SocketConnection;
 
 
 public abstract class EndPoint implements ConnectionChanel.IObserver{
@@ -12,7 +13,7 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
     }
 
     @Override
-    public void notifyObserver(String message){
+    public void notifyObserver(SocketConnection connection, String message){
         execute(message);
     }
 

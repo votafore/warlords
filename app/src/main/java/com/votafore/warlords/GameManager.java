@@ -21,12 +21,11 @@ import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.SocketConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,10 +37,6 @@ import java.util.List;
 public class GameManager {
 
     private static volatile GameManager mThis;
-
-
-
-
 
     static GameManager getInstance(Context context){
 
@@ -161,9 +156,7 @@ public class GameManager {
                         Log.v(TAG, "хост: " + serviceInfo.getHost().toString());
                         Log.v(TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
-                        //mConnectionManager.addConnection(serviceInfo.getHost(), serviceInfo.getPort());
-
-                        clientChanel.getConnectionAppend().addConnection(serviceInfo.getHost(), serviceInfo.getPort());
+                        clientChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
                     }
                 });
             }
@@ -235,7 +228,7 @@ public class GameManager {
 
         observer = new ConnectionChanel.IObserver() {
             @Override
-            public void notifyObserver(String message) {
+            public void notifyObserver(SocketConnection connection, String message) {
 
                 Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
 
@@ -256,8 +249,8 @@ public class GameManager {
                             instanceInfo.mCreator      = response.getInt("creatorID");
                             instanceInfo.mCreatorName  = response.getString("creatorName");
 
-                            instanceInfo.mAddress      = InetAddress.getByName(response.getString("host"));
-                            instanceInfo.mPort         = response.getInt("port");
+                            instanceInfo.mAddress      = connection.getHost();
+                            instanceInfo.mPort         = connection.getPort();
 
                             mInstances.add(instanceInfo);
                             Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). Добавили информацию об инстансе в список");
@@ -271,8 +264,6 @@ public class GameManager {
                     Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). обработка ответа сервера. Ошибка: " + e.getMessage());
                     e.printStackTrace();
                     return;
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
                 }
             }
         };
@@ -335,18 +326,6 @@ public class GameManager {
 
 
     /******************************** для взаимодействия Клиент - Сервер *****************************/
-
-    /**
-     * Строим систему следующим образом:
-     *      1) Создаем объект клиента (он будет в любом случае). У него будет свой
-     *      объект сервера (будет ли это реальный сервер или сокеты - вопрос другой)
-     *
-     *      2) создаем сервер (в случае необходимости). У него будет свой объект
-     *      клиента (реальный клиент или сокеты - разберемся по ходу)
-     *
-     * Таким образом получаем что необходимо 4 объекта.
-     * Они ниже
-     */
 
     private EndPoint mServer;
 
@@ -530,6 +509,9 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: stopServer(). закрываем подключения сервера");
 
+        if(serverChanel == null)
+            return;
+
         serverChanel.close();
         serverChanel.clearObservers();
     }
@@ -592,7 +574,7 @@ public class GameManager {
      */
     private class InstanceContainer{
 
-        public InetAddress  mAddress;
+        public String       mAddress;
         public int          mPort;
 
 

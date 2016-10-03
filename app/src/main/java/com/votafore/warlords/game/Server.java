@@ -68,9 +68,6 @@ public class Server extends EndPoint{
                         response.put("map"          , android.R.drawable.btn_star);
                         response.put("creatorID"    , 125);
                         response.put("creatorName"  , "Andrew");
-
-                        response.put("host"         , mChanel.getHost().toString()); // переделать эту строку.... жалуется на сетевую операцию в основном потоке
-                        response.put("port"         , mChanel.getPort());
                     }
                     break;
 
