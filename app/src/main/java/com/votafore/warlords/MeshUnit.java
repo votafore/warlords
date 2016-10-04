@@ -2,12 +2,10 @@ package com.votafore.warlords;
 
 import android.content.Context;
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
-import com.votafore.warlords.glutil.ObjectContainer;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLUnit;
-import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.glutil.ObjectContainer;
 
 import java.io.IOException;
 

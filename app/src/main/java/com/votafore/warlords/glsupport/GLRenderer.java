@@ -7,8 +7,6 @@ import android.opengl.Matrix;
 import com.votafore.warlords.Constants;
 import com.votafore.warlords.game.Instance;
 
-import java.util.List;
-
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -28,9 +26,9 @@ import static android.opengl.GLES20.glViewport;
 
 public  class GLRenderer implements Renderer {
 
-    private GLWorld     mWorld;
+    private GLWorld mWorld;
     private Instance    mInstance;
-    private GLShader    mShader;
+    private GLShader mShader;
 
     public GLRenderer(GLWorld world, Instance instance, GLShader shader) {
 

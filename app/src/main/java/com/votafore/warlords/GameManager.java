@@ -48,12 +48,12 @@ public class GameManager {
 
     private GameManager(Context context){
 
-        Log.v(TAG, "GameManager: вызвали конструктор");
+        //Log.v(TAG, "GameManager: вызвали конструктор");
 
         mWorld = new GLWorld(this);
         mWorld.camMove(GLWorld.AXIS_Y, 3f);
 
-        Log.v(TAG, "GameManager: пытаемся получить NsdManager");
+        //Log.v(TAG, "GameManager: пытаемся получить NsdManager");
         mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
 
         mDiscoveryListener    = new NsdManager.DiscoveryListener() {
@@ -215,7 +215,7 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
 
-        Trace.beginSection("GameManager_setupClient");
+        Trace.beginSection("Create client");
 
         mInstance       = new Instance(context);
 
@@ -288,8 +288,8 @@ public class GameManager {
         Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
 
         mClient = mInstance;
-        Trace.endSection();
 
+        Trace.endSection();
     }
 
 
@@ -328,7 +328,6 @@ public class GameManager {
     /******************************** для взаимодействия Клиент - Сервер *****************************/
 
     private EndPoint mServer;
-
     private EndPoint mClient;
 
 
@@ -347,8 +346,6 @@ public class GameManager {
     /*************************************************************************************************/
     /*********************************** УПРАВЛЕНИЕ ИГРОВЫМ ПРОЦЕССОМ ********************************/
     /*************************************************************************************************/
-
-    //??????????????
 
     /**
      * запускаем игру
@@ -677,4 +674,26 @@ public class GameManager {
         clientChanel.clearObservers();
     }
 
+
+
+
+
+
+
+
+
+
+    /*********************** тестирование класса ********************************/
+
+    public void setWorld(GLWorld world){
+        mWorld = world;
+    }
+
+    public void setInstance(Instance inst){
+        mInstance = inst;
+    }
+
+    public void setNsdManager(NsdManager mgr){
+        mNsdManager = mgr;
+    }
 }

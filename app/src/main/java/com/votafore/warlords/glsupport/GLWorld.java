@@ -12,7 +12,7 @@ import java.util.List;
 public class GLWorld implements GLView.ICamera {
 
 
-    private GameManager     mManager;
+    private GameManager mManager;
 
     public GLWorld(GameManager manager) {
 

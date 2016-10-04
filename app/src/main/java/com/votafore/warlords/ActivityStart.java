@@ -1,51 +1,19 @@
 package com.votafore.warlords;
 
-import android.net.nsd.NsdManager;
-import android.net.nsd.NsdServiceInfo;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.Toolbar;
-
-import java.io.IOException;
-import java.net.ServerSocket;
 
 public class ActivityStart extends AppCompatActivity {
 
     GameManager manager;
 
     Toolbar mToolbar;
-
-
-//    NsdManager mNsdManager;
-//
-//    @Override
-//    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//        Log.v("GAMESERVICE", "onRegistrationFailed");
-//    }
-//
-//    @Override
-//    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//        Log.v("GAMESERVICE", "onUnregistrationFailed");
-//    }
-//
-//    @Override
-//    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-//        Log.v("GAMESERVICE", "onServiceRegistered. Имя сервиса: " + serviceInfo.getServiceName());
-//    }
-//
-//    @Override
-//    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-//        Log.v("GAMESERVICE", "onServiceUnregistered");
-//    }
-
-
-
 
 
     @Override
