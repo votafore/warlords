@@ -13,7 +13,7 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
     }
 
     @Override
-    public void notifyObserver(SocketConnection connection, String message){
+    public void notifyObserver(int connectionID, String message){
         execute(message);
     }
 

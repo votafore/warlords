@@ -12,8 +12,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
+import com.votafore.warlords.test.ServiceScanner;
+
 import java.io.IOException;
 import java.net.ServerSocket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ActivityStart extends AppCompatActivity {
 
@@ -45,13 +49,14 @@ public class ActivityStart extends AppCompatActivity {
 //    }
 
 
-
+    ServiceScanner mScanner;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+
 
         mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -69,6 +74,8 @@ public class ActivityStart extends AppCompatActivity {
         serverList.setAdapter(manager.getAdapter());
 
         //mNsdManager = (NsdManager) getSystemService(NSD_SERVICE);
+
+        mScanner = new ServiceScanner(this);
     }
 
     @Override
@@ -83,7 +90,8 @@ public class ActivityStart extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.refresh:
 
-                manager.discoverServers(this);
+                //manager.discoverServers(this);
+                mScanner.startScan();
                 break;
 
             case R.id.new_game:
@@ -106,7 +114,8 @@ public class ActivityStart extends AppCompatActivity {
                 break;
             case R.id.stop_client:
 
-                manager.stopClient();
+                //manager.stopClient();
+                mScanner.stopScan();
                 break;
         }
 

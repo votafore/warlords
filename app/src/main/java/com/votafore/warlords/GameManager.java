@@ -21,6 +21,9 @@ import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
+import com.votafore.warlords.net.IConnection;
+import com.votafore.warlords.net.ISocketListener;
 import com.votafore.warlords.net.SocketConnection;
 
 import org.json.JSONException;
@@ -228,7 +231,10 @@ public class GameManager {
 
         observer = new ConnectionChanel.IObserver() {
             @Override
-            public void notifyObserver(SocketConnection connection, String message) {
+            public void notifyObserver(int connectionId, String message) {
+
+                // TODO: этот ответ получают даже те, кто не отсылал его
+                // переделать этот момент
 
                 Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
 
@@ -249,8 +255,16 @@ public class GameManager {
                             instanceInfo.mCreator      = response.getInt("creatorID");
                             instanceInfo.mCreatorName  = response.getString("creatorName");
 
-                            instanceInfo.mAddress      = connection.getHost();
-                            instanceInfo.mPort         = connection.getPort();
+
+                            try {
+                                SocketConnection connection = (SocketConnection) clientChanel.getConnections().get(connectionId);
+
+                                instanceInfo.mAddress      = connection.getHost();
+                                instanceInfo.mPort         = connection.getPort();
+
+                            } catch (ClassCastException e) {
+                                e.printStackTrace();
+                            }
 
                             mInstances.add(instanceInfo);
                             Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). Добавили информацию об инстансе в список");
@@ -416,13 +430,13 @@ public class GameManager {
     /**
      * имя сервиса (или хотя бы как оно должно выглядеть)
      */
-    public String mServiceName = "Warlords";
+    public static String mServiceName = "Warlords";
 
 
     /**
      * протокол - транспорт сервиса
      */
-    public String mServiceType = "_http._tcp.";
+    public static String mServiceType = "_http._tcp.";
 
 
 
@@ -455,9 +469,13 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: createServer()");
 
+        Trace.beginSection("Server create (thread UI)");
+
         new Thread(new Runnable() {
             @Override
             public void run() {
+
+                Trace.beginSection("Server create");
 
                 Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - запущен");
 
@@ -477,10 +495,22 @@ public class GameManager {
 
                 mServer = server;
 
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - установка и настройка адаптера для локального клиента");
+
+                ClientAdapter adapter = new ClientAdapter(clientChanel, serverChanel);
+
+                clientChanel.close();
+                clientChanel.clearObservers();
+
+                clientChanel.onSocketConnected(adapter.getClientSocket());
+                clientChanel.registerObserver(mClient);
+
+                serverChanel.onSocketConnected(adapter.getServerSocket());
+
                 Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** сервер создан ******************");
 
                 // дадим ненмого времени на подключение сервера сокетов
-                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - ждем 1 секунду");
+                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - ждем 5 сек");
                 try {
                     Thread.sleep(5000);
                 } catch (InterruptedException e) {
@@ -500,8 +530,13 @@ public class GameManager {
                 Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverChanel.getPort()));
 
                 mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+
+                Trace.endSection();
+
             }
         }).start();
+
+        Trace.endSection();
 
     }
 
@@ -516,6 +551,55 @@ public class GameManager {
         serverChanel.clearObservers();
     }
 
+
+
+    private class ClientAdapter{
+
+        private IConnection mClientSocket;
+        private IConnection mServerSocket;
+
+        private ISocketListener mServerChanel;
+        private ISocketListener mClientChanel;
+
+        public ClientAdapter(ISocketListener clientChanel, ISocketListener serverChanel){
+
+            mClientChanel = clientChanel;
+            mServerChanel = serverChanel;
+
+            mClientSocket = new IConnection() {
+                @Override
+                public void send(String command) {
+
+                    mServerChanel.onIncommingCommandReceived(mServerSocket, command);
+                }
+
+                @Override
+                public void close() {
+                    mClientChanel.onSocketDisconnected(mClientSocket);
+                }
+            };
+
+            mServerSocket = new IConnection() {
+                @Override
+                public void send(String command) {
+                    mClientChanel.onIncommingCommandReceived(mClientSocket, command);
+                }
+
+                @Override
+                public void close() {
+                    mServerChanel.onSocketDisconnected(mServerSocket);
+                }
+            };
+        }
+
+        public IConnection getClientSocket(){
+            return mClientSocket;
+        }
+
+        public IConnection getServerSocket(){
+            return mServerSocket;
+        }
+    }
 
     /********************************** поиск созданных сервисов *************************************/
 
@@ -572,7 +656,7 @@ public class GameManager {
     /**
      * контейнер, для хранения информации об инстансе
      */
-    private class InstanceContainer{
+    public class InstanceContainer{
 
         public String       mAddress;
         public int          mPort;
