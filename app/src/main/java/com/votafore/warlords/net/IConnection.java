@@ -3,6 +3,7 @@ package com.votafore.warlords.net;
 
 public interface IConnection {
 
-    void send(String command);
+    void put(String command);
+    void send();
     void close();
 }

@@ -9,8 +9,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.InetAddress;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author Votafore
@@ -37,6 +38,12 @@ public class SocketConnection implements IConnection {
     private BufferedReader mInput;
 
 
+    /**
+     * стек команд
+     */
+    private List<String> mStack;
+
+
     private ISocketListener mListener;
 
     private Handler mHandler;
@@ -48,6 +55,8 @@ public class SocketConnection implements IConnection {
         mSocket   = socket;
         mListener = listener;
         mHandler  =  handler;
+
+        mStack = new ArrayList<>();
 
 
         mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
@@ -145,10 +154,17 @@ public class SocketConnection implements IConnection {
     }
 
     @Override
-    public void send(String command){
+    public void send(){
 
         if(mSocket == null)
             return;
+
+        if(mStack.size() == 0)
+            return;
+
+        Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
+
+        String command = mStack.get(0);
 
         try {
             PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
@@ -160,6 +176,15 @@ public class SocketConnection implements IConnection {
             Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - ошибка: " + e.getMessage());
             e.printStackTrace();
         }
+
+        mStack.remove(0);
+        Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
+    }
+
+    @Override
+    public void put(String command){
+        mStack.add(command);
+        Log.v(GameManager.TAG, "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 
 

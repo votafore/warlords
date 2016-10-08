@@ -21,7 +21,6 @@ import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.ConnectionChanel;
-import com.votafore.warlords.net.IChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
 import com.votafore.warlords.net.SocketConnection;
@@ -59,130 +58,10 @@ public class GameManager {
         Log.v(TAG, "GameManager: пытаемся получить NsdManager");
         mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
 
-        mDiscoveryListener    = new NsdManager.DiscoveryListener() {
-            @Override
-            public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                Log.v(TAG, "NsdManager.DiscoveryListener: onStartDiscoveryFailed");
-            }
-
-            @Override
-            public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                Log.v(TAG, "NsdManager.DiscoveryListener: onStopDiscoveryFailed");
-            }
-
-            @Override
-            public void onDiscoveryStarted(String serviceType) {
-                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStarted");
-            }
-
-            @Override
-            public void onDiscoveryStopped(String serviceType) {
-                Log.v(TAG, "NsdManager.DiscoveryListener: onDiscoveryStopped");
-
-                // как только прекратили искать (5 сек. ожидания)
-                // посылаем запрос на информацию о созданных инстансах
-
-                Log.v(TAG, "NsdManager.DiscoveryListener: рассылаем запросы");
-
-                // при отправке запроса:
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-
-                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - запущен");
-
-                        // отправляем запрос на информацию об инстансе
-                        try {
-
-                            JSONObject query = new JSONObject();
-
-                            query.put("clientID" , 0);
-                            query.put("type"     , "InstanceInfo");
-                            query.put("command"  , "get");
-
-                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - отправляем запрос");
-
-                            //mConnectionManager.sendMessage(query.toString());
-
-                            clientChanel.sendCommand(query.toString());
-
-                        } catch (JSONException e) {
-
-                            Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов, создание запроса: " + e.getMessage());
-
-                            e.printStackTrace();
-                        }
-
-                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - ждем ответы (5 сек)");
-
-                        // ждем ответы 5 сек
-                        long end = System.currentTimeMillis() + 5 * 1000;
-                        while(System.currentTimeMillis() < end){
-
-                            try {
-                                Thread.sleep(end - System.currentTimeMillis());
-                            } catch (InterruptedException e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                        Log.v(TAG, "NsdManager.DiscoveryListener: поток рассылки запросов - закрываем все соединения");
-
-                        // закрываем соединение(я)
-                        //mConnectionManager.close();
-
-                        clientChanel.close();
-
-                    }
-                }).start();
-            }
-
-            @Override
-            public void onServiceFound(NsdServiceInfo serviceInfo) {
-
-                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
-
-                if(!serviceInfo.getServiceName().contains(mServiceName))
-                    return;
-
-                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceFound. пытаемся подключиться к сервису");
-                mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
-                    @Override
-                    public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        Log.v(TAG, "NsdManager.ResolveListener: onResolveFailed. не удалось подключиться к сервису");
-                    }
-
-                    @Override
-                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-
-                        Log.v(TAG, "NsdManager.ResolveListener: onServiceResolved. добавляем соединение");
-                        Log.v(TAG, "хост: " + serviceInfo.getHost().toString());
-                        Log.v(TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
-
-                        clientChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
-                    }
-                });
-            }
-
-            @Override
-            public void onServiceLost(NsdServiceInfo serviceInfo) {
-                Log.v(TAG, "NsdManager.DiscoveryListener: onServiceLost. закрываем соединения");
-
-                // думаю что все подключения закрывать не обязательно
-                //mConnectionManager.close();
-
-
-                //mClientManager.close();
-
-//                if(mServerManager != null)
-//                    mServerManager.close();
-            }
-        };
         mRegistrationListener = new NsdManager.RegistrationListener() {
             @Override
             public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
                 Log.v(TAG, "NsdManager.RegistrationListener: onRegistrationFailed");
-
             }
 
             @Override
@@ -206,9 +85,7 @@ public class GameManager {
         };
 
 
-
-
-        mInstances  = new ArrayList<>();
+        //mInstances  = new ArrayList<>();
         mAdapter    = new GameServerAdapter();
 
 
@@ -227,78 +104,6 @@ public class GameManager {
 
         mInstance.setChanel(clientChanel);
 
-        final ConnectionChanel.IObserver observer;
-
-        observer = new ConnectionChanel.IObserver() {
-            @Override
-            public void notifyObserver(int connectionId, String message) {
-
-                // TODO: этот ответ получают даже те, кто не отсылал его
-                // переделать этот момент
-
-                Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
-
-                JSONObject response;
-
-                try {
-                    response = new JSONObject(message);
-
-                    switch(response.getString("type")){
-                        case "InstanceInfo":
-
-                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
-
-                            InstanceContainer instanceInfo;
-
-                            instanceInfo = new InstanceContainer();
-                            instanceInfo.mResMap       = response.getInt("map");
-                            instanceInfo.mCreator      = response.getInt("creatorID");
-                            instanceInfo.mCreatorName  = response.getString("creatorName");
-
-
-                            try {
-                                SocketConnection connection = (SocketConnection) clientChanel.getConnections().get(connectionId);
-
-                                instanceInfo.mAddress      = connection.getHost();
-                                instanceInfo.mPort         = connection.getPort();
-
-                            } catch (ClassCastException e) {
-                                e.printStackTrace();
-                            }
-
-                            mInstances.add(instanceInfo);
-                            Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). Добавили информацию об инстансе в список");
-
-                            mAdapter.notifyItemInserted(mInstances.size()-1);
-
-                            break;
-                    }
-
-                } catch (JSONException e) {
-                    Log.v(TAG, "ConnectionChanel.IObserver: notifyObserver(). обработка ответа сервера. Ошибка: " + e.getMessage());
-                    e.printStackTrace();
-                    return;
-                }
-            }
-        };
-
-        clientChanel.registerObserver(observer);
-
-
-
-        mAdapter.setListener(new ClickListener() {
-            @Override
-            public void onClick(int position) {
-
-                InstanceContainer item = mInstances.get(position);
-
-                clientChanel.getConnectionAppend().addConnection(item.mAddress, item.mPort);
-                clientChanel.unregisterObserver(observer);
-
-                clientChanel.registerObserver(mInstance);
-            }
-        });
-
         Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
 
         mClient = mInstance;
@@ -315,22 +120,15 @@ public class GameManager {
     /*************************************************************************************************/
 
     /**
-     * должен быть объект, определяющий параметры игры
+     * здесь находятся
+     * - объект, определяющий параметры игры
+     * - объект для отрисовки 3D мира
+     * - 3D мир (управление камерой)
      */
+
     private Instance mInstance;
-
-    /**
-     * объект для отрисовки 3D мира
-     * создаем заранее
-     */
-    private GLView mSurfaceView;
-
-    /**
-     * 3D мир
-     * управление камерой
-     */
-    private GLWorld     mWorld;
-
+    private GLView   mSurfaceView;
+    private GLWorld  mWorld;
 
     GLSurfaceView getSurfaceView(){
         return mSurfaceView;
@@ -414,12 +212,6 @@ public class GameManager {
 
     /******************************* вспомогательные объекты и переменные ****************************/
 
-    /**
-     * слушатель для начала и остановки поиска сервиса, а так же
-     * для реакции на событие нахождения сервиса.
-     */
-    private NsdManager.DiscoveryListener mDiscoveryListener;
-
 
     /**
      * слушатель для регистрации сервиса и отмены его регистрации
@@ -442,9 +234,6 @@ public class GameManager {
 
     /******************************* создание собственного сервиса (и сервера) ***********************/
 
-    /**
-     * останавливаем трансляцию сервиса
-     */
     public void stopBroadcastService(){
 
         Log.v(TAG, "GameManager: stopBroadcastService()");
@@ -458,13 +247,6 @@ public class GameManager {
         }
     }
 
-
-    /**
-     * создаем сервер
-     *
-     * запускаем наш сервис в мир
-     * что бы его увидели и могли подключиться
-     */
     public void createServer(){
 
         Log.v(TAG, "GameManager: createServer()");
@@ -567,10 +349,28 @@ public class GameManager {
             mServerChanel = serverChanel;
 
             mClientSocket = new IConnection() {
+
+                List<String> stack = new ArrayList<>();
+
                 @Override
-                public void send(String command) {
+                public void put(String command) {
+
+                    synchronized(((ConnectionChanel)mClientChanel).mStackLock){
+                        stack.add(command);
+                    }
+                }
+
+                @Override
+                public void send() {
+
+                    if(stack.size() == 0)
+                        return;
+
+                    String command = stack.get(0);
 
                     mServerChanel.onIncommingCommandReceived(mServerSocket, command);
+
+                    stack.remove(0);
                 }
 
                 @Override
@@ -580,9 +380,28 @@ public class GameManager {
             };
 
             mServerSocket = new IConnection() {
+
+                List<String> stack = new ArrayList<>();
+
                 @Override
-                public void send(String command) {
+                public void put(String command) {
+
+                    synchronized(((ConnectionChanel)mServerChanel).mStackLock){
+                        stack.add(command);
+                    }
+                }
+
+                @Override
+                public void send() {
+
+                    if(stack.size() == 0)
+                        return;
+
+                    String command = stack.get(0);
+
                     mClientChanel.onIncommingCommandReceived(mClientSocket, command);
+
+                    stack.remove(0);
                 }
 
                 @Override
@@ -601,61 +420,11 @@ public class GameManager {
         }
     }
 
-    /********************************** поиск созданных сервисов *************************************/
-
-
-    /**
-     * запускаем поиск игр (сервисов для подключения)
-     * созданных другими игроками
-     */
-    public void discoverServers(Context context){
-
-        Log.v(TAG, "GameManager: discoverServers().");
-
-        mInstances = new ArrayList<>();
-        mAdapter.notifyDataSetChanged();
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - запущен. Начинаем поиск");
-
-                // начинаем поиск сервисов
-                mNsdManager.discoverServices(mServiceType, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);
-
-                long end = System.currentTimeMillis() + 15 * 1000;
-
-                while(System.currentTimeMillis() < end){
-
-                    Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - ждем 15 сек");
-
-                    try {
-                        Thread.sleep(end - System.currentTimeMillis());
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-
-                Log.v(TAG, "GameManager: discoverServers(). Поток поиска сервисов (серверов) - останавливаем поиск");
-                // останавливаем поиск сервисов
-                mNsdManager.stopServiceDiscovery(mDiscoveryListener);
-            }
-        }).start();
-    }
-
 
     /***************************** отображение найденных игр (серверов) ******************************/
 
-    /**
-     * список созданных игр (найденных)
-     */
-    private List<InstanceContainer> mInstances;
+    //private List<InstanceContainer> mInstances;
 
-
-    /**
-     * контейнер, для хранения информации об инстансе
-     */
     public class InstanceContainer{
 
         public String       mAddress;
@@ -671,7 +440,7 @@ public class GameManager {
 
     private GameServerAdapter mAdapter;
 
-    GameServerAdapter getAdapter(){
+    public GameServerAdapter getAdapter(){
         return mAdapter;
     }
 
@@ -697,17 +466,17 @@ public class GameManager {
         @Override
         public void onBindViewHolder(Holder holder, int position) {
 
-            InstanceContainer item = mInstances.get(position);
-
-            holder.mImageView.setImageResource(item.mResMap);
-            holder.mOwnerName.setText(item.mCreatorName);
-            holder.mPlayerCount.setText("undefined");
+//            InstanceContainer item = mInstances.get(position);
+//
+//            holder.mImageView.setImageResource(item.mResMap);
+//            holder.mOwnerName.setText(item.mCreatorName);
+//            holder.mPlayerCount.setText("undefined");
         }
 
         @Override
         public int getItemCount() {
 
-            return mInstances.size();
+            return 0;//mInstances.size();
         }
 
         public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener{

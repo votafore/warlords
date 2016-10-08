@@ -7,22 +7,24 @@ import android.util.Log;
 
 import com.votafore.warlords.GameManager;
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
+
 public class ServiceScanner implements NsdManager.DiscoveryListener{
 
-    private NsdManager          mNsdManager;
-    private ConnectionChanel2   mChanel;
-    private ConnectionChanel.IObserver mObserver;
+    private NsdManager                  mNsdManager;
+    private ConnectionChanel            mChanel;
+    private ConnectionChanel.IObserver  mObserver;
 
 
     public ServiceScanner(Context context){
 
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-        mChanel     = new ConnectionChanel2();
+        mChanel     = new ConnectionChanel();
 
         mChanel.setupAppend(ConnectionChanel.TYPE_FOR_CLIENT);
 
@@ -44,6 +46,17 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                         case "InstanceInfo":
 
                             Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
+
+                            ListAdapter.ListItem item = new ListAdapter.ListItem();
+
+                            item.mResMap       = response.getInt("map");
+                            item.mCreator      = response.getInt("creatorID");
+                            item.mCreatorName  = response.getString("creatorName");
+
+                            item.mConnection   = mChanel.getConnections().get(connectionId);
+
+                            Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
+                            mAdapter.addItem(item);
 
                             break;
                     }
@@ -85,6 +98,22 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
         mChanel.clearObservers();
         mChanel.close();
     }
+
+
+
+
+    /**************************************************************************************/
+    /****************************** работа с адаптером списка *****************************/
+    /**************************************************************************************/
+
+    private ListAdapter mAdapter;
+
+    public void setAdapter(ListAdapter adapter){
+        mAdapter = adapter;
+    }
+
+
+
 
     /**************************************************************************************/
     /**************************** NsdManager.DiscoveryListener ****************************/
@@ -195,14 +224,14 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                             e.printStackTrace();
                         }
 
-                        Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запущен. помещаем запрос в стек для всех подключений");
+                        Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запущен. помещаем запрос в стек");
 
                         // помещаем запрос для конкретного подключения в стек
                         int indexLast = mChanel.getConnections().size() - 1;
 
                         if(indexLast > -1){
 
-                            IConnection2  connection = mChanel.getConnections().get(indexLast);
+                            IConnection connection = mChanel.getConnections().get(indexLast);
                             connection.put(Queries.getQuery(Queries.QUERY_INSTANCE));
 
                             Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запрос отправлен.");

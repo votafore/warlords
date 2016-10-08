@@ -1,8 +1,6 @@
 package com.votafore.warlords.game;
 
 import com.votafore.warlords.net.ConnectionChanel;
-import com.votafore.warlords.net.SocketConnection;
-
 
 public abstract class EndPoint implements ConnectionChanel.IObserver{
 

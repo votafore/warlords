@@ -12,6 +12,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
+import com.votafore.warlords.test.ListAdapter;
 import com.votafore.warlords.test.ServiceScanner;
 
 import java.io.IOException;
@@ -63,7 +64,11 @@ public class ActivityStart extends AppCompatActivity {
 
 
 
-        manager = GameManager.getInstance(this);
+        manager     = GameManager.getInstance(this);
+        mScanner    = new ServiceScanner(this);
+        ListAdapter adapter = new ListAdapter();
+
+        mScanner.setAdapter(adapter);
 
         RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
@@ -71,11 +76,7 @@ public class ActivityStart extends AppCompatActivity {
         serverList.setItemAnimator(new DefaultItemAnimator());
         serverList.setLayoutManager(new LinearLayoutManager(this));
 
-        serverList.setAdapter(manager.getAdapter());
-
-        //mNsdManager = (NsdManager) getSystemService(NSD_SERVICE);
-
-        mScanner = new ServiceScanner(this);
+        serverList.setAdapter(adapter);
     }
 
     @Override
