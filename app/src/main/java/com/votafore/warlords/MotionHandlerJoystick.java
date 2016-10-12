@@ -53,7 +53,7 @@ public class MotionHandlerJoystick {
         mOrientationHandler = -1;
     }
 
-    protected boolean onHandleEvent(MotionEvent event) {
+    public boolean onHandleEvent(MotionEvent event) {
 
         switch(MotionEventCompat.getActionMasked(event)){
             case MotionEvent.ACTION_DOWN:

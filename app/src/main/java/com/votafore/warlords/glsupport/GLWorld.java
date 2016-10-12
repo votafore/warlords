@@ -14,9 +14,7 @@ public class GLWorld implements GLView.ICamera {
 
     private GameManager     mManager;
 
-    public GLWorld(GameManager manager) {
-
-        mManager    = manager;
+    public GLWorld() {
 
         mPositionMatrix     = new float[16];
         Matrix.setIdentityM(mPositionMatrix, 0);

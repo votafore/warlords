@@ -5,13 +5,8 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Trace;
-import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MotionEvent;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
@@ -23,13 +18,23 @@ import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
-import com.votafore.warlords.net.SocketConnection;
+import com.votafore.warlords.test.ConnectionChanel2;
+import com.votafore.warlords.test.ListAdapter;
+import com.votafore.warlords.test.ServiceBroadcaster;
+import com.votafore.warlords.test.ServiceScanner;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.Socket;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.logging.SocketHandler;
+
+import javax.net.SocketFactory;
 
 
 /**
@@ -52,67 +57,189 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: вызвали конструктор");
 
-        mWorld = new GLWorld(this);
-        mWorld.camMove(GLWorld.AXIS_Y, 3f);
+//        mWorld = new GLWorld(this);
+//        mWorld.camMove(GLWorld.AXIS_Y, 3f);
+//
+//        Log.v(TAG, "GameManager: пытаемся получить NsdManager");
+//        mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+////
+//        mRegistrationListener = new NsdManager.RegistrationListener() {
+//            @Override
+//            public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+//                Log.v(TAG, "NsdManager.RegistrationListener: onRegistrationFailed");
+//            }
+//
+//            @Override
+//            public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+//                Log.v(TAG, "NsdManager.RegistrationListener: onUnregistrationFailed");
+//            }
+//
+//            @Override
+//            public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+//
+//                // актуализация имени сервиса
+//                mServiceName = serviceInfo.getServiceName();
+//
+//                Log.v(TAG, "NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
+//            }
+//
+//            @Override
+//            public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+//                Log.v(TAG, "NsdManager.RegistrationListener: onServiceUnregistered");
+//            }
+//        };
 
-        Log.v(TAG, "GameManager: пытаемся получить NsdManager");
-        mNsdManager           = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+        //mAdapter    = new ListAdapter();
 
-        mRegistrationListener = new NsdManager.RegistrationListener() {
-            @Override
-            public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.v(TAG, "NsdManager.RegistrationListener: onRegistrationFailed");
-            }
+//        mAdapter.setListener(new ClickListener() {
+//            @Override
+//            public void onClick(int position) {
+//
+//            }
+//        });
 
-            @Override
-            public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.v(TAG, "NsdManager.RegistrationListener: onUnregistrationFailed");
-            }
-
-            @Override
-            public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-
-                // актуализация имени сервиса
-                mServiceName = serviceInfo.getServiceName();
-
-                Log.v(TAG, "NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
-            }
-
-            @Override
-            public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-                Log.v(TAG, "NsdManager.RegistrationListener: onServiceUnregistered");
-            }
-        };
-
-
-        //mInstances  = new ArrayList<>();
-        mAdapter    = new GameServerAdapter();
-
-
-        //////////////////////////////////////////////////
-        // настройка клиентской части
-        //////////////////////////////////////////////////
-
-        Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
-
-        Trace.beginSection("GameManager_setupClient");
-
-        mInstance       = new Instance(context);
-
-        clientChanel = new ConnectionChanel();
-        clientChanel.setupAppend(ConnectionChanel.TYPE_FOR_CLIENT);
-
-        mInstance.setChanel(clientChanel);
-
-        Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
-
-        mClient = mInstance;
-        Trace.endSection();
-
+//        //////////////////////////////////////////////////
+//        // настройка клиентской части
+//        //////////////////////////////////////////////////
+//
+//        Log.v(TAG, "GameManager: ***************** настройка клиента ******************");
+//
+//        Trace.beginSection("GameManager_setupClient");
+//
+//        mInstance       = new Instance(context);
+//        clientChanel    = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
+//
+//        mInstance.setChanel(clientChanel);
+//
+//        Log.v(TAG, "GameManager: ***************** настройка клиента завершена******************");
+//
+//        mClient = mInstance;
+//        Trace.endSection();
     }
 
 
     public static String TAG = "TEST";
+
+    /*************************************************************************************************/
+    /******************************** обработка контрольных событий **********************************/
+    /*************************************************************************************************/
+
+    public ServiceScanner mScanner;
+
+    // основные контрольные точки
+    public static final String STATE_LISTACTIVITY_STARTED  = "ACTIVITY_STARTED";
+    public static final String STATE_SERVER_CREATED        = "SERVER_CREATED";
+    public static final String STATE_GAME_STARTED          = "GAME_STARTED";
+
+
+    // дополнительные состояния
+    public static final String STATE_LISTACTIVITY_RESUMED  = "ACTIVITY_RESUMED";
+    public static final String STATE_LISTACTIVITY_PAUSED   = "ACTIVITY_PAUSED";
+
+
+    public static final String STATE_EXIT                  = "EXIT";
+
+    private List curStates = new ArrayList();
+
+    public void changeState(Context context, String newState){
+
+        Log.v(TAG, "GameManager - changeState");
+
+        if(curStates.contains(newState))
+            return;
+
+        switch(newState){
+            case STATE_LISTACTIVITY_STARTED:
+
+                Log.v(TAG, "GameManager - changeState: STATE_LISTACTIVITY_STARTED");
+
+                mAdapter = new ListAdapter();
+
+                mScanner = new ServiceScanner(context);
+                mScanner.setAdapter(mAdapter);
+
+                curStates.add(newState);
+
+                break;
+            case STATE_SERVER_CREATED:
+
+                Log.v(TAG, "GameManager - changeState: STATE_SERVER_CREATED");
+
+                createServer(context);
+
+                curStates.add(newState);
+
+                break;
+
+            case STATE_GAME_STARTED:
+
+                Log.v(TAG, "GameManager - changeState: STATE_GAME_STARTED");
+
+                mScanner.stopScan();
+
+                if(curStates.contains(STATE_SERVER_CREATED)){
+                    mBroadcaster.stopBroadcast();
+                }
+
+                startGame(context);
+
+                // TODO: запускаем активити с игрой
+
+                break;
+            case STATE_EXIT:
+
+                Log.v(TAG, "GameManager - changeState: STATE_EXIT");
+
+                if(curStates.contains(STATE_LISTACTIVITY_STARTED)){
+
+                    Log.v(TAG, "GameManager - changeState: Полная остановка клиента");
+
+                    mScanner.stopScan();
+                    mScanner.close();
+                }
+
+                if(curStates.contains(STATE_SERVER_CREATED)){
+
+                    Log.v(TAG, "GameManager - changeState: Полная остановка сервера");
+
+                    mBroadcaster.stopBroadcast();
+
+                    serverChanel.close();
+                    serverChanel.clearObservers();
+                }
+
+                curStates = new ArrayList();
+
+                break;
+            case STATE_LISTACTIVITY_RESUMED:
+
+                Log.v(TAG, "GameManager - changeState: STATE_LISTACTIVITY_RESUMED");
+
+                if(curStates.contains(STATE_LISTACTIVITY_STARTED)){
+                    mScanner.startScan();
+                }
+
+                if(curStates.contains(STATE_SERVER_CREATED)){
+                    mBroadcaster.startBroadcast();
+                }
+
+                break;
+            case STATE_LISTACTIVITY_PAUSED:
+
+                Log.v(TAG, "GameManager - changeState: STATE_LISTACTIVITY_PAUSED");
+
+                // если не был стартован, то и остановить не можем
+                if(curStates.contains(STATE_LISTACTIVITY_STARTED)){
+                    mScanner.stopScan();
+                }
+
+                if(curStates.contains(STATE_SERVER_CREATED)){
+                    mBroadcaster.stopBroadcast();
+                }
+
+                break;
+        }
+    }
 
 
     /*************************************************************************************************/
@@ -136,37 +263,41 @@ public class GameManager {
 
 
 
-
-    /******************************** для взаимодействия Клиент - Сервер *****************************/
-
-    private EndPoint mServer;
-
-    private EndPoint mClient;
-
-
-
-    /**
-     * связь клиента и сервера происходит благодаря каналам связи (для клиента свой, для сервера - свой)
-     * пользователь канала подключается к нему как наблюдатель (ну и не только) что бы получать
-     * входящие сообщения.
-     *
-     * кроме клиента или сервера каналом могут пользоваться и другие объекты
-     */
-    private ConnectionChanel clientChanel;
-    private ConnectionChanel serverChanel;
-
-
     /*************************************************************************************************/
     /*********************************** УПРАВЛЕНИЕ ИГРОВЫМ ПРОЦЕССОМ ********************************/
     /*************************************************************************************************/
-
-    //??????????????
 
     /**
      * запускаем игру
      */
 
     void startGame(Context context){
+
+        ConnectionChanel2 clientChanel;
+
+        mInstance     = new Instance(context);
+        clientChanel  = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
+
+        mInstance.setChanel(clientChanel);
+        clientChanel.registerObserver(mInstance);
+
+        mClient = mInstance;
+
+        if(mServer != null){
+
+            ClientAdapter adapter = new ClientAdapter(clientChanel, serverChanel);
+
+            clientChanel.onSocketConnected(adapter.getClientSocket());
+            serverChanel.onSocketConnected(adapter.getServerSocket());
+        }else{
+
+            // TODO: установить выбранное подключения для клиентского канала
+        }
+
+
+
+        mWorld = new GLWorld();
+        mWorld.camMove(GLWorld.AXIS_Y, 3f);
 
         GLShader   mShader     = new GLShader(context, R.raw.shader_vertex, R.raw.shader_fragment);
         GLRenderer mRenderer   = new GLRenderer(mWorld, mInstance, mShader);
@@ -200,58 +331,34 @@ public class GameManager {
     /*********************************** РАБОТА ПО СЕТИ В ЭТОМ КЛАССЕ ********************************/
     /*************************************************************************************************/
 
+    /******************************** для взаимодействия Клиент - Сервер *****************************/
 
-    /**
-     * объект для поиска\создания сервиса, позволяющего
-     * автоматически создать сеть для игры между игроками
-     */
-    private NsdManager mNsdManager;
+    private EndPoint mServer;
 
+    private EndPoint mClient;
 
-
-
-    /******************************* вспомогательные объекты и переменные ****************************/
 
 
     /**
-     * слушатель для регистрации сервиса и отмены его регистрации
+     * связь клиента и сервера происходит благодаря каналам связи (для клиента свой, для сервера - свой)
+     * пользователь канала подключается к нему как наблюдатель (ну и не только) что бы получать
+     * входящие сообщения.
+     *
+     * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private NsdManager.RegistrationListener mRegistrationListener;
+    private ConnectionChanel2 clientChanel;
+    private ConnectionChanel2 serverChanel;
+
+    private ServiceBroadcaster mBroadcaster;
 
 
-    /**
-     * имя сервиса (или хотя бы как оно должно выглядеть)
-     */
-    public static String mServiceName = "Warlords";
-
-
-    /**
-     * протокол - транспорт сервиса
-     */
-    public static String mServiceType = "_http._tcp.";
-
-
-
-    /******************************* создание собственного сервиса (и сервера) ***********************/
-
-    public void stopBroadcastService(){
-
-        Log.v(TAG, "GameManager: stopBroadcastService()");
-
-        // отменяем регистрацию (трансляцию) сервиса в сети
-        try {
-            mNsdManager.unregisterService(mRegistrationListener);
-        } catch (IllegalArgumentException e) {
-            Log.v(TAG, "GameManager: stopBroadcastService(). Ошибка - " + e.getMessage());
-            e.printStackTrace();
-        }
-    }
-
-    public void createServer(){
+    public void createServer(Context context){
 
         Log.v(TAG, "GameManager: createServer()");
 
         Trace.beginSection("Server create (thread UI)");
+
+        mBroadcaster = new ServiceBroadcaster(context);
 
         new Thread(new Runnable() {
             @Override
@@ -265,10 +372,10 @@ public class GameManager {
 
                 // настройка серверной части
                 Server server;
-                server          = new Server();
 
-                serverChanel = new ConnectionChanel();
-                serverChanel.setupAppend(ConnectionChanel.TYPE_FOR_SERVER);
+                server       = new Server();
+                serverChanel = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_SERVER);
+
                 serverChanel.getConnectionAppend().addConnection();
 
                 server.setChanel(serverChanel);
@@ -277,17 +384,28 @@ public class GameManager {
 
                 mServer = server;
 
-                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - установка и настройка адаптера для локального клиента");
+                //Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - установка и настройка адаптера для локального клиента");
 
-                ClientAdapter adapter = new ClientAdapter(clientChanel, serverChanel);
+                //ClientAdapter adapter = new ClientAdapter(clientChanel, serverChanel);
 
-                clientChanel.close();
-                clientChanel.clearObservers();
+//                clientChanel.close();
+//                clientChanel.clearObservers();
+//
+//                clientChanel.onSocketConnected(adapter.getClientSocket());
+//                clientChanel.registerObserver(mClient);
 
-                clientChanel.onSocketConnected(adapter.getClientSocket());
-                clientChanel.registerObserver(mClient);
+                //serverChanel.onSocketConnected(adapter.getServerSocket());
 
-                serverChanel.onSocketConnected(adapter.getServerSocket());
+
+
+                ListAdapter.ListItem item = new ListAdapter.ListItem();
+
+                //item.mConnection  = adapter.getClientSocket();
+                item.mCreator     = 123;
+                item.mCreatorName = "Andrew";
+                item.mResMap      = android.R.drawable.ic_lock_idle_lock;
+
+                mAdapter.addItem(item);
 
                 Log.v(TAG, "GameManager: createServer(). Поток настройки сервера   ************** сервер создан ******************");
 
@@ -305,13 +423,14 @@ public class GameManager {
                 NsdServiceInfo info;
 
                 info = new NsdServiceInfo();
-                info.setServiceName(mServiceName);
-                info.setServiceType(mServiceType);
+                info.setServiceName(ServiceBroadcaster.mServiceName);
+                info.setServiceType(ServiceBroadcaster.mServiceType);
                 info.setPort(serverChanel.getPort());
 
-                Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverChanel.getPort()));
+                //Log.v(TAG, "GameManager: createServer(). Поток настройки сервера - включаем транслящию сервиса. port: " + String.valueOf(serverChanel.getPort()));
 
-                mNsdManager.registerService(info, NsdManager.PROTOCOL_DNS_SD, mRegistrationListener);
+                mBroadcaster.setServiceInfo(info);
+                mBroadcaster.startBroadcast();
 
                 Trace.endSection();
 
@@ -333,6 +452,7 @@ public class GameManager {
         serverChanel.clearObservers();
     }
 
+    /******************************* вспомогательные объекты и переменные ****************************/
 
 
     private class ClientAdapter{
@@ -352,10 +472,12 @@ public class GameManager {
 
                 List<String> stack = new ArrayList<>();
 
+                private final Object mStackLock = new Object();
+
                 @Override
                 public void put(String command) {
 
-                    synchronized(((ConnectionChanel)mClientChanel).mStackLock){
+                    synchronized(mStackLock){
                         stack.add(command);
                     }
                 }
@@ -366,11 +488,12 @@ public class GameManager {
                     if(stack.size() == 0)
                         return;
 
-                    String command = stack.get(0);
+                    synchronized(mStackLock){
 
-                    mServerChanel.onIncommingCommandReceived(mServerSocket, command);
-
-                    stack.remove(0);
+                        String command = stack.get(0);
+                        mServerChanel.onIncommingCommandReceived(mServerSocket, command);
+                        stack.remove(0);
+                    }
                 }
 
                 @Override
@@ -382,6 +505,8 @@ public class GameManager {
             mServerSocket = new IConnection() {
 
                 List<String> stack = new ArrayList<>();
+
+                private final Object mStackLock = new Object();
 
                 @Override
                 public void put(String command) {
@@ -397,11 +522,12 @@ public class GameManager {
                     if(stack.size() == 0)
                         return;
 
-                    String command = stack.get(0);
+                    synchronized(((ConnectionChanel)mServerChanel).mStackLock){
 
-                    mClientChanel.onIncommingCommandReceived(mClientSocket, command);
-
-                    stack.remove(0);
+                        String command = stack.get(0);
+                        mClientChanel.onIncommingCommandReceived(mClientSocket, command);
+                        stack.remove(0);
+                    }
                 }
 
                 @Override
@@ -423,85 +549,16 @@ public class GameManager {
 
     /***************************** отображение найденных игр (серверов) ******************************/
 
-    //private List<InstanceContainer> mInstances;
 
-    public class InstanceContainer{
+    private ListAdapter mAdapter;
 
-        public String       mAddress;
-        public int          mPort;
-
-
-        public int          mResMap;
-        public int          mCreator;
-        public String       mCreatorName;
-    }
-
-
-
-    private GameServerAdapter mAdapter;
-
-    public GameServerAdapter getAdapter(){
+    public ListAdapter getAdapter(){
         return mAdapter;
     }
 
-    interface ClickListener{
+    public interface ClickListener{
         void onClick(int position);
     }
-
-    class GameServerAdapter extends RecyclerView.Adapter<GameServerAdapter.Holder>{
-
-        ClickListener mListener;
-
-        public void setListener(ClickListener listener){
-            mListener = listener;
-        }
-
-        @Override
-        public Holder onCreateViewHolder(ViewGroup parent, int viewType) {
-
-            View v = View.inflate(parent.getContext(), R.layout.item_found_game, null);
-            return new Holder(v);
-        }
-
-        @Override
-        public void onBindViewHolder(Holder holder, int position) {
-
-//            InstanceContainer item = mInstances.get(position);
-//
-//            holder.mImageView.setImageResource(item.mResMap);
-//            holder.mOwnerName.setText(item.mCreatorName);
-//            holder.mPlayerCount.setText("undefined");
-        }
-
-        @Override
-        public int getItemCount() {
-
-            return 0;//mInstances.size();
-        }
-
-        public class Holder extends RecyclerView.ViewHolder implements View.OnClickListener{
-
-            public ImageView    mImageView;
-            public TextView     mOwnerName;
-            public TextView     mPlayerCount;
-
-            public Holder(View itemView) {
-                super(itemView);
-
-                mImageView      = (ImageView) itemView.findViewById(R.id.map_thumbnail);
-                mOwnerName      = (TextView) itemView.findViewById(R.id.owner_name);
-                mPlayerCount    = (TextView) itemView.findViewById(R.id.player_count);
-
-                itemView.setOnClickListener(this);
-            }
-
-            @Override
-            public void onClick(View v) {
-                mListener.onClick(getAdapterPosition());
-            }
-        }
-    }
-
 
 
 
@@ -519,7 +576,7 @@ public class GameManager {
 
         Log.v(TAG, "GameManager: someFunc(). произвольная функция инстанса");
 
-        mInstance.someFunc();
+        //mInstance.someFunc();
     }
 
     public void stopClient(){
@@ -530,4 +587,20 @@ public class GameManager {
         clientChanel.clearObservers();
     }
 
+    private String getLocalIpAddress() {
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+                NetworkInterface intf = en.nextElement();
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+                    if (!inetAddress.isLoopbackAddress()) {
+                        return inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+        } catch (SocketException ex) {
+            Log.e("ServerActivity", ex.toString());
+        }
+        return null;
+    }
 }

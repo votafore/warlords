@@ -8,6 +8,8 @@ import android.util.Log;
 import com.votafore.warlords.GameManager;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
+import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.net.SocketConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -17,16 +19,39 @@ import org.json.JSONObject;
 public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     private NsdManager                  mNsdManager;
-    private ConnectionChanel            mChanel;
+    private ConnectionChanel2           mChanel;
     private ConnectionChanel.IObserver  mObserver;
 
+    private GameFactory                 mFactory;
 
-    public ServiceScanner(Context context){
+    public ServiceScanner(final Context context){
+
+        Log.v(GameManager.TAG + "_1", "ServiceScanner: конструктор");
 
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-        mChanel     = new ConnectionChanel();
+        mChanel     = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
 
-        mChanel.setupAppend(ConnectionChanel.TYPE_FOR_CLIENT);
+        mChanel.setCustomListener(new ISocketListener() {
+            @Override
+            public void onIncommingCommandReceived(IConnection connection, String message) {
+
+            }
+
+            @Override
+            public void onSocketConnected(IConnection connection) {
+
+                Log.v(GameManager.TAG, "ServiceScanner - CustomListener - onSocketConnected. Отправляем запрос.");
+
+                connection.put(Queries.getQuery(Queries.QUERY_INSTANCE));
+            }
+
+            @Override
+            public void onSocketDisconnected(IConnection connection) {
+
+            }
+        });
+
+        mFactory = GameFactory.getInstance(context);
 
         mObserver = new ConnectionChanel.IObserver() {
             @Override
@@ -56,6 +81,15 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                             item.mConnection   = mChanel.getConnections().get(connectionId);
 
                             Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
+
+                            String host = "/" + mFactory.getLocalIpAddress(context);
+
+                            if(item.mConnection instanceof SocketConnection){
+                                host = ((SocketConnection)item.mConnection).getHost();
+                            }
+
+                            item.mHost = host;
+
                             mAdapter.addItem(item);
 
                             break;
@@ -78,16 +112,16 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     public void startScan(){
 
-        Log.v(GameManager.TAG, "ServiceScanner - startScan().");
-
-        mNsdManager.discoverServices(GameManager.mServiceType, NsdManager.PROTOCOL_DNS_SD, this);
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - startScan.");
 
         mChanel.registerObserver(mObserver);
+
+        mNsdManager.discoverServices(ServiceBroadcaster.mServiceType, NsdManager.PROTOCOL_DNS_SD, this);
     }
 
     public void stopScan(){
 
-        Log.v(GameManager.TAG, "ServiceScanner - stopScan().");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - stopScan.");
 
         try {
             mNsdManager.stopServiceDiscovery(this);
@@ -95,10 +129,16 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             e.printStackTrace();
         }
 
+        mChanel.unregisterObserver(mObserver);
+    }
+
+    public void close(){
+
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - close.");
+
         mChanel.clearObservers();
         mChanel.close();
     }
-
 
 
 
@@ -109,6 +149,9 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
     private ListAdapter mAdapter;
 
     public void setAdapter(ListAdapter adapter){
+
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - setAdapter.");
+
         mAdapter = adapter;
     }
 
@@ -121,76 +164,27 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     @Override
     public void onDiscoveryStarted(String serviceType) {
-        Log.v(GameManager.TAG, "ServiceScanner - onDiscoveryStarted");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onDiscoveryStarted");
     }
 
     @Override
     public void onDiscoveryStopped(String serviceType) {
-        Log.v(GameManager.TAG, "ServiceScanner - onDiscoveryStopped");
-
-        // как только прекратили искать (5 сек. ожидания)
-        // посылаем запрос на информацию о созданных инстансах
-
-        //Log.v(GameManager.TAG, "ServiceScanner - рассылаем запросы");
-
-//        // при отправке запроса:
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-
-                //Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов - запущен");
-
-                // отправляем запрос на информацию об инстансе
-//                try {
-//
-//                    JSONObject query = new JSONObject();
-//
-//                    query.put("clientID" , 0);
-//                    query.put("type"     , "InstanceInfo");
-//                    query.put("command"  , "get");
-//
-//                    Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов - отправляем запрос");
-//
-//                    mChanel.sendCommand(query.toString());
-//
-//                } catch (JSONException e) {
-//
-//                    Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов, создание запроса: " + e.getMessage());
-//
-//                    e.printStackTrace();
-//                }
-
-//                Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов - ждем ответы (5 сек)");
-//
-//                // ждем ответы 5 сек
-//                long end = System.currentTimeMillis() + 5 * 1000;
-//                while(System.currentTimeMillis() < end){
-//
-//                    try {
-//                        Thread.sleep(end - System.currentTimeMillis());
-//                    } catch (InterruptedException e) {
-//                        e.printStackTrace();
-//                    }
-//                }
-
-                //Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов - закрываем все соединения");
-
-                // закрываем соединение(я)
-                //mConnectionManager.close();
-
-                //clientChanel.close();
-
-//            }
-//        }).start();
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onDiscoveryStopped");
     }
 
     @Override
     public void onServiceFound(NsdServiceInfo serviceInfo) {
 
-        Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
 
-        if(!serviceInfo.getServiceName().contains(GameManager.mServiceName))
+        if(!serviceInfo.getServiceName().contains(ServiceBroadcaster.mServiceName))
             return;
+
+        // TODO: мы запустили сервис и мы его нашли...
+        // т.е. это наш сервис, для работы клиента с сервером создан и настроен адаптер
+        // поэтому ЭТОТ сервер в список не добавляем (он уже добавлен)
+//        if(serviceInfo.getServiceName().equals(GameManager.mServiceName))
+//            return;
 
         Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. пытаемся подключиться к сервису");
         mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
@@ -201,51 +195,20 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             }
 
             @Override
-            public void onServiceResolved(final NsdServiceInfo serviceInfo) {
+            public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
                 Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
                 Log.v(GameManager.TAG, "хост: " + serviceInfo.getHost().toString());
                 Log.v(GameManager.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
-                new Runnable(){
-                    @Override
-                    public void run() {
-
-                        Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запущен. Добавляем подключение");
-
-                        mChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
-
-                        Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запущен. ждем 1 сек что бы подключение создалось");
-
-                        try {
-                            // дадим время на создание соединения
-                            Thread.sleep(1000);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-
-                        Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запущен. помещаем запрос в стек");
-
-                        // помещаем запрос для конкретного подключения в стек
-                        int indexLast = mChanel.getConnections().size() - 1;
-
-                        if(indexLast > -1){
-
-                            IConnection connection = mChanel.getConnections().get(indexLast);
-                            connection.put(Queries.getQuery(Queries.QUERY_INSTANCE));
-
-                            Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - поток запроса - запрос отправлен.");
-                        }
-
-                    }
-                }.run();
+                mChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
             }
         });
     }
 
     @Override
     public void onServiceLost(NsdServiceInfo serviceInfo) {
-        Log.v(GameManager.TAG, "ServiceScanner - onServiceLost.");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onServiceLost.");
     }
 
 
@@ -253,11 +216,11 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
     // fails
     @Override
     public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-        Log.v(GameManager.TAG, "ServiceScanner - onStartDiscoveryFailed");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onStartDiscoveryFailed");
     }
 
     @Override
     public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-        Log.v(GameManager.TAG, "ServiceScanner - onStopDiscoveryFailed");
+        Log.v(GameManager.TAG + "_1", "ServiceScanner - onStopDiscoveryFailed");
     }
 }

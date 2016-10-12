@@ -1,7 +1,5 @@
 package com.votafore.warlords;
 
-import android.net.nsd.NsdManager;
-import android.net.nsd.NsdServiceInfo;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -12,63 +10,22 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
-import com.votafore.warlords.test.ListAdapter;
-import com.votafore.warlords.test.ServiceScanner;
+import com.votafore.warlords.test.GameFactory;
 
-import java.io.IOException;
-import java.net.ServerSocket;
-import java.util.ArrayList;
-import java.util.List;
 
 public class ActivityStart extends AppCompatActivity {
 
-    GameManager manager;
-
-    Toolbar mToolbar;
-
-
-//    NsdManager mNsdManager;
-//
-//    @Override
-//    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//        Log.v("GAMESERVICE", "onRegistrationFailed");
-//    }
-//
-//    @Override
-//    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//        Log.v("GAMESERVICE", "onUnregistrationFailed");
-//    }
-//
-//    @Override
-//    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-//        Log.v("GAMESERVICE", "onServiceRegistered. Имя сервиса: " + serviceInfo.getServiceName());
-//    }
-//
-//    @Override
-//    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-//        Log.v("GAMESERVICE", "onServiceUnregistered");
-//    }
-
-
-    ServiceScanner mScanner;
-
+    private GameFactory   mFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
 
-
-        manager     = GameManager.getInstance(this);
-        mScanner    = new ServiceScanner(this);
-        ListAdapter adapter = new ListAdapter();
-
-        mScanner.setAdapter(adapter);
 
         RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
@@ -76,7 +33,41 @@ public class ActivityStart extends AppCompatActivity {
         serverList.setItemAnimator(new DefaultItemAnimator());
         serverList.setLayoutManager(new LinearLayoutManager(this));
 
-        serverList.setAdapter(adapter);
+        mFactory = GameFactory.getInstance(this);
+
+        mFactory.onActivityCreate(this);
+
+        serverList.setAdapter(mFactory.getAdapter());
+
+//        manager.getAdapter().setListener(new GameManager.ClickListener() {
+//            @Override
+//            public void onClick(int position) {
+//
+//                //manager.handleServerListActivityStoped();
+//
+//                manager.startGame(ActivityStart.this);
+//
+//                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
+//                startActivity(i);
+//
+//            }
+//        });
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        Log.v(GameManager.TAG, "ActivityStart: onResume().");
+        mFactory.onActivityResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        Log.v(GameManager.TAG, "ActivityStart: onPause().");
+        mFactory.onActivityPause();
     }
 
     @Override
@@ -89,35 +80,24 @@ public class ActivityStart extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch(item.getItemId()){
-            case R.id.refresh:
-
-                //manager.discoverServers(this);
-                mScanner.startScan();
-                break;
-
             case R.id.new_game:
 
-                manager.createServer();
+                mFactory.createServer(this);
 
                 break;
+            case R.id.start_game:
 
-            case R.id.stop_server:
-
-                manager.stopBroadcastService();
-                manager.stopServer();
+                mFactory.startGame(this);
 
                 break;
-
             case R.id.call_someFunc:
 
-                manager.someFunc();
+                mFactory.someFunc();
 
                 break;
-            case R.id.stop_client:
+            case R.id.exit:
 
-                //manager.stopClient();
-                mScanner.stopScan();
-                break;
+                mFactory.exit();
         }
 
         return super.onOptionsItemSelected(item);

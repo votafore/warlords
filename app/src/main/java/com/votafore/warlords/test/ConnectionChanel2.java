@@ -1,11 +1,18 @@
-package com.votafore.warlords.net;
+package com.votafore.warlords.test;
 
 
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Looper;
+import android.os.Message;
 import android.util.Log;
 
 import com.votafore.warlords.GameManager;
+import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
+import com.votafore.warlords.net.IConnection;
+import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.net.SocketConnection;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -14,41 +21,35 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
-public class ConnectionChanel implements IChanel, ISocketListener {
+public class ConnectionChanel2 implements IChanel, ISocketListener {
 
-    private Thread mWorkThread;
+    private WorkerThread mWorkThread;
+    private Runnable     mTaskSend;
 
-    public ConnectionChanel(int type){
+    public ConnectionChanel2(int type){
 
-        Log.v(GameManager.TAG, "ConnectionChanel: конструктор");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: конструктор");
 
         mObservers      = new ArrayList<>();
         mConnections    = new ArrayList<>();
-
         mHandler        = new Handler(Looper.getMainLooper());
+        mWorkThread     = new WorkerThread("Connection chanel thread");
 
-        mWorkThread = new Thread(new Runnable() {
+        mWorkThread.start();
+        mWorkThread.prepareHandler();
+
+        mTaskSend = new Runnable() {
             @Override
             public void run() {
 
-                Log.v(GameManager.TAG, "ConnectionChanel - поток стека - запущен.");
+                Log.v(GameManager.TAG, "ConnectionChanel2 - поток стека - выполнение задачи рассылки.");
 
-                while (!Thread.currentThread().isInterrupted()) {
-
-                    if(mConnections.size() == 0)
-                        continue;
-
-                    // обход всех подключений
-                    for (IConnection connection : mConnections) {
-                        connection.send();
-                    }
+                // обход всех подключений
+                for (IConnection connection : mConnections) {
+                    connection.send();
                 }
             }
-        });
-
-        // TODO: нужна оптимизация
-        // поток просто ЖЕСТКО грузит проц и ЖРЕТ память
-        mWorkThread.start();
+        };
 
         setupAppend(type);
     }
@@ -68,36 +69,36 @@ public class ConnectionChanel implements IChanel, ISocketListener {
      * у канала есть "подписчики" для этого они должны поддерживать определенный
      * интерфейс
      */
-    public interface IObserver{
-        void notifyObserver(int connectionId, String message);
-    }
 
-    private List<IObserver> mObservers;
+    private List<ConnectionChanel.IObserver> mObservers;
 
 
 
     @Override
     public void sendCommand(String command){
 
-        Log.v(GameManager.TAG, "ConnectionChanel: sendCommand(). Отправка команды");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: sendCommand(). Отправка команды");
 
         synchronized (mStackLock){
             for (IConnection connection : mConnections) {
-                Log.v(GameManager.TAG, "ConnectionChanel: sendCommand(). добавили команду в стек");
+                Log.v(GameManager.TAG, "ConnectionChanel2: sendCommand(). добавили команду в стек");
                 connection.put(command);
             }
         }
+
+        Log.v(GameManager.TAG, "ConnectionChanel2: sendCommand(). запуск задачи рассылки");
+        mWorkThread.postTask();
     }
 
     @Override
-    public void registerObserver(IObserver observer){
-        Log.v(GameManager.TAG, "ConnectionChanel: registerObserver()");
+    public void registerObserver(ConnectionChanel.IObserver observer){
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: registerObserver()");
         mObservers.add(observer);
     }
 
     @Override
-    public void unregisterObserver(IObserver observer){
-        Log.v(GameManager.TAG, "ConnectionChanel: unregisterObserver()");
+    public void unregisterObserver(ConnectionChanel.IObserver observer){
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: unregisterObserver()");
         mObservers.remove(observer);
     }
 
@@ -117,27 +118,36 @@ public class ConnectionChanel implements IChanel, ISocketListener {
     @Override
     public void onIncommingCommandReceived(IConnection connection, String message) {
 
-        Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: onIncommingCommandReceived() есть сообщение");
 
-        for (IObserver observer : mObservers) {
-            Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение. отправляем сообщение подписчику");
-            Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение. ИД подключения: " + String.valueOf(mConnections.indexOf(connection)));
+        for (ConnectionChanel.IObserver observer : mObservers) {
+            Log.v(GameManager.TAG, "ConnectionChanel2: onIncommingCommandReceived() есть сообщение. отправляем сообщение подписчику");
+            Log.v(GameManager.TAG, "ConnectionChanel2: onIncommingCommandReceived() есть сообщение. ИД подключения: " + String.valueOf(mConnections.indexOf(connection)));
             observer.notifyObserver(mConnections.indexOf(connection), message);
         }
+
+        if(mCustomListener != null)
+            mCustomListener.onIncommingCommandReceived(connection, message);
     }
 
     @Override
     public void onSocketConnected(IConnection connection) {
-        Log.v(GameManager.TAG, "ConnectionChanel: onSocketConnected()");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: onSocketConnected()");
 
         mConnections.add(connection);
+
+        if(mCustomListener != null)
+            mCustomListener.onSocketConnected(connection);
     }
 
     @Override
     public void onSocketDisconnected(IConnection connection) {
-        Log.v(GameManager.TAG, "ConnectionChanel: onSocketDisconnected()");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel: onSocketDisconnected()");
 
         mConnections.remove(connection);
+
+        if(mCustomListener != null)
+            mCustomListener.onSocketDisconnected(connection);
     }
 
 
@@ -153,9 +163,9 @@ public class ConnectionChanel implements IChanel, ISocketListener {
      */
     public void close(){
 
-        Log.v(GameManager.TAG, "ConnectionChanel: close()");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: close()");
 
-        mWorkThread.interrupt();
+        mWorkThread.quitSafely();
 
         while(mConnections.size() > 0){
 
@@ -163,20 +173,20 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                 mConnections.get(0).close();
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
-                Log.v(GameManager.TAG, "ConnectionChanel: close(). закрытие сокетов - Ошибка: " + e.getMessage());
+                Log.v(GameManager.TAG, "ConnectionChanel2: close(). закрытие сокетов - Ошибка: " + e.getMessage());
             }
 
-            Log.v(GameManager.TAG, "ConnectionChanel: close(). закрытие сокетов - 1 закрыт");
+            Log.v(GameManager.TAG, "ConnectionChanel2: close(). закрытие сокетов - 1 закрыт");
         }
 
         if(mConnectionAppend != null){
-            Log.v(GameManager.TAG, "ConnectionChanel: close(). закрываем append-ер");
+            Log.v(GameManager.TAG, "ConnectionChanel2: close(). закрываем append-ер");
             mConnectionAppend.stop();
         }
     }
 
     public void clearObservers(){
-        Log.v(GameManager.TAG, "ConnectionChanel: clearObservers()");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: clearObservers()");
         mObservers = new ArrayList<>();
     }
 
@@ -186,12 +196,12 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
     private void setupAppend(int type){
 
-        Log.v(GameManager.TAG, "ConnectionChanel: setupAppend()");
+        Log.v(GameManager.TAG + "_1", "ConnectionChanel2: setupAppend()");
 
         switch (type){
             case TYPE_FOR_CLIENT:
 
-                Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). клиент");
+                Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). клиент");
 
                 mConnectionAppend = new Append() {
                     @Override
@@ -208,16 +218,16 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
                                 String ip = serverIP.replace("/","");
 
-                                Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. запущен");
+                                Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). поток создания сокета. запущен");
 
                                 try {
-                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем сокет");
+                                    Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). поток создания сокета. создаем сокет");
                                     Socket socket      = new Socket(InetAddress.getByName(ip), mServerPort);
-                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем подключение");
-                                    new SocketConnection(socket, mHandler, ConnectionChanel.this);
-                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. все создано");
+                                    Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). поток создания сокета. создаем подключение");
+                                    new SocketConnection(socket, mHandler, ConnectionChanel2.this);
+                                    Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). поток создания сокета. все создано");
                                 } catch (IOException e) {
-                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. ошибка - " + e.getMessage());
+                                    Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). поток создания сокета. ошибка - " + e.getMessage());
                                     e.printStackTrace();
                                 }
                             }
@@ -235,7 +245,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
             case TYPE_FOR_SERVER:
 
-                Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). сервер");
+                Log.v(GameManager.TAG, "ConnectionChanel2: setupAppend(). сервер");
 
                 mConnectionAppend = new Append() {
 
@@ -249,14 +259,15 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                             @Override
                             public void run() {
 
-                                Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - запущен");
+                                Log.v(GameManager.TAG, "ConnectionChanel2: addConnection(). Поток сокета - запущен");
 
                                 try {
                                     mServerSocket = new ServerSocket(0);
 
                                     mPort = mServerSocket.getLocalPort();
+
                                 } catch (IOException e) {
-                                    Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - создание сервера. Ошибка: " + e.getMessage());
+                                    Log.v(GameManager.TAG, "ConnectionChanel2: addConnection(). Поток сокета - создание сервера. Ошибка: " + e.getMessage());
                                     e.printStackTrace();
                                     return;
                                 }
@@ -267,11 +278,11 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
                                         Socket socket = mServerSocket.accept();
 
-                                        Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - есть входящее подключение, настраиваем его");
-                                        new SocketConnection(socket, mHandler, ConnectionChanel.this);
+                                        Log.v(GameManager.TAG, "ConnectionChanel2: addConnection(). Поток сокета - есть входящее подключение, настраиваем его");
+                                        new SocketConnection(socket, mHandler, ConnectionChanel2.this);
 
                                     } catch (IOException e) {
-                                        Log.v(GameManager.TAG, "ConnectionChanel: addConnection(). Поток сокета - входящие подключения. Ошибка: " + e.getMessage());
+                                        Log.v(GameManager.TAG, "ConnectionChanel2: addConnection(). Поток сокета - входящие подключения. Ошибка: " + e.getMessage());
                                         e.printStackTrace();
                                     }
                                 }
@@ -289,23 +300,23 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                     @Override
                     public void stop() {
 
-                        Log.v(GameManager.TAG, "ConnectionChanel: stop()");
+                        Log.v(GameManager.TAG, "ConnectionChanel2: stop()");
 
                         if(this.mServerSocket != null){
                             try {
                                 this.mServerSocket.close();
 
-                                Log.v(GameManager.TAG, "ConnectionChanel: stop(). Остановка сервера сокетов - остановлен");
+                                Log.v(GameManager.TAG, "ConnectionChanel2: stop(). Остановка сервера сокетов - остановлен");
 
                             } catch (IOException e) {
-                                Log.v(GameManager.TAG, "ConnectionChanel: stop(). Остановка сервера сокетов - ошибка: " + e.getMessage());
+                                Log.v(GameManager.TAG, "ConnectionChanel2: stop(). Остановка сервера сокетов - ошибка: " + e.getMessage());
                                 e.printStackTrace();
                             }
                         }
 
                         if(this.mWorkThread != null){
                             this.mWorkThread.interrupt();
-                            Log.v(GameManager.TAG, "ConnectionChanel: stop(). Остановка потока сервера сокетов - остановлен");
+                            Log.v(GameManager.TAG, "ConnectionChanel2: stop(). Остановка потока сервера сокетов - остановлен");
                         }
                     }
                 };
@@ -349,5 +360,62 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
     public int getPort(){
         return mPort;
+    }
+
+
+
+    /*****************************************************************************/
+    /*********************** раздел еще в разработке *****************************/
+
+    private ISocketListener mCustomListener;
+
+    public void setCustomListener(ISocketListener socketListener){
+        mCustomListener = socketListener;
+    }
+
+
+
+    public class WorkerThread extends HandlerThread{
+
+        private ThreadHandler mWorkerHandler;
+
+        public WorkerThread(String name) {
+            super(name);
+        }
+
+        public void postTask(Runnable task){
+            mWorkerHandler.post(task);
+        }
+
+        public void postTask(){
+
+            mWorkerHandler.sendMessage(mWorkerHandler.obtainMessage());
+
+        }
+
+        public void prepareHandler(){
+            mWorkerHandler = new ThreadHandler(getLooper());
+        }
+    }
+
+
+    public class ThreadHandler extends Handler{
+
+        public ThreadHandler(Looper looper){
+            super(looper);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+
+            Log.v(GameManager.TAG, "ThreadHandler: handleMessage(). обработка отправки команды");
+
+            // обход всех подключений
+            for (IConnection connection : mConnections) {
+                connection.send();
+            }
+
+            super.handleMessage(msg);
+        }
     }
 }

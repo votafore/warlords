@@ -45,12 +45,13 @@ public class SocketConnection implements IConnection {
 
 
     private ISocketListener mListener;
+    private final Object mStackLock = new Object();
 
     private Handler mHandler;
 
     public SocketConnection(final Socket socket, Handler handler, ISocketListener listener) throws IOException{
 
-        Log.v(GameManager.TAG, "SocketConnection: конструктор");
+        Log.v(GameManager.TAG + "_1", "SocketConnection: конструктор");
 
         mSocket   = socket;
         mListener = listener;
@@ -128,7 +129,7 @@ public class SocketConnection implements IConnection {
     @Override
     public void close(){
 
-        Log.v(GameManager.TAG, "SocketConnection: close()");
+        Log.v(GameManager.TAG + "_1", "SocketConnection: close()");
 
         if(mSocket != null){
 
@@ -162,29 +163,35 @@ public class SocketConnection implements IConnection {
         if(mStack.size() == 0)
             return;
 
-        Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
+        Log.v(GameManager.TAG + "_1", "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
 
-        String command = mStack.get(0);
+        synchronized (mStackLock){
 
-        try {
-            PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
-            out.println(command);
+            String command = mStack.get(0);
 
-            Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - отправлена");
+            try {
+                PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
+                out.println(command);
 
-        } catch (IOException e) {
-            Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - ошибка: " + e.getMessage());
-            e.printStackTrace();
+                Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - отправлена");
+
+            } catch (IOException e) {
+                Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - ошибка: " + e.getMessage());
+                e.printStackTrace();
+            }
+
+            mStack.remove(0);
         }
 
-        mStack.remove(0);
-        Log.v(GameManager.TAG, "SocketConnection: sendCommand(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
+        Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
     }
 
     @Override
     public void put(String command){
-        mStack.add(command);
-        Log.v(GameManager.TAG, "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
+        synchronized (mStackLock){
+            mStack.add(command);
+        }
+        Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 
 

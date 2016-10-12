@@ -1,28 +1,39 @@
 package com.votafore.warlords.test;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.votafore.warlords.GameManager;
 import com.votafore.warlords.R;
 import com.votafore.warlords.net.IConnection;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.zip.Inflater;
 
 
 public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     private List<ListItem> mItems;
 
+    private HashMap<String, ListItem> mHostItem = new HashMap<>();
+
     public ListAdapter(){
         mItems = new ArrayList<>();
     }
 
 
+
+
+    private GameManager.ClickListener mListener;
+
+    public void setListener(GameManager.ClickListener listener){
+        mListener = listener;
+    }
 
 
     /**************************************************************************************/
@@ -51,7 +62,8 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return mItems.size();
     }
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public ImageView mImageView;
         public TextView  mOwnerName;
@@ -64,10 +76,19 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             mOwnerName   = (TextView) itemView.findViewById(R.id.owner_name);
             mPlayerCount = (TextView) itemView.findViewById(R.id.player_count);
 
-            //itemView.setOnClickListener(this);
+            itemView.setOnClickListener(this);
+        }
+
+
+        @Override
+        public void onClick(View v) {
+
+            if(mListener == null)
+                return;
+
+            mListener.onClick(getAdapterPosition());
         }
     }
-
 
 
 
@@ -77,8 +98,38 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
     /**************************************************************************************/
 
     public void addItem(ListItem item){
+
+        Log.v(GameManager.TAG + "_1", "ListAdapter - addItem.");
+
+        // добавляем только если такого хоста у нас еще нет
+        for (ListItem curItem : mItems) {
+
+            Log.v(GameManager.TAG, "ListAdapter - addItem. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
+
+            if(item.mHost.equals(curItem.mHost))
+                return;
+        }
+
         mItems.add(item);
         notifyItemInserted(mItems.size()-1);
+
+        Log.v(GameManager.TAG, "ListAdapter - addItem. Количество элементов: " + String.valueOf(mItems.size()));
+    }
+
+    public void addItem(String host, ListItem item){
+
+        Log.v(GameManager.TAG + "_1", "ListAdapter - addItem (HashMap).");
+
+        if(mHostItem.get(host) != null)
+            return;
+
+        mHostItem.put(host, item);
+
+        notifyItemInserted(mHostItem.size()-1);
+    }
+
+    public ListItem getItemByHost(String host){
+        return mHostItem.get(host);
     }
 
     public void removeItem(IConnection connection){
@@ -113,5 +164,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         public int          mResMap;
         public int          mCreator;
         public String       mCreatorName;
+        public String       mHost;
     }
 }
