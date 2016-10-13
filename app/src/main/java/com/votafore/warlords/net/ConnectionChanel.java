@@ -52,7 +52,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
      * интерфейс
      */
     public interface IObserver{
-        void notifyObserver(int connectionId, String message);
+        void notifyObserver(IConnection connection, String message);
     }
 
     private List<IObserver> mObservers;
@@ -116,7 +116,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
         for (IObserver observer : mObservers) {
 //            Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение. отправляем сообщение подписчику");
 //            Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение. ИД подключения: " + String.valueOf(mConnections.indexOf(connection)));
-            observer.notifyObserver(mConnections.indexOf(connection), message);
+            observer.notifyObserver(connection, message);
         }
 
         if(mCustomListener != null)
@@ -218,13 +218,13 @@ public class ConnectionChanel implements IChanel, ISocketListener {
                                 //Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. запущен");
 
                                 try {
-                                    //Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем сокет");
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем сокет");
                                     Socket socket      = new Socket(InetAddress.getByName(ip), mServerPort);
-                                    //Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем подключение");
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. создаем подключение");
                                     new SocketConnection(socket, mHandler, ConnectionChanel.this);
-                                    //Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. все создано");
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. все создано");
                                 } catch (IOException e) {
-                                    //Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. ошибка - " + e.getMessage());
+                                    Log.v(GameManager.TAG, "ConnectionChanel: setupAppend(). поток создания сокета. ошибка - " + e.getMessage());
                                     e.printStackTrace();
                                 }
                             }

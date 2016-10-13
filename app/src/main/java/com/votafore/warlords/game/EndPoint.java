@@ -28,15 +28,12 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
     }
 
     @Override
-    public void notifyObserver(int connectionID, final String message){
-
-        final IConnection queryConnection;
-        queryConnection = mChanel.getConnections().get(connectionID);
+    public void notifyObserver(final IConnection connection, final String message){
 
         mWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
-                execute(queryConnection, message);
+                execute(connection, message);
             }
         });
 

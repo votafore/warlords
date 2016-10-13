@@ -106,8 +106,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
             //Log.v(GameManager.TAG, "ListAdapter - addItem. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
 
-            if(item.mHost.equals(curItem.mHost))
+            if(item.mHost.equals(curItem.mHost)){
+
                 return;
+            }
         }
 
         mItems.add(item);

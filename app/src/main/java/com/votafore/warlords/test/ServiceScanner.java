@@ -57,7 +57,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
         mObserver = new ConnectionChanel.IObserver() {
             @Override
-            public void notifyObserver(int connectionId, String message) {
+            public void notifyObserver(IConnection connection, String message) {
 
                 // TODO: этот ответ получают даже те, кто не отсылал его
                 // переделать этот момент
@@ -80,7 +80,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                             item.mCreator      = response.getInt("creatorID");
                             item.mCreatorName  = response.getString("creatorName");
 
-                            item.mConnection   = mChanel.getConnections().get(connectionId);
+                            item.mConnection   = connection;
 
                             //Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
 
@@ -177,16 +177,8 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
     @Override
     public void onServiceFound(NsdServiceInfo serviceInfo) {
 
-//        Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
-
         if(!serviceInfo.getServiceName().contains(ServiceBroadcaster.mServiceName))
             return;
-
-        // TODO: мы запустили сервис и мы его нашли...
-        // т.е. это наш сервис, для работы клиента с сервером создан и настроен адаптер
-        // поэтому ЭТОТ сервер в список не добавляем (он уже добавлен)
-//        if(serviceInfo.getServiceName().equals(GameManager.mServiceName))
-//            return;
 
         Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. пытаемся подключиться к сервису");
         mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
@@ -200,9 +192,17 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
                 Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
-//                Log.v(GameManager.TAG, "хост: " + serviceInfo.getHost().toString());
-//                Log.v(GameManager.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
+                Log.v(GameManager.TAG, "хост: " + serviceInfo.getHost().toString());
+                Log.v(GameManager.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
+                // если сокет к этому хосту уже есть, то новый добавлять не надо
+                for (IConnection connection : mChanel.getConnections()) {
+                    if(serviceInfo.getHost().toString().equals(((SocketConnection)connection).getHost())){
+                        return;
+                    }
+                }
+
+                Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. таки добавляем");
                 mChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());
             }
         });
@@ -210,7 +210,10 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     @Override
     public void onServiceLost(NsdServiceInfo serviceInfo) {
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - onServiceLost.");
+        Log.v(GameManager.TAG, "ServiceScanner - onServiceLost.");
+
+        // TODO: нужен механизм слежения за отвалившимися сервисами
+        // хотя, может и не понадобится т.к. во время игры нет поиска сервисов
     }
 
 
