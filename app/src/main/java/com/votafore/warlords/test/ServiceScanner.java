@@ -34,7 +34,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
         mChanel.setCustomListener(new ISocketListener() {
             @Override
-            public void onIncommingCommandReceived(IConnection connection, String message) {
+            public void onCommandReceived(IConnection connection, String message) {
 
             }
 

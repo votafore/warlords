@@ -483,7 +483,7 @@ public class GameManager {
                     synchronized(mStackLock){
 
                         String command = stack.get(0);
-                        mServerChanel.onIncommingCommandReceived(mServerSocket, command);
+                        mServerChanel.onCommandReceived(mServerSocket, command);
                         stack.remove(0);
                     }
                 }
@@ -517,7 +517,7 @@ public class GameManager {
                     synchronized(((ConnectionChanel)mServerChanel).mStackLock){
 
                         String command = stack.get(0);
-                        mClientChanel.onIncommingCommandReceived(mClientSocket, command);
+                        mClientChanel.onCommandReceived(mClientSocket, command);
                         stack.remove(0);
                     }
                 }

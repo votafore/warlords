@@ -4,6 +4,7 @@ import android.os.Handler;
 import android.util.Log;
 
 import com.votafore.warlords.GameManager;
+import com.votafore.warlords.support.Stack;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -41,11 +42,10 @@ public class SocketConnection implements IConnection {
     /**
      * стек команд
      */
-    private List<String> mStack;
+    private Stack mStack;
 
 
     private ISocketListener mListener;
-    private final Object mStackLock = new Object();
 
     private Handler mHandler;
 
@@ -55,10 +55,8 @@ public class SocketConnection implements IConnection {
 
         mSocket   = socket;
         mListener = listener;
-        mHandler  =  handler;
-
-        mStack = new ArrayList<>();
-
+        mHandler  = handler;
+        mStack    = new Stack(50);
 
         mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
         //Log.v(GameManager.TAG, "SocketConnection: получили входящий поток сокета");
@@ -86,37 +84,23 @@ public class SocketConnection implements IConnection {
 
                         //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - останавливаем, закрываем сокет");
 
-                        Thread.currentThread().interrupt();
-                        try {
-
-                            mSocket.close();
-
-                            mHandler.post(new Runnable() {
-                                @Override
-                                public void run() {
-                                    mListener.onSocketDisconnected(SocketConnection.this);
-                                }
-                            });
-
-                        } catch (IOException e) {
-                            //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - остановка. Ошибка: " + e.getMessage());
-                            e.printStackTrace();
-                        }
-
+                        close();
                         continue;
                     }
 
                     // при получении сообщения отправляем другое сообщение
                     // в основной поток сервера
 
-                    final String message = msg;
+                    //final String message = msg;
 
-                    mHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            mListener.onIncommingCommandReceived(SocketConnection.this, message);
-                        }
-                    });
+//                    mHandler.post(new Runnable() {
+//                        @Override
+//                        public void run() {
+//                            mListener.onIncommingCommandReceived(SocketConnection.this, message);
+//                        }
+//                    });
+
+                    mListener.onCommandReceived(SocketConnection.this, msg);
                 }
             }
         });
@@ -127,9 +111,14 @@ public class SocketConnection implements IConnection {
     }
 
     @Override
-    public void close(){
+    synchronized public void close(){
 
         //Log.v(GameManager.TAG + "_1", "SocketConnection: close()");
+
+        if(!mThread.isInterrupted()){
+            mThread.interrupt();
+            //Log.v(GameManager.TAG, "SocketConnection: close(). поток входящих сообщений остановлен");
+        }
 
         if(mSocket != null){
 
@@ -146,11 +135,6 @@ public class SocketConnection implements IConnection {
             }
         }
 
-        if(!mThread.isInterrupted()){
-            mThread.interrupt();
-            //Log.v(GameManager.TAG, "SocketConnection: close(). поток входящих сообщений остановлен");
-        }
-
         mListener.onSocketDisconnected(SocketConnection.this);
     }
 
@@ -160,27 +144,20 @@ public class SocketConnection implements IConnection {
         if(mSocket == null)
             return;
 
-        if(mStack.size() == 0)
+        if(!mStack.hasNext())
             return;
 
         //Log.v(GameManager.TAG + "_1", "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
 
-        synchronized (mStackLock){
+        try {
+            PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
+            out.println(mStack.get());
 
-            String command = mStack.get(0);
+            //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - отправлена");
 
-            try {
-                PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
-                out.println(command);
-
-                //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - отправлена");
-
-            } catch (IOException e) {
-                //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - ошибка: " + e.getMessage());
-                e.printStackTrace();
-            }
-
-            mStack.remove(0);
+        } catch (IOException e) {
+            //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - ошибка: " + e.getMessage());
+            e.printStackTrace();
         }
 
         //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
@@ -188,9 +165,7 @@ public class SocketConnection implements IConnection {
 
     @Override
     public void put(String command){
-        synchronized (mStackLock){
-            mStack.add(command);
-        }
+        mStack.put(command);
         //Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 

@@ -13,6 +13,7 @@ import com.votafore.warlords.game.Server;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.support.Stack;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
@@ -314,7 +315,7 @@ public class GameFactory {
                     synchronized(mStackLock){
 
                         String command = stack.get(0);
-                        mServerChanel.onIncommingCommandReceived(mServerSocket, command);
+                        mServerChanel.onCommandReceived(mServerSocket, command);
                         stack.remove(0);
                     }
                 }
@@ -327,30 +328,23 @@ public class GameFactory {
 
             mServerSocket = new IConnection() {
 
-                List<String> stack = new ArrayList<>();
+                Stack stack = new Stack(50);
 
                 private final Object mStackLock = new Object();
 
                 @Override
                 public void put(String command) {
 
-                    synchronized(mStackLock){
-                        stack.add(command);
-                    }
+                    stack.put(command);
                 }
 
                 @Override
                 public void send() {
 
-                    if(stack.size() == 0)
+                    if(!stack.hasNext())
                         return;
 
-                    synchronized(mStackLock){
-
-                        String command = stack.get(0);
-                        mClientChanel.onIncommingCommandReceived(mClientSocket, command);
-                        stack.remove(0);
-                    }
+                    mClientChanel.onCommandReceived(mClientSocket, stack.get());
                 }
 
                 @Override

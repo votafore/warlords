@@ -109,7 +109,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
     private List<IConnection> mConnections;
 
     @Override
-    public void onIncommingCommandReceived(IConnection connection, String message) {
+    public void onCommandReceived(IConnection connection, String message) {
 
         //Log.v(GameManager.TAG, "ConnectionChanel: onIncommingCommandReceived() есть сообщение");
 
@@ -120,7 +120,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
         }
 
         if(mCustomListener != null)
-            mCustomListener.onIncommingCommandReceived(connection, message);
+            mCustomListener.onCommandReceived(connection, message);
     }
 
     @Override
