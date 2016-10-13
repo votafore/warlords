@@ -88,18 +88,6 @@ public class SocketConnection implements IConnection {
                         continue;
                     }
 
-                    // при получении сообщения отправляем другое сообщение
-                    // в основной поток сервера
-
-                    //final String message = msg;
-
-//                    mHandler.post(new Runnable() {
-//                        @Override
-//                        public void run() {
-//                            mListener.onIncommingCommandReceived(SocketConnection.this, message);
-//                        }
-//                    });
-
                     mListener.onCommandReceived(SocketConnection.this, msg);
                 }
             }

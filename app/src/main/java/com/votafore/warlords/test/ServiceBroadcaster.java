@@ -6,7 +6,6 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
 
 public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 

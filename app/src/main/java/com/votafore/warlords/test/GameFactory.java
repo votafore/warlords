@@ -156,6 +156,7 @@ public class GameFactory {
         //Log.v(GameManager.TAG + "_1", "GameFactory - startGame");
 
         mScanner.stopScan();
+        mScanner.close();
 
         if(mBroadcaster != null){
             mBroadcaster.stopBroadcast();
@@ -164,15 +165,13 @@ public class GameFactory {
 
 
         //ConnectionChanel clientChanel;
-        //Instance          mInstance;
+        Instance          mInstance;
 
         mInstance     = new Instance(context);
         clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
 
         mInstance.setChanel(clientChanel);
         clientChanel.registerObserver(mInstance);
-
-        mClient = mInstance;
 
         if(mServer != null){
 
@@ -225,8 +224,6 @@ public class GameFactory {
 
 
 
-    Instance          mInstance;
-
 
 
 
@@ -248,7 +245,6 @@ public class GameFactory {
 
     /******************************** для взаимодействия Клиент - Сервер *****************************/
 
-    private EndPoint mClient;
 
 
 
@@ -373,7 +369,7 @@ public class GameFactory {
 
         Log.v(GameManager.TAG + "_1", "GameManager: someFunc(). произвольная функция инстанса");
 
-        mInstance.someFunc();
+        //mInstance.someFunc();
     }
 
     public void stopClient(){

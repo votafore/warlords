@@ -7,7 +7,7 @@ import com.votafore.warlords.net.ConnectionChanel;
 
 public abstract class EndPoint implements ConnectionChanel.IObserver{
 
-    protected ConnectionChanel     mChanel;
+    protected ConnectionChanel      mChanel;
     protected HandlerThread         mWorkerThread;
     protected Handler               mWorkerHandler;
 
