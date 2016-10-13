@@ -18,7 +18,9 @@ import org.json.JSONObject;
 public class Server extends EndPoint{
 
 
-
+    public Server(){
+        super();
+    }
 
 
 

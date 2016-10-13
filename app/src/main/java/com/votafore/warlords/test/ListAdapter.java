@@ -99,12 +99,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public void addItem(ListItem item){
 
-        Log.v(GameManager.TAG + "_1", "ListAdapter - addItem.");
+        //Log.v(GameManager.TAG + "_1", "ListAdapter - addItem.");
 
         // добавляем только если такого хоста у нас еще нет
         for (ListItem curItem : mItems) {
 
-            Log.v(GameManager.TAG, "ListAdapter - addItem. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
+            //Log.v(GameManager.TAG, "ListAdapter - addItem. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
 
             if(item.mHost.equals(curItem.mHost))
                 return;
@@ -113,12 +113,12 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         mItems.add(item);
         notifyItemInserted(mItems.size()-1);
 
-        Log.v(GameManager.TAG, "ListAdapter - addItem. Количество элементов: " + String.valueOf(mItems.size()));
+        //Log.v(GameManager.TAG, "ListAdapter - addItem. Количество элементов: " + String.valueOf(mItems.size()));
     }
 
     public void addItem(String host, ListItem item){
 
-        Log.v(GameManager.TAG + "_1", "ListAdapter - addItem (HashMap).");
+        //Log.v(GameManager.TAG + "_1", "ListAdapter - addItem (HashMap).");
 
         if(mHostItem.get(host) != null)
             return;

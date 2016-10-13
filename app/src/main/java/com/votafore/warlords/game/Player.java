@@ -9,7 +9,7 @@ public abstract class Player {
     /**
      * Переменная, хранящая количество денег
      */
-    public static final int mMoney = 0;
+    public int mMoney = 0;
 
 
     /**

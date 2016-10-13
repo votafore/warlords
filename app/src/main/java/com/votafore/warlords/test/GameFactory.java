@@ -40,10 +40,8 @@ public class GameFactory {
 
     private GameFactory(){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory: вызвали конструктор");
+        //Log.v(GameManager.TAG + "_1", "GameFactory: вызвали конструктор");
     }
-
-
 
 
 
@@ -57,7 +55,7 @@ public class GameFactory {
 
     public void onActivityCreate(Context context){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - onActivityCreate");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityCreate");
 
         mAdapter = new ListAdapter();
 
@@ -67,7 +65,7 @@ public class GameFactory {
 
     public void onActivityResume(){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - onActivityResume");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityResume");
 
         mScanner.startScan();
 
@@ -78,7 +76,7 @@ public class GameFactory {
 
     public void onActivityPause(){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - onActivityPause");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityPause");
 
         mScanner.stopScan();
 
@@ -95,7 +93,7 @@ public class GameFactory {
 
     public void createServer(final Context context){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - createServer");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - createServer");
 
         new Thread(new Runnable() {
             @Override
@@ -105,7 +103,7 @@ public class GameFactory {
                 Server server;
 
                 server       = new Server();
-                serverChanel = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_SERVER);
+                serverChanel = new ConnectionChanel(ConnectionChanel.TYPE_FOR_SERVER);
 
                 server.setChanel(serverChanel);
                 serverChanel.registerObserver(server);
@@ -115,7 +113,7 @@ public class GameFactory {
 
 
 
-                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
+                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
 
                 ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -124,7 +122,7 @@ public class GameFactory {
                 item.mResMap      = android.R.drawable.ic_lock_idle_lock;
                 item.mHost        = "/"+getLocalIpAddress(context);
 
-                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
+                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
 
                 mAdapter.addItem(item);
 
@@ -154,7 +152,7 @@ public class GameFactory {
 
     public void startGame(Context context){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - startGame");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - startGame");
 
         mScanner.stopScan();
 
@@ -164,11 +162,11 @@ public class GameFactory {
 
 
 
-        ConnectionChanel2 clientChanel;
-        Instance          mInstance;
+        //ConnectionChanel clientChanel;
+        //Instance          mInstance;
 
         mInstance     = new Instance(context);
-        clientChanel  = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
+        clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
 
         mInstance.setChanel(clientChanel);
         clientChanel.registerObserver(mInstance);
@@ -191,21 +189,21 @@ public class GameFactory {
 
     public void exit(){
 
-        Log.v(GameManager.TAG + "_1", "GameFactory - exit: остановка сканера");
+        //Log.v(GameManager.TAG + "_1", "GameFactory - exit: остановка сканера");
 
         mScanner.stopScan();
         mScanner.close();
 
         if(mBroadcaster != null){
 
-            Log.v(GameManager.TAG, "GameFactory - exit: остановка mBroadcaster");
+            //Log.v(GameManager.TAG, "GameFactory - exit: остановка mBroadcaster");
 
             mBroadcaster.stopBroadcast();
         }
 
         if(mServer != null){
 
-            Log.v(GameManager.TAG, "GameFactory - exit: остановка сервера");
+            //Log.v(GameManager.TAG, "GameFactory - exit: остановка сервера");
 
             serverChanel.close();
             serverChanel.clearObservers();
@@ -213,7 +211,7 @@ public class GameFactory {
 
         if(clientChanel != null){
 
-            Log.v(GameManager.TAG, "GameFactory - exit: остановка клиента (канала клиента)");
+            //Log.v(GameManager.TAG, "GameFactory - exit: остановка клиента (канала клиента)");
 
             clientChanel.close();
             clientChanel.clearObservers();
@@ -226,7 +224,7 @@ public class GameFactory {
 
 
 
-
+    Instance          mInstance;
 
 
 
@@ -260,8 +258,8 @@ public class GameFactory {
      *
      * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private ConnectionChanel2 clientChanel;
-    private ConnectionChanel2 serverChanel;
+    private ConnectionChanel clientChanel;
+    private ConnectionChanel serverChanel;
 
     private ServiceBroadcaster mBroadcaster;
 
@@ -336,7 +334,7 @@ public class GameFactory {
                 @Override
                 public void put(String command) {
 
-                    synchronized(((ConnectionChanel2)mServerChanel).mStackLock){
+                    synchronized(mStackLock){
                         stack.add(command);
                     }
                 }
@@ -347,7 +345,7 @@ public class GameFactory {
                     if(stack.size() == 0)
                         return;
 
-                    synchronized(((ConnectionChanel2)mServerChanel).mStackLock){
+                    synchronized(mStackLock){
 
                         String command = stack.get(0);
                         mClientChanel.onIncommingCommandReceived(mClientSocket, command);
@@ -387,13 +385,6 @@ public class GameFactory {
 
 
 
-
-
-
-
-
-
-
     /************************************** раздел еще в разработке **********************************/
 
 
@@ -401,7 +392,7 @@ public class GameFactory {
 
         Log.v(GameManager.TAG + "_1", "GameManager: someFunc(). произвольная функция инстанса");
 
-        serverChanel.sendCommand("test command");
+        mInstance.someFunc();
     }
 
     public void stopClient(){

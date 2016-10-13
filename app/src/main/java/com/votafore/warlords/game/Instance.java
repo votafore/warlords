@@ -41,10 +41,10 @@ public class Instance extends EndPoint {
     private Context mContext;
 
     public Instance(Context context){
-        Trace.beginSection("Instance");
+        super();
+
         mContext = context;
-        Log.v(GameManager.TAG, "Instance");
-        Trace.endSection();
+        //Log.v(GameManager.TAG, "Instance");
     }
 
 
@@ -58,7 +58,7 @@ public class Instance extends EndPoint {
 
     public void someFunc(){
 
-        Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
+        //Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
 
         //mConnectionManager2.sendCommand("test command");
 

@@ -58,7 +58,7 @@ public class ActivityStart extends AppCompatActivity {
     public void onResume(){
         super.onResume();
 
-        Log.v(GameManager.TAG, "ActivityStart: onResume().");
+        //Log.v(GameManager.TAG, "ActivityStart: onResume().");
         mFactory.onActivityResume();
     }
 
@@ -66,7 +66,7 @@ public class ActivityStart extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
 
-        Log.v(GameManager.TAG, "ActivityStart: onPause().");
+        //Log.v(GameManager.TAG, "ActivityStart: onPause().");
         mFactory.onActivityPause();
     }
 

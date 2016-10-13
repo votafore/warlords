@@ -51,7 +51,7 @@ public class SocketConnection implements IConnection {
 
     public SocketConnection(final Socket socket, Handler handler, ISocketListener listener) throws IOException{
 
-        Log.v(GameManager.TAG + "_1", "SocketConnection: конструктор");
+        //Log.v(GameManager.TAG + "_1", "SocketConnection: конструктор");
 
         mSocket   = socket;
         mListener = listener;
@@ -61,14 +61,14 @@ public class SocketConnection implements IConnection {
 
 
         mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
-        Log.v(GameManager.TAG, "SocketConnection: получили входящий поток сокета");
+        //Log.v(GameManager.TAG, "SocketConnection: получили входящий поток сокета");
 
         // при создании соединения стартует поток
         mThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
-                Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - запущен");
+                //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - запущен");
 
                 while(!Thread.currentThread().isInterrupted()){
 
@@ -80,11 +80,11 @@ public class SocketConnection implements IConnection {
                         e.printStackTrace();
                     }
 
-                    Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - есть сообщение (" + msg + ")");
+                    //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - есть сообщение (" + msg + ")");
 
                     if(msg == null){
 
-                        Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - останавливаем, закрываем сокет");
+                        //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - останавливаем, закрываем сокет");
 
                         Thread.currentThread().interrupt();
                         try {
@@ -99,7 +99,7 @@ public class SocketConnection implements IConnection {
                             });
 
                         } catch (IOException e) {
-                            Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - остановка. Ошибка: " + e.getMessage());
+                            //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - остановка. Ошибка: " + e.getMessage());
                             e.printStackTrace();
                         }
 
@@ -129,26 +129,26 @@ public class SocketConnection implements IConnection {
     @Override
     public void close(){
 
-        Log.v(GameManager.TAG + "_1", "SocketConnection: close()");
+        //Log.v(GameManager.TAG + "_1", "SocketConnection: close()");
 
         if(mSocket != null){
 
-            Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета");
+            //Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета");
 
             try {
                 mSocket.close();
 
-                Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета - закрыт");
+                //Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета - закрыт");
 
             } catch (IOException e) {
-                Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета - ошибка: " + e.getMessage());
+                //Log.v(GameManager.TAG, "SocketConnection: close(). Закрытие сокета - ошибка: " + e.getMessage());
                 e.printStackTrace();
             }
         }
 
         if(!mThread.isInterrupted()){
             mThread.interrupt();
-            Log.v(GameManager.TAG, "SocketConnection: close(). поток входящих сообщений остановлен");
+            //Log.v(GameManager.TAG, "SocketConnection: close(). поток входящих сообщений остановлен");
         }
 
         mListener.onSocketDisconnected(SocketConnection.this);
@@ -163,7 +163,7 @@ public class SocketConnection implements IConnection {
         if(mStack.size() == 0)
             return;
 
-        Log.v(GameManager.TAG + "_1", "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
+        //Log.v(GameManager.TAG + "_1", "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
 
         synchronized (mStackLock){
 
@@ -173,17 +173,17 @@ public class SocketConnection implements IConnection {
                 PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);
                 out.println(command);
 
-                Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - отправлена");
+                //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - отправлена");
 
             } catch (IOException e) {
-                Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - ошибка: " + e.getMessage());
+                //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - ошибка: " + e.getMessage());
                 e.printStackTrace();
             }
 
             mStack.remove(0);
         }
 
-        Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
+        //Log.v(GameManager.TAG, "SocketConnection: send(). отправка команды - размер стека после отправки: " + String.valueOf(mStack.size()));
     }
 
     @Override
@@ -191,7 +191,7 @@ public class SocketConnection implements IConnection {
         synchronized (mStackLock){
             mStack.add(command);
         }
-        Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
+        //Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 
 

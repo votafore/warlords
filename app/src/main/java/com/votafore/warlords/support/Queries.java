@@ -1,4 +1,4 @@
-package com.votafore.warlords.test;
+package com.votafore.warlords.support;
 
 import android.util.Log;
 

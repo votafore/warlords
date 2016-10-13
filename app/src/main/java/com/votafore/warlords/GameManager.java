@@ -1,7 +1,6 @@
 package com.votafore.warlords;
 
 import android.content.Context;
-import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.opengl.GLSurfaceView;
 import android.os.Trace;
@@ -18,23 +17,16 @@ import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
-import com.votafore.warlords.test.ConnectionChanel2;
 import com.votafore.warlords.test.ListAdapter;
 import com.votafore.warlords.test.ServiceBroadcaster;
 import com.votafore.warlords.test.ServiceScanner;
 
-import java.io.IOException;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
-import java.net.Socket;
 import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.SocketHandler;
-
-import javax.net.SocketFactory;
 
 
 /**
@@ -273,10 +265,10 @@ public class GameManager {
 
     void startGame(Context context){
 
-        ConnectionChanel2 clientChanel;
+        ConnectionChanel clientChanel;
 
         mInstance     = new Instance(context);
-        clientChanel  = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
+        clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
 
         mInstance.setChanel(clientChanel);
         clientChanel.registerObserver(mInstance);
@@ -346,8 +338,8 @@ public class GameManager {
      *
      * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private ConnectionChanel2 clientChanel;
-    private ConnectionChanel2 serverChanel;
+    private ConnectionChanel clientChanel;
+    private ConnectionChanel serverChanel;
 
     private ServiceBroadcaster mBroadcaster;
 
@@ -374,7 +366,7 @@ public class GameManager {
                 Server server;
 
                 server       = new Server();
-                serverChanel = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_SERVER);
+                serverChanel = new ConnectionChanel(ConnectionChanel.TYPE_FOR_SERVER);
 
                 serverChanel.getConnectionAppend().addConnection();
 
