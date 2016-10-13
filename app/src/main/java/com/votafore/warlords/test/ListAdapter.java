@@ -107,7 +107,6 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
             //Log.v(GameManager.TAG, "ListAdapter - addItem. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
 
             if(item.mHost.equals(curItem.mHost)){
-
                 return;
             }
         }
@@ -118,46 +117,18 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         //Log.v(GameManager.TAG, "ListAdapter - addItem. Количество элементов: " + String.valueOf(mItems.size()));
     }
 
-    public void addItem(String host, ListItem item){
+    public boolean isExist(String host){
 
-        //Log.v(GameManager.TAG + "_1", "ListAdapter - addItem (HashMap).");
+        for (ListItem curItem : mItems) {
 
-        if(mHostItem.get(host) != null)
-            return;
+            //Log.v(GameManager.TAG, "ListAdapter - isExist. проверка хостов... " + item.mHost + " -- " + curItem.mHost);
 
-        mHostItem.put(host, item);
-
-        notifyItemInserted(mHostItem.size()-1);
-    }
-
-    public ListItem getItemByHost(String host){
-        return mHostItem.get(host);
-    }
-
-    public void removeItem(IConnection connection){
-
-        for (ListItem item : mItems) {
-
-            if(item.mConnection == connection){
-
-                int index = mItems.indexOf(item);
-
-                mItems.remove(index);
-                notifyItemRemoved(index);
-
-                break;
+            if(curItem.mHost.equals(host)){
+                return true;
             }
         }
-    }
 
-    public void clearList(){
-
-        while(mItems.size() > 0) {
-            mItems.get(0).mConnection.close();
-            mItems.remove(0);
-
-            notifyItemInserted(0);
-        }
+        return false;
     }
 
     public static class ListItem{

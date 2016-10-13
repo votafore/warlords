@@ -144,6 +144,9 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
 
 
+    /******************************** дополнительные возможности ********************************/
+
+
     /**************************************************************************************/
     /****************************** работа с адаптером списка *****************************/
     /**************************************************************************************/
@@ -196,11 +199,8 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                 Log.v(GameManager.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
                 // если сокет к этому хосту уже есть, то новый добавлять не надо
-                for (IConnection connection : mChanel.getConnections()) {
-                    if(serviceInfo.getHost().toString().equals(((SocketConnection)connection).getHost())){
-                        return;
-                    }
-                }
+                if(mAdapter.isExist(serviceInfo.getHost().toString()))
+                    return;
 
                 Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. таки добавляем");
                 mChanel.getConnectionAppend().addConnection(serviceInfo.getHost().toString(), serviceInfo.getPort());

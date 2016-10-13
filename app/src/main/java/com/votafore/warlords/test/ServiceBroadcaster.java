@@ -38,14 +38,14 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 
     public void startBroadcast(){
 
-        Log.v(GameManager.TAG, "ServiceBroadcaster: startBroadcast(). Включаем транслящию сервиса. port: " + String.valueOf(mServiceInfo.getPort()));
+        //Log.v(GameManager.TAG, "ServiceBroadcaster: startBroadcast(). Включаем транслящию сервиса. port: " + String.valueOf(mServiceInfo.getPort()));
 
         mNsdManager.registerService(mServiceInfo, NsdManager.PROTOCOL_DNS_SD, this);
     }
 
     public void stopBroadcast(){
 
-        Log.v(GameManager.TAG, "ServiceBroadcaster: stopBroadcast()");
+        //Log.v(GameManager.TAG, "ServiceBroadcaster: stopBroadcast()");
 
         // отменяем регистрацию (трансляцию) сервиса в сети
         try {
@@ -64,12 +64,12 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 
     @Override
     public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-        Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onRegistrationFailed");
+        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onRegistrationFailed");
     }
 
     @Override
     public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-        Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onUnregistrationFailed");
+        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onUnregistrationFailed");
     }
 
     @Override
@@ -78,11 +78,11 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
         // актуализация имени сервиса
         mServiceName = serviceInfo.getServiceName();
 
-        Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
+        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
     }
 
     @Override
     public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-        Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
+        ///Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
     }
 }

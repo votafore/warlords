@@ -94,7 +94,7 @@ public class GameFactory {
 
     public void createServer(final Context context){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory - createServer");
+        Log.v(GameManager.TAG, "GameFactory - createServer");
 
         new Thread(new Runnable() {
             @Override
@@ -114,7 +114,7 @@ public class GameFactory {
 
 
 
-                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
+                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
 
                 ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -123,7 +123,7 @@ public class GameFactory {
                 item.mResMap      = android.R.drawable.ic_lock_idle_lock;
                 item.mHost        = "/"+getLocalIpAddress(context);
 
-                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
+                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
 
                 mAdapter.addItem(item);
 
