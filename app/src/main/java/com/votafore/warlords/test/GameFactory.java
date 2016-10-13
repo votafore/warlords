@@ -3,6 +3,7 @@ package com.votafore.warlords.test;
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
+import android.opengl.GLSurfaceView;
 import android.text.format.Formatter;
 import android.util.Log;
 
@@ -54,7 +55,7 @@ public class GameFactory {
 
     public ServiceScanner mScanner;
 
-    public void onActivityCreate(Context context){
+    public void onActivityCreate(final Context context){
 
         //Log.v(GameManager.TAG, "GameFactory - onActivityCreate");
 
@@ -94,7 +95,7 @@ public class GameFactory {
 
     public void createServer(final Context context){
 
-        Log.v(GameManager.TAG, "GameFactory - createServer");
+        //Log.v(GameManager.TAG, "GameFactory - createServer");
 
         new Thread(new Runnable() {
             @Override
@@ -114,16 +115,16 @@ public class GameFactory {
 
 
 
-                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
+                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
 
                 ListAdapter.ListItem item = new ListAdapter.ListItem();
 
                 item.mCreator     = 123;
                 item.mCreatorName = "Andrew";
                 item.mResMap      = android.R.drawable.ic_lock_idle_lock;
-                item.mHost        = "/"+getLocalIpAddress(context);
+                item.mHost        = getLocalIpAddress(context);
 
-                Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
+                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
 
                 mAdapter.addItem(item);
 
@@ -151,9 +152,9 @@ public class GameFactory {
         }).start();
     }
 
-    public void startGame(Context context){
+    public void startGame(int selectedServerPosition, Context context){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory - startGame");
+        Log.v(GameManager.TAG, "GameFactory - startGame");
 
         mScanner.stopScan();
         mScanner.close();
@@ -165,7 +166,7 @@ public class GameFactory {
 
 
         //ConnectionChanel clientChanel;
-        Instance          mInstance;
+        //Instance          mInstance;
 
         mInstance     = new Instance(context);
         clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
@@ -173,18 +174,40 @@ public class GameFactory {
         mInstance.setChanel(clientChanel);
         clientChanel.registerObserver(mInstance);
 
-        if(mServer != null){
 
-            ClientAdapter adapter = new ClientAdapter(clientChanel, serverChanel);
+        /////////////////////////
+        //
 
-            clientChanel.onSocketConnected(adapter.getClientSocket());
-            serverChanel.onSocketConnected(adapter.getServerSocket());
+        game = new TestGame();
+        game.setClient(mInstance);
 
-            //mAdapter.getItemByHost("undefined").mConnection = adapter.getClientSocket();
+        if(mServer != null)
+            game.setServer(mServer);
+
+
+        ListAdapter.ListItem item = mAdapter.getItemByPosition(selectedServerPosition);
+
+        if(item.mHost.equals(getLocalIpAddress(context))){
+
+            Log.v(GameManager.TAG, "GameFactory - startGame. Выбрали игру с сервером на текущем девайсе");
+
+            // выбрана игра с сервером на текущем девайсе
+            mLocalAdapter = new ClientAdapter(clientChanel, serverChanel);
+
+            clientChanel.onSocketConnected(mLocalAdapter.getClientSocket());
+            serverChanel.onSocketConnected(mLocalAdapter.getServerSocket());
+
         }else{
 
-            // TODO: установить выбранное подключения для клиентского канала
+            Log.v(GameManager.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
+
+            clientChanel.onSocketConnected(item.mConnection);
         }
+
+        game.start(context);
+
+        //
+        ////////////////////////
     }
 
     public void exit(){
@@ -201,7 +224,7 @@ public class GameFactory {
             mBroadcaster.stopBroadcast();
         }
 
-        if(mServer != null){
+        if(serverChanel != null){
 
             //Log.v(GameManager.TAG, "GameFactory - exit: остановка сервера");
 
@@ -223,6 +246,13 @@ public class GameFactory {
 
 
 
+
+    // временно... для тестов
+    Instance          mInstance;
+
+    ClientAdapter mLocalAdapter;
+
+    TestGame game;
 
 
 
@@ -369,7 +399,7 @@ public class GameFactory {
 
         Log.v(GameManager.TAG + "_1", "GameManager: someFunc(). произвольная функция инстанса");
 
-        //mInstance.someFunc();
+        mInstance.someFunc();
     }
 
     public void stopClient(){
@@ -397,8 +427,12 @@ public class GameFactory {
 //        return null;
 
         WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-        String ip = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        String ip = "/" + Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
 
         return ip;
+    }
+
+    public GLSurfaceView getSurfaceView(){
+        return game.getSurfaceView();
     }
 }

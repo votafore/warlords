@@ -29,9 +29,9 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
 
 
-    private GameManager.ClickListener mListener;
+    private GameFactory.ClickListener mListener;
 
-    public void setListener(GameManager.ClickListener listener){
+    public void setListener(GameFactory.ClickListener listener){
         mListener = listener;
     }
 
@@ -129,6 +129,10 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         }
 
         return false;
+    }
+
+    public ListItem getItemByPosition(int position){
+        return mItems.get(position);
     }
 
     public static class ListItem{

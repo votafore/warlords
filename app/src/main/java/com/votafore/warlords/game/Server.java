@@ -71,6 +71,10 @@ public class Server extends EndPoint{
             Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. Ошибка: " + e.getMessage());
             e.printStackTrace();
         }
+
+        Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+
+        mChanel.sendCommand("response");
     }
 
 }

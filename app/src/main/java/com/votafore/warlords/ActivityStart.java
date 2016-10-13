@@ -1,5 +1,6 @@
 package com.votafore.warlords;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -38,6 +39,19 @@ public class ActivityStart extends AppCompatActivity {
         mFactory.onActivityCreate(this);
 
         serverList.setAdapter(mFactory.getAdapter());
+
+        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
+            @Override
+            public void onClick(int position) {
+
+                mFactory.startGame(position, ActivityStart.this);
+
+                finish();
+
+                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
+                startActivity(i);
+            }
+        });
 
 //        manager.getAdapter().setListener(new GameManager.ClickListener() {
 //            @Override
@@ -87,7 +101,7 @@ public class ActivityStart extends AppCompatActivity {
                 break;
             case R.id.start_game:
 
-                mFactory.startGame(this);
+                mFactory.startGame(0, this);
 
                 break;
             case R.id.call_someFunc:

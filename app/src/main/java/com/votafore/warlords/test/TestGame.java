@@ -43,7 +43,6 @@ public class TestGame {
 
 
 
-    private Instance    mInstance;
     private GLView      mSurfaceView;
 
     public GLView getSurfaceView(){
@@ -68,7 +67,7 @@ public class TestGame {
         mWorld.camMove(GLWorld.AXIS_Y, 3f);
 
         mShader    = new GLShader(context, R.raw.shader_vertex, R.raw.shader_fragment);
-        mRenderer  = new GLRenderer(mWorld, mInstance, mShader);
+        mRenderer  = new GLRenderer(mWorld, (Instance)mClient, mShader);
 
         mSurfaceView = new GLView(context, mWorld, mRenderer) {
             @Override

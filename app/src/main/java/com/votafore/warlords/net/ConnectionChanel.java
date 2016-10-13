@@ -125,7 +125,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
     @Override
     public void onSocketConnected(IConnection connection) {
-        //Log.v(GameManager.TAG, "ConnectionChanel: onSocketConnected()");
+        Log.v(GameManager.TAG, "ConnectionChanel: onSocketConnected()");
 
         synchronized (mConnectionLock){
             mConnections.add(connection);
