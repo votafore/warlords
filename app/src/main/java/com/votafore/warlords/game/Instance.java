@@ -5,6 +5,7 @@ import android.os.Trace;
 import android.util.Log;
 
 import com.votafore.warlords.GameManager;
+import com.votafore.warlords.net.IConnection;
 
 /**
  * @author Votafore
@@ -50,7 +51,7 @@ public class Instance extends EndPoint {
 
 
     @Override
-    public void execute(String command) {
+    public void execute(IConnection connection, String command) {
 
         // принимаем и обрабатываем данные от сервера
         Log.v(GameManager.TAG, "Instance: execute(). получили команду от сервера");

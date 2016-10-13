@@ -56,7 +56,7 @@ public class GameFactory {
 
     public void onActivityCreate(Context context){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityCreate");
+        //Log.v(GameManager.TAG, "GameFactory - onActivityCreate");
 
         mAdapter = new ListAdapter();
 
@@ -66,7 +66,7 @@ public class GameFactory {
 
     public void onActivityResume(){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityResume");
+        //Log.v(GameManager.TAG, "GameFactory - onActivityResume");
 
         mScanner.startScan();
 
@@ -77,7 +77,7 @@ public class GameFactory {
 
     public void onActivityPause(){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory - onActivityPause");
+        //Log.v(GameManager.TAG, "GameFactory - onActivityPause");
 
         mScanner.stopScan();
 

@@ -26,6 +26,7 @@ public class Queries {
                     query.put("clientID" , 0);
                     query.put("type"     , "InstanceInfo");
                     query.put("command"  , "get");
+                    query.put("queryType", "query");
 
                     result = query.toString();
 

@@ -41,9 +41,10 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             @Override
             public void onSocketConnected(IConnection connection) {
 
-                //Log.v(GameManager.TAG, "ServiceScanner - CustomListener - onSocketConnected. Отправляем запрос.");
+                Log.v(GameManager.TAG, "ServiceScanner - CustomListener - onSocketConnected. Отправляем запрос.");
 
                 connection.put(Queries.getQuery(Queries.QUERY_INSTANCE));
+                connection.send();
             }
 
             @Override
@@ -61,7 +62,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                 // TODO: этот ответ получают даже те, кто не отсылал его
                 // переделать этот момент
 
-                //Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
+                Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
 
                 JSONObject response;
 
@@ -71,7 +72,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                     switch(response.getString("type")){
                         case "InstanceInfo":
 
-                            //Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
+                            Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
 
                             ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -113,7 +114,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     public void startScan(){
 
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - startScan.");
+        Log.v(GameManager.TAG, "ServiceScanner - startScan.");
 
         mChanel.registerObserver(mObserver);
 
@@ -122,7 +123,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     public void stopScan(){
 
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - stopScan.");
+        Log.v(GameManager.TAG, "ServiceScanner - stopScan.");
 
         try {
             mNsdManager.stopServiceDiscovery(this);
@@ -135,7 +136,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     public void close(){
 
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - close.");
+        Log.v(GameManager.TAG, "ServiceScanner - close.");
 
         mChanel.clearObservers();
         mChanel.close();
@@ -165,18 +166,18 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     @Override
     public void onDiscoveryStarted(String serviceType) {
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - onDiscoveryStarted");
+        Log.v(GameManager.TAG, "ServiceScanner - onDiscoveryStarted");
     }
 
     @Override
     public void onDiscoveryStopped(String serviceType) {
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - onDiscoveryStopped");
+        Log.v(GameManager.TAG, "ServiceScanner - onDiscoveryStopped");
     }
 
     @Override
     public void onServiceFound(NsdServiceInfo serviceInfo) {
 
-        //Log.v(GameManager.TAG + "_1", "ServiceScanner - onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
+//        Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. нашли сервис. пытаемся получить инфу для подключения");
 
         if(!serviceInfo.getServiceName().contains(ServiceBroadcaster.mServiceName))
             return;
@@ -187,7 +188,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 //        if(serviceInfo.getServiceName().equals(GameManager.mServiceName))
 //            return;
 
-        //Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. пытаемся подключиться к сервису");
+        Log.v(GameManager.TAG, "ServiceScanner - onServiceFound. пытаемся подключиться к сервису");
         mNsdManager.resolveService(serviceInfo, new NsdManager.ResolveListener() {
 
             @Override
@@ -198,7 +199,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
-//                Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
+                Log.v(GameManager.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
 //                Log.v(GameManager.TAG, "хост: " + serviceInfo.getHost().toString());
 //                Log.v(GameManager.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 

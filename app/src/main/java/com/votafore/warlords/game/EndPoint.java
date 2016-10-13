@@ -2,8 +2,10 @@ package com.votafore.warlords.game;
 
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.support.annotation.Nullable;
 
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IConnection;
 
 public abstract class EndPoint implements ConnectionChanel.IObserver{
 
@@ -28,15 +30,18 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
     @Override
     public void notifyObserver(int connectionID, final String message){
 
+        final IConnection queryConnection;
+        queryConnection = mChanel.getConnections().get(connectionID);
+
         mWorkerHandler.post(new Runnable() {
             @Override
             public void run() {
-                execute(message);
+                execute(queryConnection, message);
             }
         });
 
     }
 
-    public abstract void execute(String command);
+    public abstract void execute(IConnection connection, String command);
 
 }
