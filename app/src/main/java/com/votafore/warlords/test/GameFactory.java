@@ -294,30 +294,20 @@ public class GameFactory {
 
             mClientSocket = new IConnection() {
 
-                List<String> stack = new ArrayList<>();
-
-                private final Object mStackLock = new Object();
+                Stack stack = new Stack(50);
 
                 @Override
                 public void put(String command) {
-
-                    synchronized(mStackLock){
-                        stack.add(command);
-                    }
+                    stack.put(command);
                 }
 
                 @Override
                 public void send() {
 
-                    if(stack.size() == 0)
+                    if(!stack.hasNext())
                         return;
 
-                    synchronized(mStackLock){
-
-                        String command = stack.get(0);
-                        mServerChanel.onCommandReceived(mServerSocket, command);
-                        stack.remove(0);
-                    }
+                    mServerChanel.onCommandReceived(mServerSocket, stack.get());
                 }
 
                 @Override
@@ -330,11 +320,8 @@ public class GameFactory {
 
                 Stack stack = new Stack(50);
 
-                private final Object mStackLock = new Object();
-
                 @Override
                 public void put(String command) {
-
                     stack.put(command);
                 }
 
