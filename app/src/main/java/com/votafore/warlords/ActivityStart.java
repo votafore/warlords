@@ -4,14 +4,11 @@ import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
-
-import com.votafore.warlords.test.GameFactory;
 
 
 public class ActivityStart extends AppCompatActivity {
@@ -32,7 +29,7 @@ public class ActivityStart extends AppCompatActivity {
 
         serverList.setHasFixedSize(true);
         serverList.setItemAnimator(new DefaultItemAnimator());
-        serverList.setLayoutManager(new LinearLayoutManager(this));
+        serverList.setLayoutManager(new GridLayoutManager(this, 2));
 
         mFactory = GameFactory.getInstance(this);
 
@@ -52,20 +49,6 @@ public class ActivityStart extends AppCompatActivity {
                 startActivity(i);
             }
         });
-
-//        manager.getAdapter().setListener(new GameManager.ClickListener() {
-//            @Override
-//            public void onClick(int position) {
-//
-//                //manager.handleServerListActivityStoped();
-//
-//                manager.startGame(ActivityStart.this);
-//
-//                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
-//                startActivity(i);
-//
-//            }
-//        });
     }
 
     @Override
@@ -99,11 +82,11 @@ public class ActivityStart extends AppCompatActivity {
                 mFactory.createServer(this);
 
                 break;
-            case R.id.start_game:
-
-                mFactory.startGame(0, this);
-
-                break;
+//            case R.id.start_game:
+//
+//                mFactory.startGame(0, this);
+//
+//                break;
             case R.id.call_someFunc:
 
                 mFactory.someFunc();

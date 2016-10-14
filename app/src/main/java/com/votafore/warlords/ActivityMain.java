@@ -9,8 +9,6 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.votafore.warlords.test.GameFactory;
-
 public class ActivityMain extends AppCompatActivity {
 
     GLSurfaceView   mSurfaceView;
