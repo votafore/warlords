@@ -4,13 +4,12 @@ package com.votafore.warlords.glsupport;
 import android.opengl.Matrix;
 import android.support.annotation.IntDef;
 
+import com.votafore.warlords.GameFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class GLWorld implements GLView.ICamera {
-
-
-    private GameManager mManager;
 
     public GLWorld() {
 
