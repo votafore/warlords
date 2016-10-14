@@ -4,8 +4,6 @@ package com.votafore.warlords.glsupport;
 import android.opengl.Matrix;
 import android.support.annotation.IntDef;
 
-import com.votafore.warlords.GameManager;
-
 import java.util.ArrayList;
 import java.util.List;
 

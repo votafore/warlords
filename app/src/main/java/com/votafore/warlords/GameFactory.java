@@ -1,4 +1,4 @@
-package com.votafore.warlords.test;
+package com.votafore.warlords;
 
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;
@@ -7,7 +7,6 @@ import android.opengl.GLSurfaceView;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
 import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
 import com.votafore.warlords.game.Server;
@@ -15,13 +14,9 @@ import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
 import com.votafore.warlords.support.Stack;
-
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
+import com.votafore.warlords.support.ListAdapter;
+import com.votafore.warlords.support.ServiceBroadcaster;
+import com.votafore.warlords.support.ServiceScanner;
 
 
 /**
@@ -42,7 +37,7 @@ public class GameFactory {
 
     private GameFactory(){
 
-        //Log.v(GameManager.TAG + "_1", "GameFactory: вызвали конструктор");
+        //Log.v(GameFactory.TAG + "_1", "GameFactory: вызвали конструктор");
     }
 
 
@@ -57,7 +52,7 @@ public class GameFactory {
 
     public void onActivityCreate(final Context context){
 
-        //Log.v(GameManager.TAG, "GameFactory - onActivityCreate");
+        //Log.v(GameFactory.TAG, "GameFactory - onActivityCreate");
 
         mAdapter = new ListAdapter();
 
@@ -67,7 +62,7 @@ public class GameFactory {
 
     public void onActivityResume(){
 
-        //Log.v(GameManager.TAG, "GameFactory - onActivityResume");
+        //Log.v(GameFactory.TAG, "GameFactory - onActivityResume");
 
         mScanner.startScan();
 
@@ -78,7 +73,7 @@ public class GameFactory {
 
     public void onActivityPause(){
 
-        //Log.v(GameManager.TAG, "GameFactory - onActivityPause");
+        //Log.v(GameFactory.TAG, "GameFactory - onActivityPause");
 
         mScanner.stopScan();
 
@@ -95,7 +90,7 @@ public class GameFactory {
 
     public void createServer(final Context context){
 
-        //Log.v(GameManager.TAG, "GameFactory - createServer");
+        //Log.v(GameFactory.TAG, "GameFactory - createServer");
 
         new Thread(new Runnable() {
             @Override
@@ -115,7 +110,7 @@ public class GameFactory {
 
 
 
-                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка");
+                //Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка");
 
                 ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -124,7 +119,7 @@ public class GameFactory {
                 item.mResMap      = android.R.drawable.ic_lock_idle_lock;
                 item.mHost        = getLocalIpAddress(context);
 
-                //Log.v(GameManager.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
+                //Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
 
                 mAdapter.addItem(item);
 
@@ -154,7 +149,7 @@ public class GameFactory {
 
     public void startGame(int selectedServerPosition, Context context){
 
-        Log.v(GameManager.TAG, "GameFactory - startGame");
+        Log.v(GameFactory.TAG, "GameFactory - startGame");
 
         mScanner.stopScan();
         mScanner.close();
@@ -178,7 +173,7 @@ public class GameFactory {
         /////////////////////////
         //
 
-        game = new TestGame();
+        game = new Game();
         game.setClient(mInstance);
 
         if(mServer != null)
@@ -189,7 +184,7 @@ public class GameFactory {
 
         if(item.mHost.equals(getLocalIpAddress(context))){
 
-            Log.v(GameManager.TAG, "GameFactory - startGame. Выбрали игру с сервером на текущем девайсе");
+            Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на текущем девайсе");
 
             // выбрана игра с сервером на текущем девайсе
             mLocalAdapter = new ClientAdapter(clientChanel, serverChanel);
@@ -199,7 +194,7 @@ public class GameFactory {
 
         }else{
 
-            Log.v(GameManager.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
+            Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
 
             clientChanel.onSocketConnected(item.mConnection);
         }
@@ -252,7 +247,7 @@ public class GameFactory {
 
     ClientAdapter mLocalAdapter;
 
-    TestGame game;
+    Game game;
 
 
 
@@ -293,7 +288,7 @@ public class GameFactory {
 
     public void stopServer(){
 
-        Log.v(GameManager.TAG + "_1", "GameManager: stopServer(). закрываем подключения сервера");
+        Log.v(GameFactory.TAG + "_1", "GameManager: stopServer(). закрываем подключения сервера");
 
         if(serverChanel == null)
             return;
@@ -394,17 +389,18 @@ public class GameFactory {
 
     /************************************** раздел еще в разработке **********************************/
 
+    public static final String TAG = "TEST";
 
     public void someFunc(){
 
-        Log.v(GameManager.TAG + "_1", "GameManager: someFunc(). произвольная функция инстанса");
+        Log.v(GameFactory.TAG + "_1", "GameManager: someFunc(). произвольная функция инстанса");
 
         mInstance.someFunc();
     }
 
     public void stopClient(){
 
-        Log.v(GameManager.TAG + "_1", "GameManager: stopClient(). остановка клиента");
+        Log.v(GameFactory.TAG + "_1", "GameManager: stopClient(). остановка клиента");
 
         clientChanel.close();
         clientChanel.clearObservers();

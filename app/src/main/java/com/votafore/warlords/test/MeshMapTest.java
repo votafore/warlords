@@ -1,16 +1,16 @@
-package com.votafore.warlords;
+package com.votafore.warlords.test;
 
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.opengl.GLES20;
-import android.opengl.Matrix;
 
+import com.votafore.warlords.R;
 import com.votafore.warlords.glsupport.GLShader;
 import com.votafore.warlords.glsupport.GLUnit;
-import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.glutil.ObjectContainer;
+import com.votafore.warlords.test.Constants;
 
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

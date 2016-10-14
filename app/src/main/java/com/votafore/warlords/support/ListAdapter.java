@@ -1,13 +1,12 @@
-package com.votafore.warlords.test;
+package com.votafore.warlords.support;
 
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.votafore.warlords.GameManager;
+import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.R;
 import com.votafore.warlords.net.IConnection;
 
@@ -133,6 +132,18 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
 
     public ListItem getItemByPosition(int position){
         return mItems.get(position);
+    }
+
+    public void deleteItemByHost(String host){
+
+        for (ListItem curItem : mItems) {
+
+            if(!curItem.mHost.equals(host))
+                continue;
+
+            mItems.remove(curItem);
+            break;
+        }
     }
 
     public static class ListItem{

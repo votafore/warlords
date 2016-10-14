@@ -1,11 +1,10 @@
-package com.votafore.warlords.test;
+package com.votafore.warlords;
 
 
 import android.content.Context;
 import android.view.MotionEvent;
 
-import com.votafore.warlords.MotionHandlerJoystick;
-import com.votafore.warlords.R;
+import com.votafore.warlords.test.MotionHandlerJoystick;
 import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
 import com.votafore.warlords.glsupport.GLRenderer;
@@ -17,9 +16,9 @@ import com.votafore.warlords.glsupport.GLWorld;
  * класс содержит объект, которые необходимы для игрового процесса
  * и больше ничего
  */
-public class TestGame {
+public class Game {
 
-    public TestGame(){
+    public Game(){
 
     }
 
@@ -43,7 +42,7 @@ public class TestGame {
 
 
 
-    private GLView      mSurfaceView;
+    private GLView mSurfaceView;
 
     public GLView getSurfaceView(){
         return mSurfaceView;

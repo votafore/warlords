@@ -1,4 +1,4 @@
-package com.votafore.warlords;
+package com.votafore.warlords.test;
 
 
 /**

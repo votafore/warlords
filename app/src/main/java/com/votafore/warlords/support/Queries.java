@@ -2,8 +2,6 @@ package com.votafore.warlords.support;
 
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

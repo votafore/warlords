@@ -1,12 +1,9 @@
-package com.votafore.warlords.test;
+package com.votafore.warlords.support;
 
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.util.Log;
-
-import com.votafore.warlords.GameManager;
 
 
 public class ServiceBroadcaster implements NsdManager.RegistrationListener {
@@ -20,7 +17,7 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 
     public ServiceBroadcaster(Context context){
 
-        //Log.v(GameManager.TAG + "_1", "ServiceBroadcaster: конструктор");
+        //Log.v(GameFactory.TAG + "_1", "ServiceBroadcaster: конструктор");
 
         mNsdManager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
     }
@@ -38,20 +35,20 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 
     public void startBroadcast(){
 
-        //Log.v(GameManager.TAG, "ServiceBroadcaster: startBroadcast(). Включаем транслящию сервиса. port: " + String.valueOf(mServiceInfo.getPort()));
+        //Log.v(GameFactory.TAG, "ServiceBroadcaster: startBroadcast(). Включаем транслящию сервиса. port: " + String.valueOf(mServiceInfo.getPort()));
 
         mNsdManager.registerService(mServiceInfo, NsdManager.PROTOCOL_DNS_SD, this);
     }
 
     public void stopBroadcast(){
 
-        //Log.v(GameManager.TAG, "ServiceBroadcaster: stopBroadcast()");
+        //Log.v(GameFactory.TAG, "ServiceBroadcaster: stopBroadcast()");
 
         // отменяем регистрацию (трансляцию) сервиса в сети
         try {
             mNsdManager.unregisterService(this);
         } catch (IllegalArgumentException e) {
-            //Log.v(GameManager.TAG, "ServiceBroadcaster: stopBroadcast(). Ошибка - " + e.getMessage());
+            //Log.v(GameFactory.TAG, "ServiceBroadcaster: stopBroadcast(). Ошибка - " + e.getMessage());
             e.printStackTrace();
         }
     }
@@ -64,12 +61,12 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
 
     @Override
     public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onRegistrationFailed");
+        //Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onRegistrationFailed");
     }
 
     @Override
     public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onUnregistrationFailed");
+        //Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onUnregistrationFailed");
     }
 
     @Override
@@ -78,11 +75,11 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
         // актуализация имени сервиса
         mServiceName = serviceInfo.getServiceName();
 
-        //Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
+        //Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
     }
 
     @Override
     public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-        ///Log.v(GameManager.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
+        ///Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
     }
 }

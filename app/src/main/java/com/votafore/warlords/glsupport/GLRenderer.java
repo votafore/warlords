@@ -4,10 +4,8 @@ import android.opengl.GLES20;
 import android.opengl.GLSurfaceView.Renderer;
 import android.opengl.Matrix;
 
-import com.votafore.warlords.Constants;
+import com.votafore.warlords.test.Constants;
 import com.votafore.warlords.game.Instance;
-
-import java.util.List;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;

@@ -1,4 +1,4 @@
-package com.votafore.warlords;
+package com.votafore.warlords.test;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -6,6 +6,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.votafore.warlords.R;
 import com.votafore.warlords.game.Instance;
 
 public class ActivityTestSocketClient extends AppCompatActivity implements View.OnClickListener{

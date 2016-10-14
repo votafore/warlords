@@ -1,10 +1,8 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
-import android.os.Trace;
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
 import com.votafore.warlords.net.IConnection;
 
 /**

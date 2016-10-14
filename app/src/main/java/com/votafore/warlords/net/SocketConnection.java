@@ -1,9 +1,5 @@
 package com.votafore.warlords.net;
 
-import android.os.Handler;
-import android.util.Log;
-
-import com.votafore.warlords.GameManager;
 import com.votafore.warlords.support.Stack;
 
 import java.io.BufferedReader;
@@ -11,8 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * @author Votafore
@@ -22,40 +16,31 @@ import java.util.List;
 public class SocketConnection implements IConnection {
 
     /**
-     * хранит ссылку на сокет клиента
+     * у нас тут следующий зверинец
+     * - сам сокет, с которым мы работаем
+     * - текущий "рабочий" поток (чтение входящего потока)
+     * - входящий стрим (stream)
+     * - стек команд для отправки
+     * - слушатель. обработчик для
+     *      - создания сокета
+     *      - получения входящего сообщения
+     *      - отключения сокета
      */
-    private Socket mSocket;
+
+    private Socket           mSocket;
+    private Thread           mThread;
+    private BufferedReader   mInput;
+    private Stack            mStack;
+    private ISocketListener  mListener;
 
 
-    /**
-     * текущий "рабочий" поток
-     */
-    private Thread  mThread;
 
-
-    /**
-     * поток входящих сообщений
-     */
-    private BufferedReader mInput;
-
-
-    /**
-     * стек команд
-     */
-    private Stack mStack;
-
-
-    private ISocketListener mListener;
-
-    private Handler mHandler;
-
-    public SocketConnection(final Socket socket, Handler handler, ISocketListener listener) throws IOException{
+    public SocketConnection(final Socket socket, ISocketListener listener) throws IOException{
 
         //Log.v(GameManager.TAG + "_1", "SocketConnection: конструктор");
 
         mSocket   = socket;
         mListener = listener;
-        mHandler  = handler;
         mStack    = new Stack(50);
 
         mInput = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
@@ -97,6 +82,17 @@ public class SocketConnection implements IConnection {
 
         mListener.onSocketConnected(this);
     }
+
+    public String getHost() {
+        return mSocket.getInetAddress().toString();
+    }
+
+
+
+
+    /*****************************************************************************/
+    /********************************* IChanel ***********************************/
+    /*****************************************************************************/
 
     @Override
     synchronized public void close(){
@@ -157,15 +153,4 @@ public class SocketConnection implements IConnection {
         //Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 
-
-
-
-
-    public String getHost() {
-        return mSocket.getInetAddress().toString();
-    }
-
-    public int getPort() {
-        return mSocket.getPort();
-    }
 }
