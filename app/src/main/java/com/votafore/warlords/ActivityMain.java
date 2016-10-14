@@ -12,7 +12,7 @@ import android.widget.TextView;
 public class ActivityMain extends AppCompatActivity {
 
     GLSurfaceView   mSurfaceView;
-    GameManager     mManager;
+    GameFactory mManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,7 +25,7 @@ public class ActivityMain extends AppCompatActivity {
                 |View.SYSTEM_UI_FLAG_FULLSCREEN);
 
 
-        mManager = GameManager.getInstance(getApplicationContext());
+        mManager = GameFactory.getInstance(getApplicationContext());
         mSurfaceView    = mManager.getSurfaceView();
 
         setContentView(mSurfaceView);

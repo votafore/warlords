@@ -1,10 +1,9 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
-import android.os.Trace;
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
+import com.votafore.warlords.net.IConnection;
 
 /**
  * @author Votafore
@@ -41,16 +40,16 @@ public class Instance extends EndPoint {
     private Context mContext;
 
     public Instance(Context context){
-        Trace.beginSection("Instance");
+        super();
+
         mContext = context;
-        Log.v(GameManager.TAG, "Instance");
-        Trace.endSection();
+        //Log.v(GameManager.TAG, "Instance");
     }
 
 
 
     @Override
-    public void execute(String command) {
+    public void execute(IConnection connection, String command) {
 
         // принимаем и обрабатываем данные от сервера
         Log.v(GameManager.TAG, "Instance: execute(). получили команду от сервера");
@@ -58,7 +57,7 @@ public class Instance extends EndPoint {
 
     public void someFunc(){
 
-        Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
+        //Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
 
         //mConnectionManager2.sendCommand("test command");
 

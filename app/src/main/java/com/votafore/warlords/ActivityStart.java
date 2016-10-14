@@ -1,42 +1,70 @@
 package com.votafore.warlords;
 
-import android.os.Bundle;
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
+import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.support.v7.widget.Toolbar;
+
 
 public class ActivityStart extends AppCompatActivity {
 
-    GameManager manager;
-
-    Toolbar mToolbar;
-
+    private GameFactory   mFactory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
 
-
-        manager = GameManager.getInstance(this);
 
         RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
         serverList.setHasFixedSize(true);
         serverList.setItemAnimator(new DefaultItemAnimator());
-        serverList.setLayoutManager(new LinearLayoutManager(this));
+        serverList.setLayoutManager(new GridLayoutManager(this, 2));
 
-        serverList.setAdapter(manager.getAdapter());
+        mFactory = GameFactory.getInstance(this);
 
-        //mNsdManager = (NsdManager) getSystemService(NSD_SERVICE);
+        mFactory.onActivityCreate(this);
+
+        serverList.setAdapter(mFactory.getAdapter());
+
+        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
+            @Override
+            public void onClick(int position) {
+
+                mFactory.startGame(position, ActivityStart.this);
+
+                finish();
+
+                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
+                startActivity(i);
+            }
+        });
+    }
+
+    @Override
+    public void onResume(){
+        super.onResume();
+
+        //Log.v(GameManager.TAG, "ActivityStart: onResume().");
+        mFactory.onActivityResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        //Log.v(GameManager.TAG, "ActivityStart: onPause().");
+        mFactory.onActivityPause();
     }
 
     @Override
@@ -49,33 +77,24 @@ public class ActivityStart extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
 
         switch(item.getItemId()){
-            case R.id.refresh:
-
-                manager.discoverServers(this);
-                break;
-
             case R.id.new_game:
 
-                manager.createServer();
+                mFactory.createServer(this);
 
                 break;
-
-            case R.id.stop_server:
-
-                manager.stopBroadcastService();
-                manager.stopServer();
-
-                break;
-
+//            case R.id.start_game:
+//
+//                mFactory.startGame(0, this);
+//
+//                break;
             case R.id.call_someFunc:
 
-                manager.someFunc();
+                mFactory.someFunc();
 
                 break;
-            case R.id.stop_client:
+            case R.id.exit:
 
-                manager.stopClient();
-                break;
+                mFactory.exit();
         }
 
         return super.onOptionsItemSelected(item);

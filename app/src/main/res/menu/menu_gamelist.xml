@@ -2,17 +2,12 @@
 <menu xmlns:app="http://schemas.android.com/apk/res-auto"
       xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/refresh"
-          android:title="refresh"
-          android:icon="@android:drawable/ic_menu_rotate"
-          app:showAsAction="always"/>
     <item android:title="new game"
-          android:id="@+id/new_game"
-          android:icon="@android:drawable/ic_menu_add"/>
-    <item android:title="stop server"
-          android:id="@+id/stop_server"/>
+          android:id="@+id/new_game"/>
+    <item android:title="start game"
+          android:id="@+id/start_game"/>
+    <item android:title="exit"
+          android:id="@+id/exit"/>
     <item android:title="call someFunc()"
           android:id="@+id/call_someFunc"/>
-    <item android:title="stop client"
-          android:id="@+id/stop_client"/>
 </menu>

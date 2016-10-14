@@ -3,7 +3,7 @@ package com.votafore.warlords.game;
 
 import android.util.Log;
 
-import com.votafore.warlords.GameManager;
+import com.votafore.warlords.net.IConnection;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,23 +18,9 @@ import org.json.JSONObject;
 public class Server extends EndPoint{
 
 
-
-
-
-
-
-
-
-
-    /*****************************************************************************************************************/
-    /*********************************************** РАЗДЕЛ РАБОТЫ ПО СЕТИ (ИЛИ ЛОКАЛЬНО) ****************************/
-    /*****************************************************************************************************************/
-
-//    private Agent mClient;
-//
-//    public void setClient(Agent client){
-//        mClient = client;
-//    }
+    public Server(){
+        super();
+    }
 
 
     /*****************************************************************************************************************/
@@ -43,14 +29,9 @@ public class Server extends EndPoint{
 
 
     @Override
-    public void execute(String command) {
+    public void execute(IConnection connection, String command) {
 
         Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ");
-
-        // обработка сообщения
-
-        // рассылка остальным
-        //mClient.onEndPointResponded(command);
 
         JSONObject cmd;
 
@@ -69,15 +50,20 @@ public class Server extends EndPoint{
                         response.put("creatorID"    , 125);
                         response.put("creatorName"  , "Andrew");
                     }
+
+                    Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+
+                    // на некоторые типы запросов ответ идет только тем, кто его прислал
+                    connection.put(response.toString());
+                    connection.send();
+
                     break;
 
-            }
+                default:
 
-            Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
-            if(!response.toString().isEmpty()){
-                //mConnectionManager2.sendCommand(response.toString());
-                mChanel.sendCommand(response.toString());
-                return;
+                    Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+
+                    mChanel.sendCommand("response");
             }
 
         } catch (JSONException e) {
@@ -86,7 +72,7 @@ public class Server extends EndPoint{
         }
 
         Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
-        //mConnectionManager2.sendCommand("response");
+
         mChanel.sendCommand("response");
     }
 

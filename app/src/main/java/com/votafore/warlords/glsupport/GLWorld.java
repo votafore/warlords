@@ -4,8 +4,6 @@ package com.votafore.warlords.glsupport;
 import android.opengl.Matrix;
 import android.support.annotation.IntDef;
 
-import com.votafore.warlords.GameManager;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,9 +12,7 @@ public class GLWorld implements GLView.ICamera {
 
     private GameManager mManager;
 
-    public GLWorld(GameManager manager) {
-
-        mManager    = manager;
+    public GLWorld() {
 
         mPositionMatrix     = new float[16];
         Matrix.setIdentityM(mPositionMatrix, 0);
