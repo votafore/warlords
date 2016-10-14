@@ -53,7 +53,12 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                 // только с УДАЛЕННЫМ сервером, поэтому все connection которые сюда приходят
                 // это экземпляры SocketConnection
 
-                mAdapter.deleteItemByHost(((SocketConnection)connection).getHost());
+                // мда... однако тут проблемы.... удалять надо соединение ТОЛЬКО если оно
+                // больше не будет использоваться.
+                // т.е. пока не выбран сервер нет смысла удалять, а если сервер выбран,
+                // то закрытие будет выполняться и обрабатываться при старте игры
+
+                //mAdapter.deleteItemByConnection(connection);
             }
         });
 
@@ -63,7 +68,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             @Override
             public void notifyObserver(IConnection connection, String message) {
 
-                //Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
+                Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). есть ответ от сервера");
 
                 JSONObject response;
 
@@ -73,7 +78,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
                     switch(response.getString("type")){
                         case "InstanceInfo":
 
-                            //Log.v(GameManager.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
+                            Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). это инфа о созданном инстансе");
 
                             ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -83,7 +88,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
                             item.mConnection   = connection;
 
-                            //Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
+                            Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
 
                             String host = mFactory.getLocalIpAddress(context);
 
@@ -106,7 +111,9 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
         };
     }
 
-
+    public ConnectionChanel getChanel(){
+        return mChanel;
+    }
 
 
     /**************************************************************************************/
@@ -137,7 +144,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     public void close(){
 
-        //Log.v(GameFactory.TAG, "ServiceScanner - close.");
+        Log.v(GameFactory.TAG, "ServiceScanner - close.");
 
         mChanel.clearObservers();
         mChanel.close();
@@ -192,9 +199,9 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
-//                Log.v(GameFactory.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
-//                Log.v(GameFactory.TAG, "хост: " + serviceInfo.getHost().toString());
-//                Log.v(GameFactory.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
+                Log.v(GameFactory.TAG, "ServiceScanner - NsdManager.ResolveListener - onServiceResolved. добавляем соединение");
+                Log.v(GameFactory.TAG, "хост: " + serviceInfo.getHost().toString());
+                Log.v(GameFactory.TAG, "порт: " + String.valueOf(serviceInfo.getPort()));
 
                 // если сокет к этому хосту уже есть, то новый добавлять не надо
                 if(mAdapter.isExist(serviceInfo.getHost().toString()))

@@ -134,11 +134,11 @@ public class ListAdapter extends RecyclerView.Adapter<ListAdapter.ViewHolder> {
         return mItems.get(position);
     }
 
-    public void deleteItemByHost(String host){
+    public void deleteItemByConnection(IConnection connection){
 
         for (ListItem curItem : mItems) {
 
-            if(!curItem.mHost.equals(host))
+            if(curItem.mConnection != connection)
                 continue;
 
             mItems.remove(curItem);

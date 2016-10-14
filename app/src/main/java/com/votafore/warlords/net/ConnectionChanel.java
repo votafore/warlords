@@ -132,7 +132,7 @@ public class ConnectionChanel implements IChanel, ISocketListener {
 
     @Override
     public void onSocketDisconnected(IConnection connection) {
-        //Log.v(GameManager.TAG, "ConnectionChanel: onSocketDisconnected()");
+        Log.v(GameFactory.TAG, "ConnectionChanel: onSocketDisconnected()");
 
         synchronized (mConnectionLock){
             mConnections.remove(connection);
@@ -155,30 +155,31 @@ public class ConnectionChanel implements IChanel, ISocketListener {
      */
     public void close(){
 
-        //Log.v(GameManager.TAG, "ConnectionChanel: close()");
+        Log.v(GameFactory.TAG, "ConnectionChanel: close()");
 
         mWorkThread.quitSafely();
 
         while(mConnections.size() > 0){
 
             try {
+                Log.v(GameFactory.TAG, "ConnectionChanel: close(). закрытие сокетов");
                 mConnections.get(0).close();
             } catch (IndexOutOfBoundsException e) {
                 e.printStackTrace();
-                //Log.v(GameManager.TAG, "ConnectionChanel: close(). закрытие сокетов - Ошибка: " + e.getMessage());
+                Log.v(GameFactory.TAG, "ConnectionChanel: close(). закрытие сокетов - Ошибка: " + e.getMessage());
             }
 
-            //Log.v(GameManager.TAG, "ConnectionChanel: close(). закрытие сокетов - 1 закрыт");
+            Log.v(GameFactory.TAG, "ConnectionChanel: close(). закрытие сокетов - 1 закрыт");
         }
 
         if(mConnectionAppend != null){
-            //Log.v(GameManager.TAG, "ConnectionChanel: close(). закрываем append-ер");
+            Log.v(GameFactory.TAG, "ConnectionChanel: close(). закрываем append-ер");
             mConnectionAppend.stop();
         }
     }
 
     public void clearObservers(){
-        //Log.v(GameManager.TAG, "ConnectionChanel: clearObservers()");
+        Log.v(GameFactory.TAG, "ConnectionChanel: clearObservers()");
         mObservers = new ArrayList<>();
     }
 

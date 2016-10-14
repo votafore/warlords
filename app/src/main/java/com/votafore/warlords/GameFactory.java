@@ -17,6 +17,7 @@ import com.votafore.warlords.support.Stack;
 import com.votafore.warlords.support.ListAdapter;
 import com.votafore.warlords.support.ServiceBroadcaster;
 import com.votafore.warlords.support.ServiceScanner;
+import com.votafore.warlords.test.MeshMapTest;
 
 
 /**
@@ -90,7 +91,7 @@ public class GameFactory {
 
     public void createServer(final Context context){
 
-        //Log.v(GameFactory.TAG, "GameFactory - createServer");
+        Log.v(GameFactory.TAG, "GameFactory - createServer");
 
         new Thread(new Runnable() {
             @Override
@@ -110,7 +111,7 @@ public class GameFactory {
 
 
 
-                //Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка");
+                Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка");
 
                 ListAdapter.ListItem item = new ListAdapter.ListItem();
 
@@ -119,7 +120,7 @@ public class GameFactory {
                 item.mResMap      = android.R.drawable.ic_lock_idle_lock;
                 item.mHost        = getLocalIpAddress(context);
 
-                //Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
+                Log.v(GameFactory.TAG, "GameFactory - createServer. Создание первого итема списка. ХОСТ - " + item.mHost);
 
                 mAdapter.addItem(item);
 
@@ -152,7 +153,6 @@ public class GameFactory {
         Log.v(GameFactory.TAG, "GameFactory - startGame");
 
         mScanner.stopScan();
-        mScanner.close();
 
         if(mBroadcaster != null){
             mBroadcaster.stopBroadcast();
@@ -197,9 +197,17 @@ public class GameFactory {
             Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
 
             clientChanel.onSocketConnected(item.mConnection);
+
+            // при закрытии сканера закрывается и канал, а при этом закрываются все сокеты
+            // из списка.
+            // поэтому что бы сохранить подключение активным мы удаляем его из списка (канал сканера)
+            // и передаем в новый канал (клиента)... а все остальное закрываем
+            mScanner.getChanel().onSocketDisconnected(item.mConnection);
         }
 
+        mScanner.close();
 
+        mInstance.setMap(new MeshMapTest(context));
 
         game.start(context);
 

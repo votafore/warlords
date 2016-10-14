@@ -82,5 +82,7 @@ public class Game {
                 return mHandler.onHandleEvent(event);
             }
         };
+
+        ((Instance)mClient).start();
     }
 }
