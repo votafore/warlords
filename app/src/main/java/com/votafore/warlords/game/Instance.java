@@ -3,7 +3,10 @@ package com.votafore.warlords.game;
 import android.content.Context;
 import android.util.Log;
 
+import com.votafore.warlords.GameFactory;
+import com.votafore.warlords.glsupport.GLUnit;
 import com.votafore.warlords.net.IConnection;
+import com.votafore.warlords.test.MeshUnit;
 
 /**
  * @author Votafore
@@ -48,19 +51,52 @@ public class Instance extends EndPoint {
 
 
 
+    /**************************************************************************************************/
+    /************************************************* end point **************************************/
+    /**************************************************************************************************/
+
+
     @Override
     public void execute(IConnection connection, String command) {
 
         // принимаем и обрабатываем данные от сервера
-        Log.v(GameManager.TAG, "Instance: execute(). получили команду от сервера");
+        Log.v(GameFactory.TAG, "Instance: execute(). получили команду от сервера");
     }
 
     public void someFunc(){
 
-        //Log.v(GameManager.TAG, "Instance: someFunc(). посылаем тестовую команду");
+        //Log.v(GameFactory.TAG, "Instance: someFunc(). посылаем тестовую команду");
 
         //mConnectionManager2.sendCommand("test command");
 
         mChanel.sendCommand("test command");
+    }
+
+
+
+    /**************************************************************************************************/
+    /************************************************* Instance  **************************************/
+    /**************************************************************************************************/
+
+    /************************** еще в разработке *********/
+
+    public  GLUnit mBase;
+    private GLUnit mMap;
+
+    public void setMap(GLUnit map){
+        mMap = map;
+    }
+
+    public GLUnit getMap(){
+        return mMap;
+    }
+
+
+    public void start(){
+
+        mBase = new MeshUnit(mContext);
+        mBase.init();
+
+        mMap.init();
     }
 }

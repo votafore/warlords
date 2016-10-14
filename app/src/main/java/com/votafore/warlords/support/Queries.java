@@ -28,13 +28,13 @@ public class Queries {
 
                     result = query.toString();
 
-                    Log.v(GameManager.TAG, "Queries - getQuery: сформировали запрос (" + query + ")");
+                    //Log.v(GameFactory.TAG, "Queries - getQuery: сформировали запрос (" + query + ")");
 
                     break;
             }
 
         } catch (JSONException e) {
-            Log.v(GameManager.TAG, "ServiceScanner: поток рассылки запросов, создание запроса: " + e.getMessage());
+            //Log.v(GameFactory.TAG, "ServiceScanner: поток рассылки запросов, создание запроса: " + e.getMessage());
             e.printStackTrace();
         }
 

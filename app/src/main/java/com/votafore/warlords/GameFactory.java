@@ -199,6 +199,8 @@ public class GameFactory {
             clientChanel.onSocketConnected(item.mConnection);
         }
 
+
+
         game.start(context);
 
         //

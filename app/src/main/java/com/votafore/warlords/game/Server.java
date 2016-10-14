@@ -3,6 +3,7 @@ package com.votafore.warlords.game;
 
 import android.util.Log;
 
+import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.net.IConnection;
 
 import org.json.JSONException;
@@ -31,7 +32,7 @@ public class Server extends EndPoint{
     @Override
     public void execute(IConnection connection, String command) {
 
-        Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ");
+        //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ");
 
         JSONObject cmd;
 
@@ -51,7 +52,7 @@ public class Server extends EndPoint{
                         response.put("creatorName"  , "Andrew");
                     }
 
-                    Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+                    //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
 
                     // на некоторые типы запросов ответ идет только тем, кто его прислал
                     connection.put(response.toString());
@@ -61,17 +62,17 @@ public class Server extends EndPoint{
 
                 default:
 
-                    Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+                    //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
 
                     mChanel.sendCommand("response");
             }
 
         } catch (JSONException e) {
-            Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. Ошибка: " + e.getMessage());
+            //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. Ошибка: " + e.getMessage());
             e.printStackTrace();
         }
 
-        Log.v(GameManager.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
+        //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
 
         mChanel.sendCommand("response");
     }
