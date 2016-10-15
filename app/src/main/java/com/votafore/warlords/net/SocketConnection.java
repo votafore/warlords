@@ -3,6 +3,7 @@ package com.votafore.warlords.net;
 import android.util.Log;
 
 import com.votafore.warlords.GameFactory;
+import com.votafore.warlords.support.ListAdapter;
 import com.votafore.warlords.support.Stack;
 
 import java.io.BufferedReader;
@@ -66,7 +67,7 @@ public class SocketConnection implements IConnection {
                         e.printStackTrace();
                     }
 
-                    //Log.v(GameManager.TAG, "SocketConnection: Поток входящих сообщений - есть сообщение (" + msg + ")");
+                    Log.v(GameFactory.TAG, "SocketConnection: Поток входящих сообщений - есть сообщение (" + msg + ")");
 
                     if(msg == null){
 
@@ -90,7 +91,9 @@ public class SocketConnection implements IConnection {
         return mSocket.getInetAddress().toString();
     }
 
-
+    public void setListener(ISocketListener listener){
+        mListener = listener;
+    }
 
 
     /*****************************************************************************/
@@ -134,7 +137,7 @@ public class SocketConnection implements IConnection {
         if(!mStack.hasNext())
             return;
 
-        //Log.v(GameManager.TAG + "_1", "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
+        Log.v(GameFactory.TAG, "SocketConnection: send(). отправка команды - размер стека: " + String.valueOf(mStack.size()));
 
         try {
             PrintWriter out = new PrintWriter(mSocket.getOutputStream(),true);

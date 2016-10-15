@@ -1,14 +1,12 @@
 package com.votafore.warlords.game;
 
 import android.content.Context;
-import android.util.Log;
 
-import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.glsupport.GLUnit;
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
-import com.votafore.warlords.test.ConnectionChanel2;
 import com.votafore.warlords.test.MeshUnit;
 
 import org.json.JSONException;
@@ -105,8 +103,8 @@ public class Instance extends EndPoint {
 
         mWorkerThread.quit();
 
-        ((ConnectionChanel2)mChanel).clearObservers();
-        ((ConnectionChanel2)mChanel).close();
+        ((ConnectionChanel)mChanel).clearObservers();
+        ((ConnectionChanel)mChanel).close();
     }
 
 

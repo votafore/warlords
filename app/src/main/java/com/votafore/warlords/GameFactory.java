@@ -13,11 +13,11 @@ import com.votafore.warlords.game.Server;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
+import com.votafore.warlords.net.SocketConnection;
 import com.votafore.warlords.support.Stack;
 import com.votafore.warlords.support.ListAdapter;
 import com.votafore.warlords.support.ServiceBroadcaster;
 import com.votafore.warlords.support.ServiceScanner;
-import com.votafore.warlords.test.ConnectionChanel2;
 import com.votafore.warlords.test.MeshMapTest;
 
 
@@ -177,7 +177,7 @@ public class GameFactory {
 
 
         mInstance     = new Instance(context);
-        clientChanel  = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
+        clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
 
         mInstance.setMap(new MeshMapTest(context));
         mInstance.setChanel(clientChanel);
@@ -196,6 +196,10 @@ public class GameFactory {
         }else{
 
             Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
+
+            // подмена слушателя сокета т.к. был канал сканера,
+            // теперь будет канал клиента
+            ((SocketConnection)item.mConnection).setListener(clientChanel);
 
             clientChanel.onSocketConnected(item.mConnection);
 
@@ -292,7 +296,7 @@ public class GameFactory {
      *
      * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private ConnectionChanel2 clientChanel;
+    private ConnectionChanel clientChanel;
     private ConnectionChanel serverChanel;
 
     private ServiceBroadcaster mBroadcaster;

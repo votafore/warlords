@@ -174,16 +174,18 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
     @Override
     public void onDiscoveryStarted(String serviceType) {
-        //Log.v(GameFactory.TAG, "ServiceScanner - onDiscoveryStarted");
+        Log.v(GameFactory.TAG, "ServiceScanner - onDiscoveryStarted");
     }
 
     @Override
     public void onDiscoveryStopped(String serviceType) {
-        //Log.v(GameFactory.TAG, "ServiceScanner - onDiscoveryStopped");
+        Log.v(GameFactory.TAG, "ServiceScanner - onDiscoveryStopped");
     }
 
     @Override
     public void onServiceFound(NsdServiceInfo serviceInfo) {
+
+        Log.v(GameFactory.TAG, "ServiceScanner - onServiceFound.");
 
         if(!serviceInfo.getServiceName().contains(ServiceBroadcaster.mServiceName))
             return;
