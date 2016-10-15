@@ -5,11 +5,12 @@ import android.os.HandlerThread;
 import android.support.annotation.Nullable;
 
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
 import com.votafore.warlords.net.IConnection;
 
 public abstract class EndPoint implements ConnectionChanel.IObserver{
 
-    protected ConnectionChanel      mChanel;
+    protected IChanel               mChanel;
     protected HandlerThread         mWorkerThread;
     protected Handler               mWorkerHandler;
 
@@ -21,8 +22,12 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
         mWorkerHandler = new Handler(mWorkerThread.getLooper());
     }
 
-    public void setChanel(ConnectionChanel chanel){
+    public void setChanel(IChanel chanel){
         mChanel = chanel;
+    }
+
+    public IChanel getChanel(){
+        return mChanel;
     }
 
     @Override

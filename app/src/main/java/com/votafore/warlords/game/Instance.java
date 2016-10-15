@@ -5,8 +5,14 @@ import android.util.Log;
 
 import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.glsupport.GLUnit;
+import com.votafore.warlords.glsupport.GLView;
+import com.votafore.warlords.glsupport.GLWorld;
 import com.votafore.warlords.net.IConnection;
+import com.votafore.warlords.test.ConnectionChanel2;
 import com.votafore.warlords.test.MeshUnit;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Votafore
@@ -60,7 +66,29 @@ public class Instance extends EndPoint {
     public void execute(IConnection connection, String command) {
 
         // принимаем и обрабатываем данные от сервера
-        Log.v(GameFactory.TAG, "Instance: execute(). получили команду от сервера");
+        //Log.v(GameFactory.TAG, "Instance: execute(). получили команду от сервера: " + command);
+
+        try {
+            JSONObject obj = new JSONObject(command);
+
+            switch(obj.getString("command")){
+                case "camMove":
+
+                    mCamera.camMove(GLWorld.AXIS_X, Float.valueOf(obj.getString("deltaX")));
+                    mCamera.camMove(GLWorld.AXIS_Z, Float.valueOf(obj.getString("deltaY")));
+
+                    break;
+                case "camRotate":
+
+                    mCamera.camRotate(GLWorld.AXIS_Y, -Float.valueOf(obj.getString("deltaX")));
+                    mCamera.camRotate(GLWorld.AXIS_X,  Float.valueOf(obj.getString("deltaY")));
+
+                    break;
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
     }
 
     public void someFunc(){
@@ -77,8 +105,8 @@ public class Instance extends EndPoint {
 
         mWorkerThread.quit();
 
-        mChanel.clearObservers();
-        mChanel.close();
+        ((ConnectionChanel2)mChanel).clearObservers();
+        ((ConnectionChanel2)mChanel).close();
     }
 
 
@@ -99,12 +127,19 @@ public class Instance extends EndPoint {
         return mMap;
     }
 
-
     public void start(){
 
         mBase = new MeshUnit(mContext);
         mBase.init();
 
         mMap.init();
+    }
+
+
+
+    private GLView.ICamera mCamera;
+
+    public void setCamera(GLView.ICamera camera){
+        mCamera = camera;
     }
 }

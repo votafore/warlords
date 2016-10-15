@@ -4,6 +4,7 @@ package com.votafore.warlords.game;
 import android.util.Log;
 
 import com.votafore.warlords.GameFactory;
+import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 
 import org.json.JSONException;
@@ -33,8 +34,8 @@ public class Server extends EndPoint{
 
         mWorkerThread.quitSafely();
 
-        mChanel.clearObservers();
-        mChanel.close();
+        ((ConnectionChanel)mChanel).clearObservers();
+        ((ConnectionChanel)mChanel).close();
     }
 
     @Override
@@ -67,7 +68,14 @@ public class Server extends EndPoint{
                     connection.send();
 
                     break;
+                case "action":
 
+                    //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду: " + command);
+
+                    // в данному случае делаем рассылку данных
+                    mChanel.sendCommand(command);
+
+                    break;
                 default:
 
                     //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
@@ -82,7 +90,7 @@ public class Server extends EndPoint{
 
         //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ. отправляем");
 
-        mChanel.sendCommand("response");
+        //mChanel.sendCommand("response");
     }
 
 }
