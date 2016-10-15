@@ -28,6 +28,14 @@ public class Server extends EndPoint{
     /*********************************************** ОБЯЗАННОСТИ СЕРВЕРА ;) ******************************************/
     /*****************************************************************************************************************/
 
+    @Override
+    public void stop(){
+
+        mWorkerThread.quitSafely();
+
+        mChanel.clearObservers();
+        mChanel.close();
+    }
 
     @Override
     public void execute(IConnection connection, String command) {

@@ -152,7 +152,20 @@ public class GameFactory {
 
         Log.v(GameFactory.TAG, "GameFactory - startGame");
 
+        ListAdapter.ListItem item = mAdapter.getItemByPosition(selectedServerPosition);
+
+        // если выбран удаленный сервер игры
+        if(item.mConnection != null){
+
+            // при закрытии сканера закрывается и канал, а при этом закрываются все сокеты
+            // из списка.
+            // поэтому что бы сохранить подключение активным мы удаляем его из списка (канал сканера)
+            // и передаем в новый канал (клиента)... а все остальное закрываем
+            mScanner.getChanel().onSocketDisconnected(item.mConnection);
+        }
+
         mScanner.stopScan();
+        mScanner.close();
 
         if(mBroadcaster != null){
             mBroadcaster.stopBroadcast();
@@ -160,29 +173,16 @@ public class GameFactory {
 
 
 
-        //ConnectionChanel clientChanel;
-        //Instance          mInstance;
+
 
         mInstance     = new Instance(context);
         clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
 
+        mInstance.setMap(new MeshMapTest(context));
         mInstance.setChanel(clientChanel);
         clientChanel.registerObserver(mInstance);
 
-
-        /////////////////////////
-        //
-
-        game = new Game();
-        game.setClient(mInstance);
-
-        if(mServer != null)
-            game.setServer(mServer);
-
-
-        ListAdapter.ListItem item = mAdapter.getItemByPosition(selectedServerPosition);
-
-        if(item.mHost.equals(getLocalIpAddress(context))){
+        if(item.mConnection == null){
 
             Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на текущем девайсе");
 
@@ -198,21 +198,23 @@ public class GameFactory {
 
             clientChanel.onSocketConnected(item.mConnection);
 
-            // при закрытии сканера закрывается и канал, а при этом закрываются все сокеты
-            // из списка.
-            // поэтому что бы сохранить подключение активным мы удаляем его из списка (канал сканера)
-            // и передаем в новый канал (клиента)... а все остальное закрываем
-            mScanner.getChanel().onSocketDisconnected(item.mConnection);
+            if(mServer != null){
+
+                mServer.stop();
+
+                mServer        = null;
+                serverChanel   = null;
+            }
         }
 
-        mScanner.close();
 
-        mInstance.setMap(new MeshMapTest(context));
+        game = new Game();
+        game.setClient(mInstance);
+
+        if(mServer != null)
+            game.setServer(mServer);
 
         game.start(context);
-
-        //
-        ////////////////////////
     }
 
     public void exit(){
@@ -229,23 +231,22 @@ public class GameFactory {
             mBroadcaster.stopBroadcast();
         }
 
-        if(serverChanel != null){
+        if(mServer != null){
 
             //Log.v(GameManager.TAG, "GameFactory - exit: остановка сервера");
 
-            serverChanel.close();
-            serverChanel.clearObservers();
+            mServer.stop();
         }
 
-        if(clientChanel != null){
+        if(mInstance != null){
 
             //Log.v(GameManager.TAG, "GameFactory - exit: остановка клиента (канала клиента)");
 
-            clientChanel.close();
-            clientChanel.clearObservers();
+            mInstance.stop();
         }
 
         mServer       = null;
+        serverChanel  = null;
         mBroadcaster  = null;
     }
 

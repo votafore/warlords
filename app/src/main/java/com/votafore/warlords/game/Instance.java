@@ -72,6 +72,14 @@ public class Instance extends EndPoint {
         mChanel.sendCommand("test command");
     }
 
+    @Override
+    public void stop(){
+
+        mWorkerThread.quit();
+
+        mChanel.clearObservers();
+        mChanel.close();
+    }
 
 
     /**************************************************************************************************/

@@ -19,8 +19,6 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
         mWorkerThread.start();
 
         mWorkerHandler = new Handler(mWorkerThread.getLooper());
-
-        // TODO: подумать как остановить этот поток
     }
 
     public void setChanel(ConnectionChanel chanel){
@@ -41,4 +39,6 @@ public abstract class EndPoint implements ConnectionChanel.IObserver{
 
     public abstract void execute(IConnection connection, String command);
 
+
+    public abstract void stop();
 }
