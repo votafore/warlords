@@ -4,6 +4,8 @@ package com.votafore.warlords;
 import android.content.Context;
 import android.view.MotionEvent;
 
+import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
 import com.votafore.warlords.test.MotionHandlerJoystick;
 import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
@@ -32,11 +34,15 @@ public class Game {
     private EndPoint          mServer;
 
     public void setClient(EndPoint client){
-        mClient = client;
+
+        mClient         = client;
+        mClientChanel   = client.getChanel();
     }
 
     public void setServer(EndPoint server){
-        mServer = server;
+
+        mServer         = server;
+        mServerChanel   = server.getChanel();
     }
 
 
@@ -50,6 +56,9 @@ public class Game {
 
 
 
+
+    private IChanel mClientChanel;
+    private IChanel mServerChanel;
 
     /*************************************************************************************************/
     /****************************************** доп. раздел ******************************************/
@@ -73,6 +82,8 @@ public class Game {
             protected void init() {
 
                 mHandler = new MotionHandlerJoystick(mContext, mCamera);
+
+                mHandler.setChanel(mClientChanel);
             }
 
             private MotionHandlerJoystick mHandler;
@@ -84,5 +95,6 @@ public class Game {
         };
 
         ((Instance)mClient).start();
+        ((Instance)mClient).setCamera(mWorld);
     }
 }

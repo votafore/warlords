@@ -50,7 +50,7 @@ public class Stack {
 
     public void put(String msg){
 
-        // мы не может добавить сообщение если нет свободных мест
+        // мы не можем добавить сообщение если нет свободных мест
         if(mPutIndex >= (mGetIndex + mCapacity)){
             return;
 
@@ -105,9 +105,14 @@ public class Stack {
         boolean result;
 
         synchronized (mStackLock){
-            result = !mStack[mGetIndex].isEmpty();
+            result = !mStack[mGetIndex % mCapacity].isEmpty();
         }
 
         return result;
+    }
+
+
+    public int size(){
+        return mPutIndex - mGetIndex;
     }
 }

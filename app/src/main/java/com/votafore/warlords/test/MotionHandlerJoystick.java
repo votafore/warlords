@@ -10,6 +10,11 @@ import android.view.WindowManager;
 
 import com.votafore.warlords.glsupport.GLView;
 import com.votafore.warlords.glsupport.GLWorld;
+import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * @author Votafore
@@ -85,20 +90,36 @@ public class MotionHandlerJoystick {
                         deltaX /= 650;
                         deltaY /= 650;
 
-                        Log.v("TEST","pointer:"+String.valueOf(i)
-                                //+" historyX: "+String.valueOf(positionX)
-                                +" X: "+String.valueOf(event.getX(i))
-                                +" deltaX: " + String.valueOf(deltaX));
+//                        Log.v("TEST","pointer:"+String.valueOf(i)
+//                                //+" historyX: "+String.valueOf(positionX)
+//                                +" X: "+String.valueOf(event.getX(i))
+//                                +" deltaX: " + String.valueOf(deltaX));
+//
+//                        Log.v("TEST","pointer:"+String.valueOf(i)
+//                                //+" historyY: "+String.valueOf(positionY)
+//                                +" Y: "+String.valueOf(event.getY(i))
+//                                +" deltaY: " + String.valueOf(deltaY));
+//
+//                        Log.v("TEST", "delta position:");
 
-                        Log.v("TEST","pointer:"+String.valueOf(i)
-                                //+" historyY: "+String.valueOf(positionY)
-                                +" Y: "+String.valueOf(event.getY(i))
-                                +" deltaY: " + String.valueOf(deltaY));
+//                        mCamera.camMove(GLWorld.AXIS_X, deltaX);
+//                        mCamera.camMove(GLWorld.AXIS_Z, deltaY);
 
-                        Log.v("TEST", "delta position:");
+                        try {
+                            JSONObject message = new JSONObject();
 
-                        mCamera.camMove(GLWorld.AXIS_X, deltaX);
-                        mCamera.camMove(GLWorld.AXIS_Z, deltaY);
+                            message.put("clientID" , 0);
+                            message.put("type"     , "action");
+                            message.put("command"  , "camMove");
+                            message.put("queryType", "broadcast");
+                            message.put("deltaX"   ,String.valueOf(deltaX));
+                            message.put("deltaY"   ,String.valueOf(deltaY));
+
+                            mChanel.sendCommand(message.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
 
                     if (event.getPointerId(i) == mOrientationHandler) {
@@ -111,23 +132,39 @@ public class MotionHandlerJoystick {
                         deltaX /= 350;
                         deltaY /= 350;
 
-                        Log.v("TEST","pointer:"+String.valueOf(i)
-                                //+" historyX: "+String.valueOf(orientationX)
-                                +" X: "+String.valueOf(event.getX(i))
-                                +" deltaX: " + String.valueOf(deltaX));
+//                        Log.v("TEST","pointer:"+String.valueOf(i)
+//                                //+" historyX: "+String.valueOf(orientationX)
+//                                +" X: "+String.valueOf(event.getX(i))
+//                                +" deltaX: " + String.valueOf(deltaX));
+//
+//                        Log.v("TEST","pointer:"+String.valueOf(i)
+//                                //+" historyY: "+String.valueOf(orientationY)
+//                                +" Y: "+String.valueOf(event.getY(i))
+//                                +" deltaY: " + String.valueOf(deltaY));
+//
+//                        Log.v("TEST", "delta orientation:");
 
-                        Log.v("TEST","pointer:"+String.valueOf(i)
-                                //+" historyY: "+String.valueOf(orientationY)
-                                +" Y: "+String.valueOf(event.getY(i))
-                                +" deltaY: " + String.valueOf(deltaY));
+//                        // при вождении по горизонтали надо вращать по оси Y
+//                        mCamera.camRotate(GLWorld.AXIS_Y, -deltaX);
+//
+//                        // при вождении по вертикали - ось X
+//                        mCamera.camRotate(GLWorld.AXIS_X, deltaY);
 
-                        Log.v("TEST", "delta orientation:");
+                        try {
+                            JSONObject message = new JSONObject();
 
-                        // при вождении по горизонтали надо вращать по оси Y
-                        mCamera.camRotate(GLWorld.AXIS_Y, -deltaX);
+                            message.put("clientID" , 0);
+                            message.put("type"     , "action");
+                            message.put("command"  , "camRotate");
+                            message.put("queryType", "broadcast");
+                            message.put("deltaX"   ,String.valueOf(deltaX));
+                            message.put("deltaY"   ,String.valueOf(deltaY));
 
-                        // при вождении по вертикали - ось X
-                        mCamera.camRotate(GLWorld.AXIS_X, deltaY);
+                            mChanel.sendCommand(message.toString());
+
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
 
                     }
                 }
@@ -192,5 +229,22 @@ public class MotionHandlerJoystick {
             mOrientationHandler = -1;
             Log.v("TEST","ИД управления ориентацией сброшен");
         }
+    }
+
+
+
+
+
+
+
+
+
+    /************************** в разработке *************/
+
+    IChanel mChanel;
+
+    public void setChanel(IChanel chanel){
+
+        mChanel = chanel;
     }
 }

@@ -1,5 +1,8 @@
 package com.votafore.warlords.net;
 
+import android.util.Log;
+
+import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.support.Stack;
 
 import java.io.BufferedReader;
@@ -150,7 +153,7 @@ public class SocketConnection implements IConnection {
     @Override
     public void put(String command){
         mStack.put(command);
-        //Log.v(GameManager.TAG + "_1", "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
+        Log.v(GameFactory.TAG, "SocketConnection: put(). Команда в стеке. Размер стека: " + String.valueOf(mStack.size()));
     }
 
 }

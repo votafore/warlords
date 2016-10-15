@@ -69,7 +69,11 @@ public class ActivityMain extends AppCompatActivity {
     protected void onStop() {
         super.onStop();
 
-        ViewGroup parent = (ViewGroup) mManager.getSurfaceView().getParent();
-        parent.removeAllViews();
+        try {
+            ViewGroup parent = (ViewGroup) mManager.getSurfaceView().getParent();
+            parent.removeAllViews();
+        } catch (NullPointerException e) {
+            e.printStackTrace();
+        }
     }
 }

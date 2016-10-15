@@ -4,6 +4,9 @@ package com.votafore.warlords.support;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.util.Log;
+
+import com.votafore.warlords.GameFactory;
 
 
 public class ServiceBroadcaster implements NsdManager.RegistrationListener {
@@ -75,11 +78,11 @@ public class ServiceBroadcaster implements NsdManager.RegistrationListener {
         // актуализация имени сервиса
         mServiceName = serviceInfo.getServiceName();
 
-        //Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
+        Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceRegistered!!! Service name - " + mServiceName);
     }
 
     @Override
     public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-        ///Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
+        Log.v(GameFactory.TAG, "ServiceBroadcaster - NsdManager.RegistrationListener: onServiceUnregistered");
     }
 }
