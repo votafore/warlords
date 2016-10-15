@@ -17,6 +17,7 @@ import com.votafore.warlords.support.Stack;
 import com.votafore.warlords.support.ListAdapter;
 import com.votafore.warlords.support.ServiceBroadcaster;
 import com.votafore.warlords.support.ServiceScanner;
+import com.votafore.warlords.test.ConnectionChanel2;
 import com.votafore.warlords.test.MeshMapTest;
 
 
@@ -176,7 +177,7 @@ public class GameFactory {
 
 
         mInstance     = new Instance(context);
-        clientChanel  = new ConnectionChanel(ConnectionChanel.TYPE_FOR_CLIENT);
+        clientChanel  = new ConnectionChanel2(ConnectionChanel.TYPE_FOR_CLIENT);
 
         mInstance.setMap(new MeshMapTest(context));
         mInstance.setChanel(clientChanel);
@@ -291,7 +292,7 @@ public class GameFactory {
      *
      * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private ConnectionChanel clientChanel;
+    private ConnectionChanel2 clientChanel;
     private ConnectionChanel serverChanel;
 
     private ServiceBroadcaster mBroadcaster;
@@ -331,6 +332,7 @@ public class GameFactory {
                 @Override
                 public void put(String command) {
                     stack.put(command);
+                    //Log.v(GameFactory.TAG, "ClientAdapter: ClientSocket - put(). Команда в стеке. Размер стека: " + String.valueOf(stack.size()));
                 }
 
                 @Override
@@ -355,6 +357,7 @@ public class GameFactory {
                 @Override
                 public void put(String command) {
                     stack.put(command);
+                    //Log.v(GameFactory.TAG, "ClientAdapter: ServerSocket - put(). Команда в стеке. Размер стека: " + String.valueOf(stack.size()));
                 }
 
                 @Override
