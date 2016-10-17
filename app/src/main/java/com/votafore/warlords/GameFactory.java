@@ -197,6 +197,7 @@ public class GameFactory {
 
             Log.v(GameFactory.TAG, "GameFactory - startGame. Выбрали игру с сервером на удаленном девайсе");
 
+            // TODO: место для оптимизации
             // подмена слушателя сокета т.к. был канал сканера,
             // теперь будет канал клиента
             ((SocketConnection)item.mConnection).setListener(clientChanel);
@@ -449,4 +450,8 @@ public class GameFactory {
     public GLSurfaceView getSurfaceView(){
         return game.getSurfaceView();
     }
+
+
+
+    // TODO: сделать слежение за состоянием Wi-Fi при запуске и во время игры
 }

@@ -9,6 +9,19 @@ public class Queries {
 
     public static final int QUERY_INSTANCE = 148;
 
+
+
+
+    public static final int CLIENT_ID = 0;
+
+
+
+
+    // query types
+    public static final String QT_QUERY     = "QUERY";
+    public static final String QT_BROADCAST = "BROADCAST";
+
+
     public static String getQuery(int type){
 
         String result = "";
@@ -21,10 +34,10 @@ public class Queries {
 
                     JSONObject query = new JSONObject();
 
-                    query.put("clientID" , 0);
+                    query.put("clientID" , CLIENT_ID);
                     query.put("type"     , "InstanceInfo");
                     query.put("command"  , "get");
-                    query.put("queryType", "query");
+                    query.put("queryType", QT_QUERY);
 
                     result = query.toString();
 
@@ -35,6 +48,28 @@ public class Queries {
 
         } catch (JSONException e) {
             //Log.v(GameFactory.TAG, "ServiceScanner: поток рассылки запросов, создание запроса: " + e.getMessage());
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public String getQueryCamMove(float deltaX, float deltaY){
+
+        String result = "";
+
+        try {
+            JSONObject message = new JSONObject();
+
+            message.put("clientID" , CLIENT_ID);
+            message.put("type"     , "action");
+            message.put("command"  , "camMove");
+            message.put("queryType", QT_BROADCAST);
+            message.put("deltaX"   ,String.valueOf(deltaX));
+            message.put("deltaY"   ,String.valueOf(deltaY));
+
+
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 

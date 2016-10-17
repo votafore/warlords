@@ -43,6 +43,9 @@ public class Server extends EndPoint{
 
         //Log.v(GameFactory.TAG, "Server: execute() сервер принял команду. Готовим ответ");
 
+        if(command.isEmpty())
+            return;
+
         JSONObject cmd;
 
         try {
