@@ -78,8 +78,8 @@ public class Instance extends EndPoint {
                     break;
                 case "camRotate":
 
-                    mCamera.camRotate(GLWorld.AXIS_Y, -Float.valueOf(obj.getString("deltaX")));
-                    mCamera.camRotate(GLWorld.AXIS_X,  Float.valueOf(obj.getString("deltaY")));
+                    mCamera.camRotate(GLWorld.AXIS_Y, Float.valueOf(obj.getString("deltaX")));
+                    mCamera.camRotate(GLWorld.AXIS_X, Float.valueOf(obj.getString("deltaY")));
 
                     break;
             }

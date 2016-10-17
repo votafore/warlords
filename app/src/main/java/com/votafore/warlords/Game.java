@@ -81,7 +81,7 @@ public class Game {
             @Override
             protected void init() {
 
-                mHandler = new MotionHandlerJoystick(mContext, mCamera);
+                mHandler = new MotionHandlerJoystick(mContext);
 
                 mHandler.setChanel(mClientChanel);
             }

@@ -54,7 +54,7 @@ public class Queries {
         return result;
     }
 
-    public String getQueryCamMove(float deltaX, float deltaY){
+    public static String getQueryCamMove(float deltaX, float deltaY){
 
         String result = "";
 
@@ -64,6 +64,28 @@ public class Queries {
             message.put("clientID" , CLIENT_ID);
             message.put("type"     , "action");
             message.put("command"  , "camMove");
+            message.put("queryType", QT_BROADCAST);
+            message.put("deltaX"   ,String.valueOf(deltaX));
+            message.put("deltaY"   ,String.valueOf(deltaY));
+
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
+    public static String getQueryCamRotate(float deltaX, float deltaY){
+
+        String result = "";
+
+        try {
+            JSONObject message = new JSONObject();
+
+            message.put("clientID" , CLIENT_ID);
+            message.put("type"     , "action");
+            message.put("command"  , "camRotate");
             message.put("queryType", QT_BROADCAST);
             message.put("deltaX"   ,String.valueOf(deltaX));
             message.put("deltaY"   ,String.valueOf(deltaY));

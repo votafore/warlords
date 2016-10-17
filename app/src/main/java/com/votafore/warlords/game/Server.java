@@ -3,7 +3,6 @@ package com.votafore.warlords.game;
 
 import android.util.Log;
 
-import com.votafore.warlords.GameFactory;
 import com.votafore.warlords.net.ConnectionChanel;
 import com.votafore.warlords.net.IConnection;
 
