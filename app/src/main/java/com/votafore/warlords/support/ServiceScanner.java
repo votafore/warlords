@@ -62,7 +62,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             }
         });
 
-        mFactory = GameFactory.getInstance(context);
+        mFactory = GameFactory.getInstance();
 
         mObserver = new ConnectionChanel.IObserver() {
             @Override
@@ -156,7 +156,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
     /****************************** работа с адаптером списка *****************************/
     /**************************************************************************************/
 
-    private ListAdapter mAdapter;
+    public ListAdapter mAdapter;
 
     public void setAdapter(ListAdapter adapter){
 

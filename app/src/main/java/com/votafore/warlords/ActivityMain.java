@@ -25,7 +25,7 @@ public class ActivityMain extends AppCompatActivity {
                 |View.SYSTEM_UI_FLAG_FULLSCREEN);
 
 
-        mManager = GameFactory.getInstance(getApplicationContext());
+        mManager = GameFactory.getInstance();
         mSurfaceView    = mManager.getSurfaceView();
 
         setContentView(mSurfaceView);

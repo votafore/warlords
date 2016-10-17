@@ -29,7 +29,7 @@ public class GameFactory {
 
     private static volatile GameFactory mThis;
 
-    public static GameFactory getInstance(Context context){
+    public static GameFactory getInstance(){
 
         if(mThis == null)
             mThis = new GameFactory();
@@ -37,7 +37,7 @@ public class GameFactory {
         return mThis;
     }
 
-    private GameFactory(){
+    public GameFactory(){
 
         //Log.v(GameFactory.TAG + "_1", "GameFactory: вызвали конструктор");
     }
@@ -394,7 +394,7 @@ public class GameFactory {
     /***************************** отображение найденных игр (серверов) ******************************/
 
 
-    private ListAdapter mAdapter;
+    public ListAdapter mAdapter;
 
     public ListAdapter getAdapter(){
         return mAdapter;
@@ -454,4 +454,6 @@ public class GameFactory {
 
 
     // TODO: сделать слежение за состоянием Wi-Fi при запуске и во время игры
+
+
 }

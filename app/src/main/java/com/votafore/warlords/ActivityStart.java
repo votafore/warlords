@@ -31,7 +31,7 @@ public class ActivityStart extends AppCompatActivity {
         serverList.setItemAnimator(new DefaultItemAnimator());
         serverList.setLayoutManager(new GridLayoutManager(this, 2));
 
-        mFactory = GameFactory.getInstance(this);
+        mFactory = GameFactory.getInstance();
 
         mFactory.onActivityCreate(this);
 
