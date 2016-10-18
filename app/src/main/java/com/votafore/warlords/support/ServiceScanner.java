@@ -22,8 +22,6 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
     private ConnectionChanel            mChanel;
     private ConnectionChanel.IObserver  mObserver;
 
-    private GameFactory mFactory;
-
     public ServiceScanner(final Context context){
 
         //Log.v(GameFactory.TAG + "_1", "ServiceScanner: конструктор");
@@ -62,7 +60,6 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
             }
         });
 
-        mFactory = GameFactory.getInstance();
 
         mObserver = new ConnectionChanel.IObserver() {
             @Override
@@ -90,7 +87,7 @@ public class ServiceScanner implements NsdManager.DiscoveryListener{
 
                             Log.v(GameFactory.TAG, "ServiceScanner - ConnectionChanel.IObserver: notifyObserver(). добавляем элемент списка в адаптер");
 
-                            String host = mFactory.getLocalIpAddress(context);
+                            String host = GameFactory.getLocalIpAddress(context);
 
                             if(item.mConnection instanceof SocketConnection){
                                 host = ((SocketConnection)item.mConnection).getHost();
