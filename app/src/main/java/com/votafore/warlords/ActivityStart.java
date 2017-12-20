@@ -5,15 +5,20 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.GridLayoutManager;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
+import com.votafore.warlords.v2.App;
+
 
 public class ActivityStart extends AppCompatActivity {
 
     private GameFactory   mFactory;
+
+    private App mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,32 +28,33 @@ public class ActivityStart extends AppCompatActivity {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
+        mApp = (App) getApplication();
 
 
         RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
 
         serverList.setHasFixedSize(true);
         serverList.setItemAnimator(new DefaultItemAnimator());
-        serverList.setLayoutManager(new GridLayoutManager(this, 2));
+        serverList.setLayoutManager(new LinearLayoutManager(this));
 
-        mFactory = GameFactory.getInstance();
+        //mFactory = GameFactory.getInstance();
 
-        mFactory.onActivityCreate(this);
+        //mFactory.onActivityCreate(this);
 
-        serverList.setAdapter(mFactory.getAdapter());
+        serverList.setAdapter(mApp.getAdapter());
 
-        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
-            @Override
-            public void onClick(int position) {
-
-                mFactory.startGame(position, ActivityStart.this);
-
-                finish();
-
-                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
-                startActivity(i);
-            }
-        });
+//        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
+//            @Override
+//            public void onClick(int position) {
+//
+//                mFactory.startGame(position, ActivityStart.this);
+//
+//                finish();
+//
+//                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
+//                startActivity(i);
+//            }
+//        });
     }
 
     @Override
@@ -56,7 +62,7 @@ public class ActivityStart extends AppCompatActivity {
         super.onResume();
 
         //Log.v(GameManager.TAG, "ActivityStart: onResume().");
-        mFactory.onActivityResume();
+        //mFactory.onActivityResume();
     }
 
     @Override
@@ -64,7 +70,7 @@ public class ActivityStart extends AppCompatActivity {
         super.onPause();
 
         //Log.v(GameManager.TAG, "ActivityStart: onPause().");
-        mFactory.onActivityPause();
+        //mFactory.onActivityPause();
     }
 
     @Override
@@ -79,7 +85,8 @@ public class ActivityStart extends AppCompatActivity {
         switch(item.getItemId()){
             case R.id.new_game:
 
-                mFactory.createServer(this);
+                //mFactory.createServer(this);
+                mApp.createServer();
 
                 break;
 //            case R.id.start_game:
@@ -89,12 +96,13 @@ public class ActivityStart extends AppCompatActivity {
 //                break;
             case R.id.call_someFunc:
 
-                mFactory.someFunc();
+                //mFactory.someFunc();
 
                 break;
             case R.id.exit:
 
-                mFactory.exit();
+                //mFactory.exit();
+                mApp.TEST_stopServer();
         }
 
         return super.onOptionsItemSelected(item);

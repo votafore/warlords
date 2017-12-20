@@ -11,6 +11,7 @@ import com.votafore.warlords.game.EndPoint;
 import com.votafore.warlords.game.Instance;
 import com.votafore.warlords.game.Server;
 import com.votafore.warlords.net.ConnectionChanel;
+import com.votafore.warlords.net.IChanel;
 import com.votafore.warlords.net.IConnection;
 import com.votafore.warlords.net.ISocketListener;
 import com.votafore.warlords.net.SocketConnection;
@@ -56,11 +57,19 @@ public class GameFactory {
 
         //Log.v(GameFactory.TAG, "GameFactory - onActivityCreate");
 
-        mAdapter = new ListAdapter();
-
-        mScanner = new ServiceScanner(context);
+//        mAdapter = new ListAdapter();
+//        mScanner = new ServiceScanner(context);
         mScanner.setAdapter(mAdapter);
     }
+
+    public void testSetAdapter(ListAdapter adapter){
+        mAdapter = adapter;
+    }
+
+    public void testSetScanner(ServiceScanner scanner){
+        mScanner = scanner;
+    }
+
 
     public void onActivityResume(){
 
@@ -88,7 +97,15 @@ public class GameFactory {
 
     /******************************************** other */
 
-    private EndPoint mServer;
+    public EndPoint mServer;
+
+    public void testSetServer(Server server){
+        mServer = server;
+    }
+
+    public void testSetServerChanel(ConnectionChanel chanel){
+        serverChanel = chanel;
+    }
 
     public void createServer(final Context context){
 
@@ -297,10 +314,10 @@ public class GameFactory {
      *
      * кроме клиента или сервера каналом могут пользоваться и другие объекты
      */
-    private ConnectionChanel clientChanel;
-    private ConnectionChanel serverChanel;
+    public ConnectionChanel clientChanel;
+    public ConnectionChanel serverChanel;
 
-    private ServiceBroadcaster mBroadcaster;
+    public ServiceBroadcaster mBroadcaster;
 
 
     public void stopServer(){
@@ -454,6 +471,5 @@ public class GameFactory {
 
 
     // TODO: сделать слежение за состоянием Wi-Fi при запуске и во время игры
-
-
+    // TODO: сохранять игру какое-то время (вдруг случайно оборвалась связь)
 }
