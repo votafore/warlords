@@ -12,5 +12,4 @@ import java.net.InetAddress;
 public interface IChanel {
     void connect(InetAddress ip, int port);
     void disconnect();
-    void send();
 }

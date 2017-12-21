@@ -123,11 +123,6 @@ public class EndPointClient extends EndPoint {
             dsp_receiver.dispose();
             dsp_sender.dispose();
         }
-
-        @Override
-        public void send() {
-
-        }
     }
 
 

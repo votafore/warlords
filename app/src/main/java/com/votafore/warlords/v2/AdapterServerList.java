@@ -11,9 +11,12 @@ import com.votafore.warlords.support.ListAdapter;
 import com.votafore.warlords.v2.test.Chanel;
 import com.votafore.warlords.v2.test.IChanel;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,7 +99,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         ListItem item = new ListItem();
         item.createChanel(info.info.getHost(), info.info.getPort());
-        item.getProcessor().onNext(new JSONObject());
+        item.getChanel().getProcessor().onNext(new JSONObject());
 
         mList.add(item);
         notifyItemInserted(mServiceList.size()-1);
@@ -121,7 +124,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             return;
         }
 
-        mList.get(index).closeChanel();
+        mList.get(index).getChanel().getProcessor().onComplete();
         mList.remove(index);
 
         mServiceList.remove(index);
@@ -132,41 +135,56 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     public class ListItem{
 
-        public String ownerName;
-        public String playerCount;
+        String ownerName;
+        String playerCount;
 
 
 
-        private IChanel mChanel;
+        private Chanel mChanel;
 
-        private PublishProcessor<JSONObject> pp;
+        public void createChanel(final InetAddress ip, final int port){
 
-        public void createChanel(InetAddress ip, int port){
+            mChanel = new ChanelForList();
 
-            pp = PublishProcessor.create();
-            pp.observeOn(Schedulers.io());
-
-            mChanel = new Chanel(pp, new Consumer<JSONObject>() {
+            mChanel.setConsumer(new Consumer<JSONObject>() {
                 @Override
                 public void accept(JSONObject jsonObject) throws Exception {
 
-                    ownerName = jsonObject.getString("owner");
-                    playerCount = jsonObject.getString("playerCount");
+                    try {
+                        ownerName = jsonObject.getString("owner");
+                        playerCount = jsonObject.getString("playerCount");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
 
                     AdapterServerList.this.notifyItemChanged(mList.indexOf(ListItem.this));
                 }
             });
 
-            mChanel.connect(ip, port);
+            mChanel.addSocket(ip, port);
         }
 
-        public PublishProcessor<JSONObject> getProcessor(){
-            return pp;
+        public Chanel getChanel(){
+            return mChanel;
+        }
+    }
+
+
+    public class ChanelForList extends Chanel{
+
+        @Override
+        public void addSocket() {
+
         }
 
-        public void closeChanel(){
-            mChanel.disconnect();
-            pp.onComplete();
+        @Override
+        public void addSocket(InetAddress ip, int port) {
+            try {
+                com.votafore.warlords.v2.test.Socket s = new com.votafore.warlords.v2.test.Socket(ip, port);
+                onSocketAdded(s);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
