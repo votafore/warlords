@@ -31,7 +31,8 @@ import io.reactivex.schedulers.Schedulers;
  * object responsible for sending data via socket(s)
  */
 
-public abstract class Channel_v2 {
+public abstract class Channel_v2 implements IChannel_v2 {
+
 
     protected PublishProcessor<JSONObject> sender;
     protected Consumer<JSONObject> receiver;
@@ -66,10 +67,12 @@ public abstract class Channel_v2 {
     public abstract void addSocket();
     public abstract void addSocket(InetAddress ip, int port);
 
+    @Override
     public PublishProcessor<JSONObject> getSender(){
         return sender;
     }
 
+    @Override
     public void setReceiver(Consumer<JSONObject> c){
         receiver = c;
     }

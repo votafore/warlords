@@ -7,22 +7,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.support.ListAdapter;
-import com.votafore.warlords.v2.test.Chanel;
-import com.votafore.warlords.v2.test.IChanel;
+import com.votafore.warlords.v2.test.Channel_v2;
+import com.votafore.warlords.v2.test.IChannel_v2;
+import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.functions.Consumer;
-import io.reactivex.processors.PublishProcessor;
-import io.reactivex.schedulers.Schedulers;
 
 
 /**
@@ -99,7 +96,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         ListItem item = new ListItem();
         item.createChanel(info.info.getHost(), info.info.getPort());
-        item.getChanel().getProcessor().onNext(new JSONObject());
+        item.getChanel().getSender().onNext(new JSONObject());
 
         mList.add(item);
         notifyItemInserted(mServiceList.size()-1);
@@ -124,7 +121,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             return;
         }
 
-        mList.get(index).getChanel().getProcessor().onComplete();
+        mList.get(index).getChanel().getSender().onComplete();
         mList.remove(index);
 
         mServiceList.remove(index);
@@ -138,15 +135,13 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         String ownerName;
         String playerCount;
 
-
-
-        private Chanel mChanel;
+        private IChannel_v2 mChanel;
 
         public void createChanel(final InetAddress ip, final int port){
 
-            mChanel = new ChanelForList();
+            Channel_v2 ch = new ChanelForList();
 
-            mChanel.setConsumer(new Consumer<JSONObject>() {
+            ch.setReceiver(new Consumer<JSONObject>() {
                 @Override
                 public void accept(JSONObject jsonObject) throws Exception {
 
@@ -161,16 +156,18 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 }
             });
 
-            mChanel.addSocket(ip, port);
+            ch.addSocket(ip, port);
+
+            mChanel = ch;
         }
 
-        public Chanel getChanel(){
+        public IChannel_v2 getChanel(){
             return mChanel;
         }
     }
 
 
-    public class ChanelForList extends Chanel{
+    public class ChanelForList extends Channel_v2{
 
         @Override
         public void addSocket() {
@@ -180,7 +177,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         @Override
         public void addSocket(InetAddress ip, int port) {
             try {
-                com.votafore.warlords.v2.test.Socket s = new com.votafore.warlords.v2.test.Socket(ip, port);
+                Socket s = new Socket(ip, port);
                 onSocketAdded(s);
             } catch (IOException e) {
                 e.printStackTrace();
