@@ -28,6 +28,12 @@ public class Socket extends java.net.Socket {
         input = new BufferedReader(new InputStreamReader(getInputStream()));
     }
 
+    public Socket(java.net.Socket s) throws IOException{
+
+        output = new PrintWriter(s.getOutputStream());
+        input = new BufferedReader(new InputStreamReader(s.getInputStream()));
+    }
+
     @Override
     public synchronized void close() throws IOException {
         super.close();

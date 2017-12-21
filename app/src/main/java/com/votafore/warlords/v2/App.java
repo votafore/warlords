@@ -1,6 +1,11 @@
 package com.votafore.warlords.v2;
 
 import android.app.Application;
+import android.net.nsd.NsdServiceInfo;
+
+import com.votafore.warlords.v2.test2.Server;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * @author Vorafore
@@ -66,15 +71,25 @@ public class App extends Application {
 
     // TODO: 18.12.2017 make start of broadcasting
 
+    private Server mServer;
+
     public void createServer(){
 
         // TODO: 18.12.2017 create game
 
-        mServerManager.startBroadcasting();
+        mServer = new Server();
+
+        // ...
+        // initialization of server
+        // ...
+
+        mServer.test(mServerManager);
 
     }
 
     public void TEST_stopServer(){
         mServerManager.stopBroadcasting();
+
+        mServer.stop();
     }
 }

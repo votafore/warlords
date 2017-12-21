@@ -196,14 +196,50 @@ public class ServerManager {
     private Observable<ServiceInfo> obs_broadcasting;
 
 
-    public void startBroadcasting(){
+    public void startBroadcasting(final int port){
 
-        dsp_broadcasting = obs_broadcasting.subscribe(new Consumer<ServiceInfo>() {
+        dsp_broadcasting = Observable.create(new ObservableOnSubscribe<Void>() {
             @Override
-            public void accept(ServiceInfo serviceInfo) throws Exception {
-                //Log.v("TESTRX", serviceInfo.toString());
+            public void subscribe(ObservableEmitter<Void> e) throws Exception {
+
+                final NsdManager manager = (NsdManager) mContext.getSystemService(Context.NSD_SERVICE);
+                final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
+                    @Override
+                    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+
+                    }
+
+                    @Override
+                    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+
+                    }
+
+                    @Override
+                    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+
+                    }
+
+                    @Override
+                    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+
+                    }
+                };
+
+                NsdServiceInfo regInfo = new NsdServiceInfo();
+                regInfo.setServiceName(ServiceName);
+                regInfo.setServiceType("_http._tcp.");
+                regInfo.setPort(port);
+
+                manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
+
+                e.setCancellable(new Cancellable() {
+                    @Override
+                    public void cancel() throws Exception {
+                        manager.unregisterService(listener);
+                    }
+                });
             }
-        });
+        }).subscribe();
     }
 
     public void stopBroadcasting(){
@@ -277,88 +313,6 @@ public class ServerManager {
                         svc_info.info = serviceInfo;
 
                         e.onNext(svc_info);
-                    }
-                });
-            }
-        });
-
-
-        obs_broadcasting = Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
-            @Override
-            public void subscribe(final ObservableEmitter<ServiceInfo> e) throws Exception {
-
-                final NsdManager manager = (NsdManager) mContext.getSystemService(Context.NSD_SERVICE);
-                final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
-
-                    @Override
-                    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-
-                        //Log.v("TESTRX", "onRegistrationFailed");
-
-                        ServiceInfo info = new ServiceInfo();
-
-                        info.messageType = ServiceInfo.REGISTRATION_fAIL;
-                        info.info = serviceInfo;
-                        info.errorCode = errorCode;
-
-                        e.onNext(info);
-                    }
-
-                    @Override
-                    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-
-                        //Log.v("TESTRX", "onUnregistrationFailed");
-
-                        ServiceInfo info = new ServiceInfo();
-
-                        info.messageType = ServiceInfo.UNREGISTRATION_fAIL;
-                        info.info = serviceInfo;
-                        info.errorCode = errorCode;
-
-                        e.onNext(info);
-                    }
-
-                    @Override
-                    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-
-                        //Log.v("TESTRX", "onServiceRegistered");
-
-                        ServiceInfo info = new ServiceInfo();
-
-                        info.messageType = ServiceInfo.REGISTRATION_SUCCESS;
-                        info.info = serviceInfo;
-
-                        e.onNext(info);
-                    }
-
-                    @Override
-                    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-
-                        //Log.v("TESTRX", "onServiceUnregistered");
-
-                        ServiceInfo info = new ServiceInfo();
-
-                        info.messageType = ServiceInfo.UNREGISTRATION_SUCCESS;
-                        info.info = serviceInfo;
-
-                        e.onNext(info);
-
-                        //Log.v("TESTRX", "service is unregistered");
-                    }
-                };
-
-                NsdServiceInfo regInfo = new NsdServiceInfo();
-                regInfo.setServiceName(ServiceName);
-                regInfo.setServiceType("_http._tcp.");
-                regInfo.setPort(24680);
-
-                manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
-
-                e.setCancellable(new Cancellable() {
-                    @Override
-                    public void cancel() throws Exception {
-                        //Log.v("TESTRX", "Cancellable - cancel");
-                        manager.unregisterService(listener);
                     }
                 });
             }
