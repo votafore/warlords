@@ -88,9 +88,10 @@ public class Channel_v3 implements IChannel_v2 {
 
                 Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber");
 
-                sender_map_dsp.put(socket, sender.subscribe(new Consumer<JSONObject>() {
+                sender_map_dsp.put(socket, sender.subscribeOn(Schedulers.io()).subscribe(new Consumer<JSONObject>() {
                     @Override
                     public void accept(JSONObject jsonObject) throws Exception {
+                        Log.v("TESTRX", ">>>>>>>>> Channel - socket subscriber. send request for server info into output");
                         socket.output.print(jsonObject.toString());
                     }
                 }, new Consumer<Throwable>() {

@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.votafore.warlords.R;
 import com.votafore.warlords.v2.test.Channel_v2;
+import com.votafore.warlords.v2.test.Channel_v3;
 import com.votafore.warlords.v2.test.IChannel_v2;
 import com.votafore.warlords.v2.test.Socket;
 
@@ -20,6 +21,10 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 
@@ -101,6 +106,8 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         Log.v("TESTRX", ">>>>>>>>> new list item is created");
         item.createChanel(info.info.getHost(), info.info.getPort());
+
+        Log.v("TESTRX", ">>>>>>>>> List item. send request for server info");
         item.getChanel().getSender().onNext(new JSONObject());
 
         mList.add(item);
@@ -142,11 +149,13 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         private IChannel_v2 mChanel;
 
+        private Disposable dsp_socket;
+
         public void createChanel(final InetAddress ip, final int port){
 
             Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
-            Channel_v2 ch = new ChanelForList();
+            Channel_v3 ch = new Channel_v3();
 
             Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
@@ -168,7 +177,16 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             });
 
             Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is set");
-            ch.addSocket(ip, port);
+
+            Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once");
+            dsp_socket = Observable.create(new ObservableOnSubscribe<Socket>() {
+                @Override
+                public void subscribe(ObservableEmitter<Socket> e) throws Exception {
+                    Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once - create socket");
+                    e.onNext(new Socket(ip, port));
+                    e.onComplete();
+                }
+            }).subscribe(ch.getSubscriber());
 
             mChanel = ch;
         }
@@ -176,26 +194,9 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         public IChannel_v2 getChanel(){
             return mChanel;
         }
-    }
 
-
-    public class ChanelForList extends Channel_v2{
-
-        @Override
-        public void addSocket() {
-
-        }
-
-        @Override
-        public void addSocket(InetAddress ip, int port) {
-            try {
-                Socket s = new Socket(ip, port);
-                Log.v("TESTRX", ">>>>>>>>> Chanel for list. socket created");
-                onSocketAdded(s);
-                Log.v("TESTRX", ">>>>>>>>> Chanel for list. socket added to channel");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+        public void close(){
+            dsp_socket.dispose();
         }
     }
 }
