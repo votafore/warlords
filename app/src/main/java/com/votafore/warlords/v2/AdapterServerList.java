@@ -17,6 +17,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,7 +35,6 @@ import io.reactivex.functions.Consumer;
  */
 
 public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.ViewHolder> implements IAdapter{
-
 
     public AdapterServerList(){
 
@@ -64,7 +64,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
     }
 
 
-    public class ViewHolder extends RecyclerView.ViewHolder{
+    public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public ImageView mImageView;
         public TextView mOwnerName;
@@ -76,11 +76,16 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             mImageView   = (ImageView) itemView.findViewById(R.id.map_thumbnail);
             mOwnerName   = (TextView) itemView.findViewById(R.id.owner_name);
             mPlayerCount = (TextView) itemView.findViewById(R.id.player_count);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View v) {
+            Log.v("TESTRX", ">>>>>>>>> request: get info");
+            mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject());
         }
     }
-
-
-
 
 
 
@@ -100,15 +105,15 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         mServiceList.add(info);
 
-        Log.v("TESTRX", ">>>>>>>>> info is added to list");
+        //Log.v("TESTRX", ">>>>>>>>> info is added to list");
 
         ListItem item = new ListItem();
 
-        Log.v("TESTRX", ">>>>>>>>> new list item is created");
+        //Log.v("TESTRX", ">>>>>>>>> new list item is created");
         item.createChanel(info.info.getHost(), info.info.getPort());
 
-        Log.v("TESTRX", ">>>>>>>>> List item. send request for server info");
-        item.getChanel().getSender().onNext(new JSONObject());
+        //Log.v("TESTRX", ">>>>>>>>> List item. send request for server info");
+        //item.getChanel().getSender().onNext(new JSONObject());
 
         mList.add(item);
         notifyItemInserted(mServiceList.size()-1);
@@ -153,11 +158,11 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         public void createChanel(final InetAddress ip, final int port){
 
-            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
+            //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
             Channel_v3 ch = new Channel_v3();
 
-            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
+            //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
             ch.setReceiver(new Consumer<JSONObject>() {
                 @Override
@@ -176,15 +181,26 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 }
             });
 
-            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is set");
+            //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is set");
 
-            Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once");
+            //Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once");
             dsp_socket = Observable.create(new ObservableOnSubscribe<Socket>() {
                 @Override
                 public void subscribe(ObservableEmitter<Socket> e) throws Exception {
                     Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once - create socket");
-                    e.onNext(new Socket(ip, port));
-                    e.onComplete();
+                    Socket s = new Socket(ip, port);
+
+
+
+//                    Log.v("TESTRX", ">>>>>>>>> TEST: send HELLO");
+//                    PrintWriter pw = new PrintWriter(s.mSocket.getOutputStream());
+//                    pw.println("hello");
+//                    pw.close();
+
+
+
+                    e.onNext(s);
+                    //e.onComplete();
                 }
             }).subscribe(ch.getSubscriber());
 

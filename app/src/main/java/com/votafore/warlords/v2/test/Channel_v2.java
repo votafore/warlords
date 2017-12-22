@@ -104,7 +104,7 @@ public abstract class Channel_v2 implements IChannel_v2 {
             @Override
             public void accept(JSONObject jsonObject) throws Exception {
                 Log.v("TESTRX", "Channel_v2 - onSocketAdded >>>>>>>>> Chanel for list. send request");
-                socket.output.print(jsonObject.toString());
+                socket.output.writeChars(jsonObject.toString());
             }
         }, new Consumer<Throwable>() {
             @Override
@@ -193,7 +193,7 @@ public abstract class Channel_v2 implements IChannel_v2 {
                 sender_map_dsp.put(socket, sender.subscribe(new Consumer<JSONObject>() {
                     @Override
                     public void accept(JSONObject jsonObject) throws Exception {
-                        socket.output.print(jsonObject.toString());
+                        socket.output.writeChars(jsonObject.toString());
                     }
                 }, new Consumer<Throwable>() {
                     @Override

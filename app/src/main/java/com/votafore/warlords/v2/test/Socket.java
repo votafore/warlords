@@ -3,6 +3,8 @@ package com.votafore.warlords.v2.test;
 import android.util.Log;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -18,25 +20,43 @@ import java.net.InetAddress;
 
 public class Socket {
 
-    PrintWriter output;
-    BufferedReader input;
+    public DataOutputStream output;
+    public DataInputStream input;
 
-    java.net.Socket mSocket;
+    public java.net.Socket mSocket;
 
     public Socket(InetAddress ip, int port) throws IOException{
+
         mSocket = new java.net.Socket(ip, port);
 
-        output = new PrintWriter(mSocket.getOutputStream());
-        input = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+        init();
     }
 
     public Socket(java.net.Socket s) throws IOException{
 
         mSocket = s;
 
-        output = new PrintWriter(mSocket.getOutputStream());
-        input = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+        init();
     }
+
+    private void init() throws IOException{
+
+        output = new DataOutputStream(mSocket.getOutputStream());
+        input = new DataInputStream(mSocket.getInputStream());
+
+        while(!mSocket.isConnected()){
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+
+
+
+
 
     public void close() throws IOException {
         mSocket.close();

@@ -1,20 +1,14 @@
 package com.votafore.warlords.v2.test2;
 
-import android.content.Context;
-import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
-import android.view.ContextMenu;
 
 import com.votafore.warlords.v2.ServerManager;
-import com.votafore.warlords.v2.test.Channel_v2;
 import com.votafore.warlords.v2.test.Channel_v3;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.net.InetAddress;
 import java.net.ServerSocket;
 
 import io.reactivex.Observable;
@@ -88,18 +82,16 @@ public class Server extends EndPoint {
         ConnectableObservable<ServerSocket> obs = Observable.create(new ObservableOnSubscribe<ServerSocket>() {
             @Override
             public void subscribe(ObservableEmitter<ServerSocket> e) throws Exception {
-
                 ServerSocket serverSocket = new ServerSocket(0);
-                Log.v("TESTRX", ">>>>>>>>> server created !!!!!!!! <<<<<<<<<<<");
                 e.onNext(serverSocket);
             }
-        })
-                .publish();
+        }).publish();
 
         v3.setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject jsonObject) throws Exception {
                 Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
+                // TODO: 22.12.2017 handle request
             }
         });
 
@@ -111,29 +103,20 @@ public class Server extends EndPoint {
                 return Observable.create(new ObservableOnSubscribe<Socket>() {
                     @Override
                     public void subscribe(ObservableEmitter<Socket> e) throws Exception {
-
                         while(!serverSocket.isClosed()){
-
-                            Log.v("TESTRX", ">>>>>>>>> waiting for connection <<<<<<<<<<");
                             Socket s = new Socket(serverSocket.accept());
-                            Log.v("TESTRX", ">>>>>>>>> ACCEPTED !!!!! <<<<<<<<<<");
                             e.onNext(s);
                         }
                     }
                 }).subscribeOn(Schedulers.newThread());
             }
-        })
-                .observeOn(Schedulers.io())
-                .subscribe(v3.getSubscriber());
+        }).subscribe(v3.getSubscriber());
 
 
         // observable/subscriber that trigger when server created for starting broadcas
-        d1 = obs
-                .observeOn(Schedulers.newThread())
-                .subscribe(new Consumer<ServerSocket>() {
+        d1 = obs.subscribe(new Consumer<ServerSocket>() {
                     @Override
                     public void accept(ServerSocket serverSocket) throws Exception {
-                        Log.v("TESTRX", ">>>>>>>>> start broadcasting <<<<<<<<<<");
                         manager.startBroadcasting(serverSocket.getLocalPort());
                     }
                 });
@@ -142,5 +125,17 @@ public class Server extends EndPoint {
     }
 
 
+
+
+
+
+
+    /******** JSON handler *********/
+
+
+
+
+
+    /****** TESTS **********/
 
 }
