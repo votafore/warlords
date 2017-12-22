@@ -49,55 +49,55 @@ public abstract class Chanel {
 
     protected void onSocketAdded(final com.votafore.warlords.v2.test.Socket socket){
 
-        mDisposable.add(sender.subscribe(new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject jsonObject) throws Exception {
-                socket.output.print(jsonObject.toString());
-            }
-        }, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
+//        mDisposable.add(sender.subscribe(new Consumer<JSONObject>() {
+//            @Override
+//            public void accept(JSONObject jsonObject) throws Exception {
+//                socket.output.print(jsonObject.toString());
+//            }
+//        }, new Consumer<Throwable>() {
+//            @Override
+//            public void accept(Throwable throwable) throws Exception {
+//
+//            }
+//        }, new Action() {
+//            @Override
+//            public void run() throws Exception {
+//                try {
+//                    socket.close();
+//                } catch (IOException ex) {
+//                    ex.printStackTrace();
+//                }
+//            }
+//        }));
 
-            }
-        }, new Action() {
-            @Override
-            public void run() throws Exception {
-                try {
-                    socket.close();
-                } catch (IOException ex) {
-                    ex.printStackTrace();
-                }
-            }
-        }));
 
-
-        mDisposable.add(Observable.create(new ObservableOnSubscribe<JSONObject>() {
-            @Override
-            public void subscribe(ObservableEmitter<JSONObject> e) throws Exception {
-
-                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-                String data = "";
-
-                while (data != null){
-
-                    try {
-                        data = null;
-                        data = input.readLine();
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
-                    }
-
-                    if(data == null){
-                        e.onError(new Throwable("no data"));
-                    }else{
-                        e.onNext(new JSONObject(data));
-                    }
-                }
-            }
-        })
-                .observeOn(Schedulers.newThread())
-                .subscribe(receiver));
+//        mDisposable.add(Observable.create(new ObservableOnSubscribe<JSONObject>() {
+//            @Override
+//            public void subscribe(ObservableEmitter<JSONObject> e) throws Exception {
+//
+////                BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+////
+////                String data = "";
+////
+////                while (data != null){
+////
+////                    try {
+////                        data = null;
+////                        data = input.readLine();
+////                    } catch (IOException exception) {
+////                        exception.printStackTrace();
+////                    }
+////
+////                    if(data == null){
+////                        e.onError(new Throwable("no data"));
+////                    }else{
+////                        e.onNext(new JSONObject(data));
+////                    }
+////                }
+//            }
+//        })
+//                .observeOn(Schedulers.newThread())
+//                .subscribe(receiver));
 
     }
 

@@ -115,9 +115,9 @@ public class Server extends EndPoint {
                         while(!serverSocket.isClosed()){
 
                             Log.v("TESTRX", ">>>>>>>>> waiting for connection <<<<<<<<<<");
-                            java.net.Socket s = serverSocket.accept();
+                            Socket s = new Socket(serverSocket.accept());
                             Log.v("TESTRX", ">>>>>>>>> ACCEPTED !!!!! <<<<<<<<<<");
-                            e.onNext(new Socket(s));
+                            e.onNext(s);
                         }
                     }
                 }).subscribeOn(Schedulers.newThread());

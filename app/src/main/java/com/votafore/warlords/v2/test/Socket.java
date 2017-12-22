@@ -16,27 +16,35 @@ import java.net.InetAddress;
  * class represents a socket
  */
 
-public class Socket extends java.net.Socket {
+public class Socket {
 
     PrintWriter output;
     BufferedReader input;
 
-    public Socket(InetAddress ip, int port) throws IOException{
-        super(ip, port);
+    java.net.Socket mSocket;
 
-        output = new PrintWriter(getOutputStream());
-        input = new BufferedReader(new InputStreamReader(getInputStream()));
+    public Socket(InetAddress ip, int port) throws IOException{
+        mSocket = new java.net.Socket(ip, port);
+
+        output = new PrintWriter(mSocket.getOutputStream());
+        input = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
     }
 
     public Socket(java.net.Socket s) throws IOException{
 
-        output = new PrintWriter(s.getOutputStream());
-        input = new BufferedReader(new InputStreamReader(s.getInputStream()));
+        mSocket = s;
+
+        output = new PrintWriter(mSocket.getOutputStream());
+        input = new BufferedReader(new InputStreamReader(mSocket.getInputStream()));
+    }
+
+    public void close() throws IOException {
+        mSocket.close();
+        Log.v("TESTRX", "SOCKET.    closed");
     }
 
     @Override
-    public synchronized void close() throws IOException {
-        super.close();
-        Log.v("SOCKET", "closed");
+    public String toString() {
+        return mSocket.toString();
     }
 }

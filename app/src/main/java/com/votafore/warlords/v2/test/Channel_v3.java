@@ -6,6 +6,7 @@ import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -86,7 +87,7 @@ public class Channel_v3 implements IChannel_v2 {
             @Override
             public void accept(final Socket socket) throws Exception {
 
-                Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber");
+                Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber :" + socket.toString());
 
                 sender_map_dsp.put(socket, sender.subscribeOn(Schedulers.io()).subscribe(new Consumer<JSONObject>() {
                     @Override
