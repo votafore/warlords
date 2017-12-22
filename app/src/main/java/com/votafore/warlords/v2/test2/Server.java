@@ -11,6 +11,8 @@ import com.votafore.warlords.v2.test.Channel_v2;
 import com.votafore.warlords.v2.test.Channel_v3;
 import com.votafore.warlords.v2.test.Socket;
 
+import org.json.JSONObject;
+
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
@@ -22,6 +24,7 @@ import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
+import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -82,23 +85,21 @@ public class Server extends EndPoint {
         v3 = new Channel_v3();
 
         // general observable
-        Observable<ServerSocket> obs = Observable.create(new ObservableOnSubscribe<ServerSocket>() {
+        ConnectableObservable<ServerSocket> obs = Observable.create(new ObservableOnSubscribe<ServerSocket>() {
             @Override
             public void subscribe(ObservableEmitter<ServerSocket> e) throws Exception {
 
                 ServerSocket serverSocket = new ServerSocket(0);
+                Log.v("TESTRX", ">>>>>>>>> server created !!!!!!!! <<<<<<<<<<<");
                 e.onNext(serverSocket);
             }
         })
-                .subscribeOn(Schedulers.newThread())
-                .observeOn(Schedulers.computation());
+                .publish();
 
-        // observable/subscriber that trigger when server created for starting broadcast
-        d1 = obs.subscribe(new Consumer<ServerSocket>() {
+        v3.setReceiver(new Consumer<JSONObject>() {
             @Override
-            public void accept(ServerSocket serverSocket) throws Exception {
-                Log.v("TESTRX", ">>>>>>>>> start broadcasting <<<<<<<<<<");
-                manager.startBroadcasting(serverSocket.getLocalPort());
+            public void accept(JSONObject jsonObject) throws Exception {
+                Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
             }
         });
 
@@ -110,12 +111,34 @@ public class Server extends EndPoint {
                 return Observable.create(new ObservableOnSubscribe<Socket>() {
                     @Override
                     public void subscribe(ObservableEmitter<Socket> e) throws Exception {
-                        Log.v("TESTRX", ">>>>>>>>> waiting for connection <<<<<<<<<<");
-                        e.onNext(new Socket(serverSocket.accept()));
+
+                        while(!serverSocket.isClosed()){
+
+                            Log.v("TESTRX", ">>>>>>>>> waiting for connection <<<<<<<<<<");
+                            java.net.Socket s = serverSocket.accept();
+                            e.onNext(new Socket(s));
+                            Log.v("TESTRX", ">>>>>>>>> not waiting for connection anymore <<<<<<<<<<");
+                        }
+                    }
+                }).subscribeOn(Schedulers.newThread());
+            }
+        })
+                .observeOn(Schedulers.io())
+                .subscribe(v3.getSubscriber());
+
+
+        // observable/subscriber that trigger when server created for starting broadcas
+        d1 = obs
+                .observeOn(Schedulers.newThread())
+                .subscribe(new Consumer<ServerSocket>() {
+                    @Override
+                    public void accept(ServerSocket serverSocket) throws Exception {
+                        Log.v("TESTRX", ">>>>>>>>> start broadcasting <<<<<<<<<<");
+                        manager.startBroadcasting(serverSocket.getLocalPort());
                     }
                 });
-            }
-        }).subscribe(v3.getSubscriber());
+
+        obs.connect();
     }
 
 

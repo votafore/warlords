@@ -1,6 +1,7 @@
 package com.votafore.warlords.v2;
 
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -94,7 +95,11 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         mServiceList.add(info);
 
+        Log.v("TESTRX", ">>>>>>>>> info is added to list");
+
         ListItem item = new ListItem();
+
+        Log.v("TESTRX", ">>>>>>>>> new list item is created");
         item.createChanel(info.info.getHost(), info.info.getPort());
         item.getChanel().getSender().onNext(new JSONObject());
 
@@ -139,11 +144,17 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         public void createChanel(final InetAddress ip, final int port){
 
+            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
+
             Channel_v2 ch = new ChanelForList();
+
+            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
             ch.setReceiver(new Consumer<JSONObject>() {
                 @Override
                 public void accept(JSONObject jsonObject) throws Exception {
+
+                    Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is called");
 
                     try {
                         ownerName = jsonObject.getString("owner");
@@ -156,6 +167,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 }
             });
 
+            Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is set");
             ch.addSocket(ip, port);
 
             mChanel = ch;
@@ -178,7 +190,9 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         public void addSocket(InetAddress ip, int port) {
             try {
                 Socket s = new Socket(ip, port);
+                Log.v("TESTRX", ">>>>>>>>> Chanel for list. socket created");
                 onSocketAdded(s);
+                Log.v("TESTRX", ">>>>>>>>> Chanel for list. socket added to channel");
             } catch (IOException e) {
                 e.printStackTrace();
             }

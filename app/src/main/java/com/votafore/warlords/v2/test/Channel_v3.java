@@ -1,5 +1,7 @@
 package com.votafore.warlords.v2.test;
 
+import android.util.Log;
+
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -84,6 +86,8 @@ public class Channel_v3 implements IChannel_v2 {
             @Override
             public void accept(final Socket socket) throws Exception {
 
+                Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber");
+
                 sender_map_dsp.put(socket, sender.subscribe(new Consumer<JSONObject>() {
                     @Override
                     public void accept(JSONObject jsonObject) throws Exception {
@@ -119,6 +123,7 @@ public class Channel_v3 implements IChannel_v2 {
                             try {
                                 data = null;
                                 data = socket.input.readLine();
+
                             } catch (IOException exception) {
                                 exception.printStackTrace();
                             }

@@ -94,7 +94,8 @@ public class ServerManager {
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                         //Log.v("TESTRX", "2. onResolveFailed");
-                                        e.onError(new Throwable(String.valueOf(errorCode)));
+                                        // TODO: 21.12.2017 consumer is missed
+                                        //e.onError(new Throwable(String.valueOf(errorCode)));
                                     }
 
                                     @Override
@@ -142,7 +143,8 @@ public class ServerManager {
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                         //Log.v("TESTRX", "2. onResolveFailed");
-                                        e.onError(new Throwable(String.valueOf(errorCode)));
+                                        // TODO: 21.12.2017 consumer is missed
+                                        //e.onError(new Throwable(String.valueOf(errorCode)));
                                     }
 
                                     @Override
@@ -193,6 +195,7 @@ public class ServerManager {
      *
      * observer for state of broadcasting
      */
+    @Deprecated
     private Observable<ServiceInfo> obs_broadcasting;
 
 
