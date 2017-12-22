@@ -112,7 +112,6 @@ public class Server extends EndPoint {
             }
         }).subscribe(v3.getSubscriber());
 
-
         // observable/subscriber that trigger when server created for starting broadcas
         d1 = obs.subscribe(new Consumer<ServerSocket>() {
                     @Override
