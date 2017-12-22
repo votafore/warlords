@@ -55,9 +55,9 @@ public class App extends Application {
     private void initListPage(){
 
         mServerListAdapter  = new AdapterServerList();
-        mServerManager      = new ServerManager(getApplicationContext(), mServerListAdapter);
+        //mServerManager      = new ServerManager(getApplicationContext(), mServerListAdapter);
 
-        mServerManager.startScanning();
+        //mServerManager.startScanning();
     }
 
     public void finishListPage(){
