@@ -2,6 +2,7 @@ package com.votafore.warlords.v2.test;
 
 import android.util.Log;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataOutputStream;
@@ -74,8 +75,8 @@ public class Channel_v3 implements IChannel_v2 {
     /**
      * in order to know which disposable was created for socket maps are made
      */
-    protected Map<Socket, Disposable> receiver_map_dsp;
-    protected Map<Socket, Disposable> sender_map_dsp;
+    protected Map<ISocket, Disposable> receiver_map_dsp;
+    protected Map<ISocket, Disposable> sender_map_dsp;
 
     /**
      * This method create subscriber, that defines channel's behaviour when new socket is created
@@ -83,11 +84,11 @@ public class Channel_v3 implements IChannel_v2 {
      * whenever new socket is added he has to be set as observer for PublishProcessor (sender)
      * @return Consumer<Socket> - may be set to PublishProcessor or Observable
      */
-    public Consumer<Socket> getSubscriber(){
+    public Consumer<ISocket> getSubscriber(){
 
-        return new Consumer<Socket>() {
+        return new Consumer<ISocket>() {
             @Override
-            public void accept(final Socket socket) throws Exception {
+            public void accept(final ISocket socket) throws Exception {
 
                 //Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber :" + socket.toString());
 
@@ -95,7 +96,7 @@ public class Channel_v3 implements IChannel_v2 {
                     @Override
                     public void accept(JSONObject jsonObject) throws Exception {
                         Log.v("TESTRX", ">>>>>>>>> Channel - socket subscriber. send request for server info into output: " + jsonObject.toString());
-                        socket.output.writeUTF(jsonObject.toString());
+                        socket.send(jsonObject);
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -118,34 +119,50 @@ public class Channel_v3 implements IChannel_v2 {
 
                 receiver_map_dsp.put(socket, Observable.create(new ObservableOnSubscribe<JSONObject>() {
                     @Override
-                    public void subscribe(ObservableEmitter<JSONObject> e) throws Exception {
+                    public void subscribe(final ObservableEmitter<JSONObject> e) throws Exception {
 
-                        String data = "";
-                        while (true){
-
-                            //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. wait for data");
-
-                            try {
-                                data = null;
-                                data = socket.input.readUTF();
-
-                            } catch (IOException exception) {
-                                exception.printStackTrace();
+                        socket.setDataListener(new IDataListener<String>() {
+                            @Override
+                            public void onDataReceived(String data) {
+                                if(data == null){
+                                    e.onComplete();
+                                }else{
+                                    //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
+                                    try {
+                                        e.onNext(new JSONObject(data));
+                                    } catch (JSONException e1) {
+                                        e1.printStackTrace();
+                                    }
+                                }
                             }
+                        });
 
-                            if(data == null){
-                                e.onComplete();
-                                // TODO: 21.12.2017 close socket
-                                break;
-                            }else{
-                                //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
-                                JSONObject res = new JSONObject(data);
-                                e.onNext(res);
-                            }
-                        }
+//                        String data = "";
+//                        while (true){
+//
+//                            //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. wait for data");
+//
+//                            try {
+//                                data = null;
+//                                data = socket.input.readUTF();
+//
+//                            } catch (IOException exception) {
+//                                exception.printStackTrace();
+//                            }
+//
+//                            if(data == null){
+//                                e.onComplete();
+//                                // TODO: 21.12.2017 close socket
+//                                break;
+//                            }else{
+//                                //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
+//                                JSONObject res = new JSONObject(data);
+//                                e.onNext(res);
+//                            }
+//                        }
                     }
                 })
-                        .subscribeOn(Schedulers.newThread())
+                        //.subscribeOn(Schedulers.newThread())
                         .subscribe(receiver, new Consumer<Throwable>() {
                             @Override
                             public void accept(Throwable throwable) throws Exception {

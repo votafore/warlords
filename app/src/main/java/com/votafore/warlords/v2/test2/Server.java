@@ -12,6 +12,7 @@ import com.votafore.warlords.v2.test.Socket;
 import org.json.JSONObject;
 
 import java.net.ServerSocket;
+import java.net.SocketException;
 import java.util.Date;
 
 import io.reactivex.Observable;
@@ -85,8 +86,12 @@ public class Server extends EndPoint {
                             @Override
                             public void subscribe(ObservableEmitter<Socket> e) throws Exception {
                                 while(!serverSocket.isClosed()){
-                                    Socket s = new Socket(serverSocket.accept());
-                                    e.onNext(s);
+                                    try{
+                                        Socket s = new Socket(serverSocket.accept());
+                                        e.onNext(s);
+                                    }catch(SocketException ex){
+                                        ex.printStackTrace();
+                                    }
                                 }
                             }
                         }).subscribeOn(Schedulers.newThread());
