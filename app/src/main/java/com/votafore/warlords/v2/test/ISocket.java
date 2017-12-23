@@ -2,6 +2,8 @@ package com.votafore.warlords.v2.test;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
+
 /**
  * @author Votafore
  * Created on 20.12.2017.
@@ -17,11 +19,16 @@ public interface ISocket {
      * abstraction for sending data
      * @param data
      */
-    void send(JSONObject data);
+    void send(JSONObject data) throws IOException;
 
     /**
-     * callback for receiving data
+     * callback for received data
      * @param listener
      */
-    void setDataListener(IDataListener listener);
+    void setDataListener(IDataListener<String> listener);
+
+    /**
+     * close socket
+     */
+    void close() throws IOException;
 }

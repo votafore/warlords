@@ -8,5 +8,5 @@ package com.votafore.warlords.v2.test;
  */
 
 public interface IDataListener<T> {
-    T onDataReceived();
+    void onDataReceived(T data);
 }

@@ -2,6 +2,8 @@ package com.votafore.warlords.v2.test;
 
 import android.util.Log;
 
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -18,7 +20,7 @@ import java.net.InetAddress;
  * class represents a socket
  */
 
-public class Socket {
+public class Socket implements ISocket{
 
     public DataOutputStream output;
     public DataInputStream input;
@@ -28,14 +30,11 @@ public class Socket {
     public Socket(InetAddress ip, int port) throws IOException{
 
         mSocket = new java.net.Socket(ip, port);
-
         init();
     }
 
     public Socket(java.net.Socket s) throws IOException{
-
         mSocket = s;
-
         init();
     }
 
@@ -58,10 +57,52 @@ public class Socket {
 
 
 
+    /*********** ISocket **************/
+
+    @Override
+    public void send(JSONObject data)throws IOException {
+        output.writeUTF(data.toString());
+    }
+
+    @Override
     public void close() throws IOException {
         mSocket.close();
         Log.v("TESTRX", "SOCKET.    closed");
     }
+
+    @Override
+    public void setDataListener(final IDataListener<String> listener) {
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                while(!mSocket.isClosed()){
+
+                    String data = "";
+
+                    try {
+                        data = null;
+                        data = input.readUTF();
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                    }
+
+                    listener.onDataReceived(data);
+                }
+
+            }
+        }).start();
+    }
+
+
+
+
+
+
+
+
+    /************* miscellaneous ************/
 
     @Override
     public String toString() {
