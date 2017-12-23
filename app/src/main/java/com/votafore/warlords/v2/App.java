@@ -53,11 +53,7 @@ public class App extends Application {
 
 
     private void initListPage(){
-
         mServerListAdapter  = new AdapterServerList();
-        //mServerManager      = new ServerManager(getApplicationContext(), mServerListAdapter);
-
-        //mServerManager.startScanning();
     }
 
     public void finishListPage(){
@@ -75,21 +71,16 @@ public class App extends Application {
 
     public void createServer(){
 
-        // TODO: 18.12.2017 create game
-
         mServer = new Server();
-
-        // ...
-        // initialization of server
-        // ...
-
-        mServer.test(getApplicationContext());
+        mServer.start(getApplicationContext());
 
     }
 
     public void TEST_stopServer(){
-        //mServerManager.stopBroadcasting();
-
         mServer.stop();
+    }
+
+    public Server getServer(){
+        return mServer;
     }
 }

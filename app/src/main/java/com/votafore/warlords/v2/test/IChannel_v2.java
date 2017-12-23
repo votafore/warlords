@@ -16,4 +16,6 @@ import io.reactivex.processors.PublishProcessor;
 public interface IChannel_v2 {
     PublishProcessor<JSONObject> getSender();
     void setReceiver(Consumer<JSONObject> c);
+
+    // TODO: 23.12.2017 add a "close" method to interface
 }

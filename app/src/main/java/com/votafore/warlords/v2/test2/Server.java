@@ -3,10 +3,10 @@ package com.votafore.warlords.v2.test2;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.util.Log;
 
 import com.votafore.warlords.v2.test.Channel_v3;
 import com.votafore.warlords.v2.test.Constants;
+import com.votafore.warlords.v2.test.IChannel_v2;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONObject;
@@ -18,11 +18,12 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
-import io.reactivex.disposables.Disposable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.observables.ConnectableObservable;
+import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -34,64 +35,32 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Server extends EndPoint {
 
+    public Server(){
 
+        mDisposables = new CompositeDisposable();
 
-
-
-
-
-
-
-    private Disposable dsp_broadcaster;
-
-    public void waitForReadyWith(Consumer<NsdServiceInfo> info){
-
-
+        mChannel = new Channel_v3();
     }
 
 
 
+    /**************** 1-st step of starting ***************/
 
+    private Channel_v3 mChannel;
+    private CompositeDisposable mDisposables;
 
-
-
-
-
-
-
-
-
-
-    /****** under tests *********/
-
-    Channel_v3 v3;
-    Disposable d1;
-    Disposable d2;
-
-    public void stop(){
-
-        d1.dispose();
-        d2.dispose();
-
-        v3.close();
-    }
-
-
-
-    public void test(final Context context){
-
-        v3 = new Channel_v3();
+    public void start(final Context context){
 
         // general observable
         ConnectableObservable<ServerSocket> obs = Observable.create(new ObservableOnSubscribe<ServerSocket>() {
             @Override
             public void subscribe(ObservableEmitter<ServerSocket> e) throws Exception {
-                ServerSocket serverSocket = new ServerSocket(0);
+                final ServerSocket serverSocket = new ServerSocket(0);
                 e.onNext(serverSocket);
             }
         }).publish();
 
-        v3.setReceiver(new Consumer<JSONObject>() {
+        mChannel.setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject jsonObject) throws Exception {
                 //Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
@@ -100,31 +69,36 @@ public class Server extends EndPoint {
                     JSONObject response = new JSONObject();
                     response.put("owner", new Date().toString());
                     response.put("playerCount", 1);
-                    v3.getSender().onNext(response);
+                    mChannel.getSender().onNext(response);
                 }
             }
         });
 
         // appender of sockets to channel
-        d2 = obs.flatMap(new Function<ServerSocket, ObservableSource<Socket>>() {
-            @Override
-            public ObservableSource<Socket> apply(final ServerSocket serverSocket) throws Exception {
+        mDisposables.add(
 
-                return Observable.create(new ObservableOnSubscribe<Socket>() {
+                obs.flatMap(new Function<ServerSocket, ObservableSource<Socket>>() {
                     @Override
-                    public void subscribe(ObservableEmitter<Socket> e) throws Exception {
-                        while(!serverSocket.isClosed()){
-                            Socket s = new Socket(serverSocket.accept());
-                            e.onNext(s);
-                        }
+                    public ObservableSource<Socket> apply(final ServerSocket serverSocket) throws Exception {
+
+                        return Observable.create(new ObservableOnSubscribe<Socket>() {
+                            @Override
+                            public void subscribe(ObservableEmitter<Socket> e) throws Exception {
+                                while(!serverSocket.isClosed()){
+                                    Socket s = new Socket(serverSocket.accept());
+                                    e.onNext(s);
+                                }
+                            }
+                        }).subscribeOn(Schedulers.newThread());
                     }
-                }).subscribeOn(Schedulers.newThread());
-            }
-        }).subscribe(v3.getSubscriber());
+                })
+                        .subscribe(mChannel.getSubscriber())
+        );
 
         // observable/subscriber that trigger when server created for starting broadcast
-        d1 = obs
-                .flatMap(new Function<ServerSocket, ObservableSource<?>>() {
+        mDisposables.add(
+
+                obs.flatMap(new Function<ServerSocket, ObservableSource<?>>() {
                     @Override
                     public ObservableSource<?> apply(final ServerSocket serverSocket) throws Exception {
 
@@ -166,6 +140,7 @@ public class Server extends EndPoint {
                                     @Override
                                     public void cancel() throws Exception {
                                         manager.unregisterService(listener);
+                                        serverSocket.close();
                                     }
                                 });
 
@@ -173,11 +148,26 @@ public class Server extends EndPoint {
                         });
                     }
                 })
-                .subscribe();
+                .subscribe()
+        );
 
         obs.connect();
     }
 
+    public void stop(){
+
+        mDisposables.dispose();
+
+        mChannel.close();
+    }
+
+
+
+
+
+    /*************** settings for game that user may adjust *****************/
+
+    private String userName = "<...>";
 
 
 
@@ -191,5 +181,6 @@ public class Server extends EndPoint {
 
 
     /****** TESTS **********/
+
 
 }
