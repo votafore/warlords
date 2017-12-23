@@ -27,13 +27,13 @@
                 android:id="@+id/owner_name"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="28sp"/>
+                android:textSize="24sp"/>
 
             <TextView
                 android:id="@+id/player_count"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:textSize="20sp"/>
+                android:textSize="16sp"/>
 
         </LinearLayout>
 

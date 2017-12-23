@@ -11,16 +11,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v2.test.Channel_v2;
 import com.votafore.warlords.v2.test.Channel_v3;
+import com.votafore.warlords.v2.test.Constants;
 import com.votafore.warlords.v2.test.IChannel_v2;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
@@ -28,7 +26,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
@@ -45,8 +42,6 @@ import io.reactivex.functions.Predicate;
 public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.ViewHolder>{
 
     public AdapterServerList(){
-
-        //mServiceList = new ArrayList<>();
         mList = new ArrayList<>();
     }
 
@@ -90,8 +85,12 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         @Override
         public void onClick(View v) {
-            Log.v("TESTRX", ">>>>>>>>> request: get info");
-            mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject());
+            //Log.v("TESTRX", ">>>>>>>>> request: get info");
+            try {
+                mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -103,8 +102,6 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
     /******************* Service scanning ************************/
 
     private CompositeDisposable dsp_scanner;
-
-    private String ServiceName = "Warlords";
 
     public void stopScan(){
         dsp_scanner.dispose();
@@ -141,7 +138,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
                         // TODO: 22.12.2017 check if in is necessary
 
-                        Log.v("TESTRX", "onDiscoveryStarted");
+//                        Log.v("TESTRX", "onDiscoveryStarted");
 
 //                        ServiceInfo svc_info = new ServiceInfo();
 //                        svc_info.messageType = ServiceInfo.SUCCESS_DISCOVERYSTART;
@@ -155,7 +152,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
                         // TODO: 22.12.2017 check if in is necessary
 
-                        Log.v("TESTRX", "onDiscoveryStopped");
+//                        Log.v("TESTRX", "onDiscoveryStopped");
 //
 //                        ServiceInfo svc_info = new ServiceInfo();
 //                        svc_info.messageType = ServiceInfo.SUCCESS_DISCOVERYSTOP;
@@ -189,7 +186,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     }
                 };
 
-                manager.discoverServices("_http._tcp", NsdManager.PROTOCOL_DNS_SD, listener);
+                manager.discoverServices(Constants.SERVICETYPE, NsdManager.PROTOCOL_DNS_SD, listener);
 
                 e.setCancellable(new Cancellable() {
                     @Override
@@ -203,7 +200,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         .filter(new Predicate<ServiceInfo>() {
             @Override
             public boolean test(ServiceInfo serviceInfo) throws Exception {
-                return serviceInfo.info.getServiceName().contains(ServiceName);
+                return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME);
             }
         });
 
@@ -274,7 +271,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                             public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
 
                                 ListItem item = new ListItem();
-                                item.createChanel(serviceInfo.info.getHost(), serviceInfo.info.getPort());
+                                item.connectTo(serviceInfo.info.getHost(), serviceInfo.info.getPort());
                                 item.getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
                                 e.onNext(item);
                             }
@@ -352,7 +349,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         .flatMap(new Function<ServiceInfo, Observable<ListItem>>() {
                             @Override
                             public Observable<ListItem> apply(final ServiceInfo serviceInfo) throws Exception {
-
+                                // TODO: 23.12.2017 may be this step is redundant, it might be done in last step
                                 return Observable.create(new ObservableOnSubscribe<ListItem>() {
                                     @Override
                                     public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
@@ -388,61 +385,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     /********************* IAdapter *****************/
 
-    //private List<ServiceInfo> mServiceList;
     private List<ListItem> mList;
-
-//    @Override
-//    public void addServer(ServiceInfo info) {
-//
-//        // check if IP already exists
-//        for(ServiceInfo service: mServiceList){
-//            if(service.info.getHost().toString().equals(info.info.getHost().toString()))
-//                return;
-//        }
-//
-//        mServiceList.add(info);
-//
-//        //Log.v("TESTRX", ">>>>>>>>> info is added to list");
-//
-//        ListItem item = new ListItem();
-//
-//        //Log.v("TESTRX", ">>>>>>>>> new list item is created");
-//        item.createChanel(info.info.getHost(), info.info.getPort());
-//
-//        //Log.v("TESTRX", ">>>>>>>>> List item. send request for server info");
-//        //item.getChanel().getSender().onNext(new JSONObject());
-//
-//        mList.add(item);
-//        notifyItemInserted(mServiceList.size()-1);
-//    }
-
-//    @Override
-//    public void removeServer(ServiceInfo info) {
-//
-//        // find server by IP
-//        String ip = info.info.getHost().toString();
-//        int index = -1;
-//
-//        for(ServiceInfo service: mServiceList){
-//            if(service.info.getHost().toString().equals(ip)){
-//                index = mServiceList.indexOf(service);
-//                break;
-//            }
-//        }
-//
-//        if(index < 0){
-//            // strange... service doesn't exist
-//            return;
-//        }
-//
-//        mList.get(index).getChanel().getSender().onComplete();
-//        mList.remove(index);
-//
-//        mServiceList.remove(index);
-//        notifyItemRemoved(index);
-//    }
-
-
 
     public class ListItem{
 
@@ -451,21 +394,19 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         private InetAddress mIP;
 
-        private IChannel_v2 mChanel;
+        private Channel_v3 mChanel;
 
         private Disposable dsp_socket;
 
-        public void createChanel(final InetAddress ip, final int port){
+        public ListItem(){
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
-            mIP = ip;
-
-            Channel_v3 ch = new Channel_v3();
+            mChanel = new Channel_v3();
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
-            ch.setReceiver(new Consumer<JSONObject>() {
+            mChanel.setReceiver(new Consumer<JSONObject>() {
                 @Override
                 public void accept(JSONObject jsonObject) throws Exception {
 
@@ -482,20 +423,32 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 }
             });
 
+        }
+
+        public void connectTo(final InetAddress ip, final int port){
+
+            mIP = ip;
+
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. receiver is set");
 
             //Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once");
             dsp_socket = Observable.create(new ObservableOnSubscribe<Socket>() {
                 @Override
                 public void subscribe(ObservableEmitter<Socket> e) throws Exception {
-                    Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once - create socket");
+                    //Log.v("TESTRX", ">>>>>>>>> subscribing for adding socket in list once - create socket");
                     Socket s = new Socket(ip, port);
                     e.onNext(s);
-                }
-            }).subscribe(ch.getSubscriber());
 
-            mChanel = ch;
+                    e.onComplete();
+                }
+            }).subscribe(mChanel.getSubscriber());
+
         }
+
+        // TODO: 23.12.2017 create local connection
+
+
+
 
         public IChannel_v2 getChanel(){
             return mChanel;

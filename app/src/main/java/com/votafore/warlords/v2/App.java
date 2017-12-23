@@ -62,10 +62,10 @@ public class App extends Application {
 
     public void finishListPage(){
 
-        mServerManager.stopScanning();
-
-        mServerManager = null;
-        mServerListAdapter = null;
+//        mServerManager.stopScanning();
+//
+//        mServerManager = null;
+//        mServerListAdapter = null;
     }
 
 
@@ -83,12 +83,12 @@ public class App extends Application {
         // initialization of server
         // ...
 
-        mServer.test(mServerManager);
+        mServer.test(getApplicationContext());
 
     }
 
     public void TEST_stopServer(){
-        mServerManager.stopBroadcasting();
+        //mServerManager.stopBroadcasting();
 
         mServer.stop();
     }

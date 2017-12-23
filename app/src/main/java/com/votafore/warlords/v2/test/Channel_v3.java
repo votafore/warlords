@@ -78,7 +78,7 @@ public class Channel_v3 implements IChannel_v2 {
     protected Map<Socket, Disposable> sender_map_dsp;
 
     /**
-     * This method create subscriber, that define channel's behaviour when new socket is created
+     * This method create subscriber, that defines channel's behaviour when new socket is created
      *
      * whenever new socket is added he has to be set as observer for PublishProcessor (sender)
      * @return Consumer<Socket> - may be set to PublishProcessor or Observable
@@ -89,24 +89,13 @@ public class Channel_v3 implements IChannel_v2 {
             @Override
             public void accept(final Socket socket) throws Exception {
 
-                Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber :" + socket.toString());
+                //Log.v("TESTRX", ">>>>>>>>> got new socket in subscriber :" + socket.toString());
 
                 sender_map_dsp.put(socket, sender.subscribe(new Consumer<JSONObject>() {
                     @Override
                     public void accept(JSONObject jsonObject) throws Exception {
                         Log.v("TESTRX", ">>>>>>>>> Channel - socket subscriber. send request for server info into output: " + jsonObject.toString());
-
-//                        try(PrintWriter pw = new PrintWriter(socket.mSocket.getOutputStream())){
-//                            pw.print("hello, there!!");
-//                        }
-
-                        jsonObject.put("data", "hello, there");
                         socket.output.writeUTF(jsonObject.toString());
-
-                        //PrintWriter pw = new PrintWriter(socket.mSocket.getOutputStream());
-                        //pw.println("hello, there!!");
-                        //pw.close();
-                        //socket.output.println(jsonObject.toString());
                     }
                 }, new Consumer<Throwable>() {
                     @Override
@@ -134,7 +123,7 @@ public class Channel_v3 implements IChannel_v2 {
                         String data = "";
                         while (true){
 
-                            Log.v("TESTRX", ">>>>>>>>> Channel - socket input. wait for data");
+                            //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. wait for data");
 
                             try {
                                 data = null;
@@ -149,9 +138,8 @@ public class Channel_v3 implements IChannel_v2 {
                                 // TODO: 21.12.2017 close socket
                                 break;
                             }else{
-                                Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
-                                JSONObject res = new JSONObject();
-                                res.put("data", data);
+                                //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
+                                JSONObject res = new JSONObject(data);
                                 e.onNext(res);
                             }
                         }

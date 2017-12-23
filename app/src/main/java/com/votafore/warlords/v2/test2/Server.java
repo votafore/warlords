@@ -1,21 +1,25 @@
 package com.votafore.warlords.v2.test2;
 
+import android.content.Context;
+import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
-import com.votafore.warlords.v2.ServerManager;
 import com.votafore.warlords.v2.test.Channel_v3;
+import com.votafore.warlords.v2.test.Constants;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONObject;
 
 import java.net.ServerSocket;
+import java.util.Date;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.observables.ConnectableObservable;
@@ -74,7 +78,7 @@ public class Server extends EndPoint {
 
 
 
-    public void test(final ServerManager manager){
+    public void test(final Context context){
 
         v3 = new Channel_v3();
 
@@ -90,8 +94,14 @@ public class Server extends EndPoint {
         v3.setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject jsonObject) throws Exception {
-                Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
-                // TODO: 22.12.2017 handle request
+                //Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
+                if(jsonObject.getString("type").equals("request") && jsonObject.getString("data").equals("ServerInfo")){
+
+                    JSONObject response = new JSONObject();
+                    response.put("owner", new Date().toString());
+                    response.put("playerCount", 1);
+                    v3.getSender().onNext(response);
+                }
             }
         });
 
@@ -112,13 +122,58 @@ public class Server extends EndPoint {
             }
         }).subscribe(v3.getSubscriber());
 
-        // observable/subscriber that trigger when server created for starting broadcas
-        d1 = obs.subscribe(new Consumer<ServerSocket>() {
+        // observable/subscriber that trigger when server created for starting broadcast
+        d1 = obs
+                .flatMap(new Function<ServerSocket, ObservableSource<?>>() {
                     @Override
-                    public void accept(ServerSocket serverSocket) throws Exception {
-                        manager.startBroadcasting(serverSocket.getLocalPort());
+                    public ObservableSource<?> apply(final ServerSocket serverSocket) throws Exception {
+
+                        return Observable.create(new ObservableOnSubscribe<Void>() {
+                            @Override
+                            public void subscribe(ObservableEmitter<Void> e) throws Exception {
+
+                                final NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+                                final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
+                                    @Override
+                                    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+
+                                    }
+
+                                    @Override
+                                    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+
+                                    }
+
+                                    @Override
+                                    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+
+                                    }
+
+                                    @Override
+                                    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+
+                                    }
+                                };
+
+                                NsdServiceInfo regInfo = new NsdServiceInfo();
+                                regInfo.setServiceName(Constants.SERVICENAME);
+                                regInfo.setServiceType(Constants.SERVICETYPE);
+                                regInfo.setPort(serverSocket.getLocalPort());
+
+                                manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
+
+                                e.setCancellable(new Cancellable() {
+                                    @Override
+                                    public void cancel() throws Exception {
+                                        manager.unregisterService(listener);
+                                    }
+                                });
+
+                            }
+                        });
                     }
-                });
+                })
+                .subscribe();
 
         obs.connect();
     }
