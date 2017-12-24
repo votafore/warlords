@@ -1,10 +1,23 @@
 package com.votafore.warlords.v2;
 
 import android.app.Application;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.database.ContentObservable;
+import android.net.ConnectivityManager;
 import android.net.nsd.NsdServiceInfo;
+import android.net.wifi.WifiManager;
+import android.text.format.Formatter;
+import android.util.Log;
 
 import com.votafore.warlords.v2.test2.Server;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -17,6 +30,39 @@ public class App extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Log.v("TESTRX", "refresh IP");
+        refreshIP();
+
+        // start watching network start
+        Observable.create(new ObservableOnSubscribe<Intent>() {
+            @Override
+            public void subscribe(final ObservableEmitter<Intent> e) throws Exception {
+
+                final BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+                        e.onNext(intent);
+                    }
+                };
+
+                IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+                getApplicationContext().registerReceiver(receiver, filter);
+
+                e.setCancellable(new Cancellable() {
+                    @Override
+                    public void cancel() throws Exception {
+                        getApplicationContext().unregisterReceiver(receiver);
+                    }
+                });
+            }
+        }).subscribe(new Consumer<Intent>() {
+            @Override
+            public void accept(Intent intent) throws Exception {
+                Log.v("TESTRX", "refresh IP - subscriber");
+                refreshIP();
+            }
+        });
     }
 
 
@@ -82,5 +128,25 @@ public class App extends Application {
 
     public Server getServer(){
         return mServer;
+    }
+
+
+
+
+
+
+
+
+
+
+    /***************** UTILS **************/
+
+    private String mDeviceIP = "";
+
+    private void refreshIP(){
+
+        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        mDeviceIP = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        //String ip = "/" + Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
     }
 }
