@@ -6,10 +6,14 @@ import android.net.nsd.NsdServiceInfo;
 
 import com.votafore.warlords.v2.test.Channel;
 import com.votafore.warlords.v2.test.Constants;
+import com.votafore.warlords.v2.test.IChannel;
+import com.votafore.warlords.v2.test.IDataListener;
+import com.votafore.warlords.v2.test.ISocket;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.Date;
@@ -18,11 +22,15 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
+import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.observables.ConnectableObservable;
+import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -39,6 +47,20 @@ public class Server extends EndPoint {
         mDisposables = new CompositeDisposable();
 
         mChannel = new Channel();
+
+        mReceiver = new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject jsonObject) throws Exception {
+                //Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
+                if(jsonObject.getString("type").equals("request") && jsonObject.getString("data").equals("ServerInfo")){
+
+                    JSONObject response = new JSONObject();
+                    response.put("owner", new Date().toString());
+                    response.put("playerCount", 1);
+                    mChannel.getSender().onNext(response);
+                }
+            }
+        };
     }
 
 
@@ -47,6 +69,8 @@ public class Server extends EndPoint {
 
     private Channel mChannel;
     private CompositeDisposable mDisposables;
+
+    private Consumer<JSONObject> mReceiver;
 
     public void start(final Context context){
 
@@ -59,19 +83,7 @@ public class Server extends EndPoint {
             }
         }).publish();
 
-        mChannel.setReceiver(new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject jsonObject) throws Exception {
-                //Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
-                if(jsonObject.getString("type").equals("request") && jsonObject.getString("data").equals("ServerInfo")){
-
-                    JSONObject response = new JSONObject();
-                    response.put("owner", new Date().toString());
-                    response.put("playerCount", 1);
-                    mChannel.getSender().onNext(response);
-                }
-            }
-        });
+        mChannel.setReceiver(mReceiver);
 
         // appender of sockets to channel
         mDisposables.add(
@@ -185,5 +197,21 @@ public class Server extends EndPoint {
 
     /****** TESTS **********/
 
+    public IChannel getLocalChannel(){
 
+        return new IChannel() {
+            @Override
+            public PublishProcessor<JSONObject> getSender() {
+                PublishProcessor<JSONObject> localSender = PublishProcessor.create();
+                localSender.subscribe(mReceiver);
+
+                return localSender;
+            }
+
+            @Override
+            public void setReceiver(Consumer<JSONObject> c) {
+                mChannel.getSender().subscribe(c);
+            }
+        };
+    }
 }
