@@ -4,9 +4,7 @@ import android.util.Log;
 
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,8 +12,6 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.Observer;
-import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
@@ -33,7 +29,7 @@ import io.reactivex.schedulers.Schedulers;
  * object responsible for sending data via socket(s)
  */
 
-public abstract class Channel_v2 implements IChannel_v2 {
+public abstract class Channel_v2 implements IChannel {
 
     protected PublishProcessor<JSONObject> sender;
     protected Consumer<JSONObject> receiver;

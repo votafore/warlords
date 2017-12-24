@@ -148,7 +148,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         String ownerName;
         String playerCount;
 
-        private IChannel_v2 mChanel;
+        private IChannel mChanel;
 
         private Disposable dsp_socket;
 
@@ -156,7 +156,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
-            Channel_v3 ch = new Channel_v3();
+            Channel ch = new Channel();
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
@@ -203,7 +203,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             mChanel = ch;
         }
 
-        public IChannel_v2 getChanel(){
+        public IChannel getChanel(){
             return mChanel;
         }
 

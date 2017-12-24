@@ -11,9 +11,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v2.test.Channel_v3;
+import com.votafore.warlords.v2.test.Channel;
 import com.votafore.warlords.v2.test.Constants;
-import com.votafore.warlords.v2.test.IChannel_v2;
+import com.votafore.warlords.v2.test.IChannel;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONException;
@@ -394,7 +394,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         private InetAddress mIP;
 
-        private Channel_v3 mChanel;
+        private Channel mChanel;
 
         private Disposable dsp_socket;
 
@@ -402,7 +402,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
-            mChanel = new Channel_v3();
+            mChanel = new Channel();
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
@@ -450,7 +450,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
 
 
-        public IChannel_v2 getChanel(){
+        public IChannel getChanel(){
             return mChanel;
         }
 

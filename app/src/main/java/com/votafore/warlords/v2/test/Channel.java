@@ -5,11 +5,7 @@ import android.util.Log;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.SocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,14 +29,14 @@ import io.reactivex.schedulers.Schedulers;
  * object responsible for sending data via socket(s)
  */
 
-public class Channel_v3 implements IChannel_v2 {
+public class Channel implements IChannel {
 
     // TODO: 21.12.2017 check if using of interface is necessary
     
     protected PublishProcessor<JSONObject> sender;
     protected Consumer<JSONObject> receiver;
 
-    public Channel_v3(){
+    public Channel(){
 
         sender = PublishProcessor.create();
         sender.observeOn(Schedulers.io());
@@ -126,40 +122,17 @@ public class Channel_v3 implements IChannel_v2 {
                             public void onDataReceived(String data) {
                                 if(data == null){
                                     e.onComplete();
+                                    // TODO: 21.12.2017 close socket
                                 }else{
                                     //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
                                     try {
                                         e.onNext(new JSONObject(data));
-                                    } catch (JSONException e1) {
-                                        e1.printStackTrace();
+                                    } catch (JSONException ex) {
+                                        ex.printStackTrace();
                                     }
                                 }
                             }
                         });
-
-//                        String data = "";
-//                        while (true){
-//
-//                            //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. wait for data");
-//
-//                            try {
-//                                data = null;
-//                                data = socket.input.readUTF();
-//
-//                            } catch (IOException exception) {
-//                                exception.printStackTrace();
-//                            }
-//
-//                            if(data == null){
-//                                e.onComplete();
-//                                // TODO: 21.12.2017 close socket
-//                                break;
-//                            }else{
-//                                //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
-//                                JSONObject res = new JSONObject(data);
-//                                e.onNext(res);
-//                            }
-//                        }
                     }
                 })
                         //.subscribeOn(Schedulers.newThread())

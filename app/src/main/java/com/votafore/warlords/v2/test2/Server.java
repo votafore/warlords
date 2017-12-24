@@ -4,9 +4,8 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 
-import com.votafore.warlords.v2.test.Channel_v3;
+import com.votafore.warlords.v2.test.Channel;
 import com.votafore.warlords.v2.test.Constants;
-import com.votafore.warlords.v2.test.IChannel_v2;
 import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONObject;
@@ -24,7 +23,6 @@ import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.observables.ConnectableObservable;
-import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -40,14 +38,14 @@ public class Server extends EndPoint {
 
         mDisposables = new CompositeDisposable();
 
-        mChannel = new Channel_v3();
+        mChannel = new Channel();
     }
 
 
 
     /**************** 1-st step of starting ***************/
 
-    private Channel_v3 mChannel;
+    private Channel mChannel;
     private CompositeDisposable mDisposables;
 
     public void start(final Context context){

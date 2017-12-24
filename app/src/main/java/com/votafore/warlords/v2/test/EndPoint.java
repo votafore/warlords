@@ -17,7 +17,7 @@ public class EndPoint {
     /**
      * chanel for connection
      */
-    protected IChanel mChanel;
+    protected IChannel_v1 mChanel;
 
 
     /**

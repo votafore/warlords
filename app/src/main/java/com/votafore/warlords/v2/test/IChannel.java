@@ -13,7 +13,7 @@ import io.reactivex.processors.PublishProcessor;
  * presents object responsible for sending of information to server
  */
 
-public interface IChannel_v2 {
+public interface IChannel {
     PublishProcessor<JSONObject> getSender();
     void setReceiver(Consumer<JSONObject> c);
 

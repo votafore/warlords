@@ -51,7 +51,7 @@ public class EndPointClient extends EndPoint {
 
 
 
-    public class Chanel implements IChanel{
+    public class Chanel implements IChannel_v1 {
 
         private Socket mSocket;
 

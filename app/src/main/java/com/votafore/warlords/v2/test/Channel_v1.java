@@ -21,13 +21,13 @@ import io.reactivex.schedulers.Schedulers;
  * Created on 20.12.2017.
  */
 
-public abstract class Chanel {
+public abstract class Channel_v1 {
 
     protected CompositeDisposable mDisposable;
     protected PublishProcessor<JSONObject> sender;
     protected Consumer<JSONObject> receiver;
 
-    public Chanel(){
+    public Channel_v1(){
 
         mDisposable = new CompositeDisposable();
 

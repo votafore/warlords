@@ -9,7 +9,7 @@ import java.net.InetAddress;
  * presents object responsible for sending of information to server
  */
 
-public interface IChanel {
+public interface IChannel_v1 {
     void connect(InetAddress ip, int port);
     void disconnect();
 }
