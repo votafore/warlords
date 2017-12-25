@@ -101,7 +101,7 @@ public class App extends Application {
 
 
     private void initListPage(){
-        mServerListAdapter  = new AdapterServerList();
+        mServerListAdapter  = new AdapterServerList(this);
     }
 
     public void finishListPage(){
@@ -177,4 +177,44 @@ public class App extends Application {
             Log.e("IP Address", ex.toString());
         }
     }
+
+
+
+
+
+
+
+
+    /*************** TESTS *********************/
+
+
+    /**
+     * transition: list of servers -> server settings
+     */
+
+    private AdapterServerList.ListItem mSelected;
+
+    public void setSelected(AdapterServerList.ListItem item){
+        mSelected = item;
+    }
+
+    public AdapterServerList.ListItem getSelected(){
+        return mSelected;
+    }
+
+
+
+    /**
+     * START GAME !!!!!!!!!!
+     * finish scanning for services/servers
+     * finish broadcasting
+     */
+    public void startGame(){
+        finishListPage();
+
+        // TODO: 25.12.2017 prepare objects for game
+    }
+
+
+
 }

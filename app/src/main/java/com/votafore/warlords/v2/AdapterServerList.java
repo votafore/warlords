@@ -1,6 +1,7 @@
 package com.votafore.warlords.v2;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.support.v7.widget.RecyclerView;
@@ -10,6 +11,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.votafore.warlords.ActivityGame;
 import com.votafore.warlords.R;
 
 import org.json.JSONException;
@@ -37,7 +39,10 @@ import io.reactivex.functions.Predicate;
 
 public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.ViewHolder>{
 
-    public AdapterServerList(){
+    private Context mContext;
+
+    public AdapterServerList(Context c){
+        mContext = c;
         mList = new ArrayList<>();
     }
 
@@ -82,11 +87,20 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         @Override
         public void onClick(View v) {
             //Log.v("TESTRX", ">>>>>>>>> request: get info");
-            try {
-                mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
+//
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+
+            App app = (App) mContext.getApplicationContext();
+            app.setSelected(mList.get(getAdapterPosition()));
+
+            Intent i = new Intent(mContext, ActivityGame.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            mContext.startActivity(i);
         }
     }
 
