@@ -5,14 +5,11 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.ContentObservable;
-import android.net.ConnectivityManager;
-import android.net.nsd.NsdServiceInfo;
 import android.net.wifi.WifiManager;
 import android.text.format.Formatter;
 import android.util.Log;
 
-import com.votafore.warlords.v2.test2.Server;
+import com.votafore.warlords.v2.versions.ServerManager;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;

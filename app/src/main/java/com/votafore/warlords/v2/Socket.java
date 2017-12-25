@@ -1,15 +1,15 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2;
 
 import android.util.Log;
 
+import com.votafore.warlords.v2.IDataListener;
+import com.votafore.warlords.v2.ISocket;
+
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.net.InetAddress;
 
 
@@ -20,7 +20,7 @@ import java.net.InetAddress;
  * class represents a socket
  */
 
-public class Socket implements ISocket{
+public class Socket implements ISocket {
 
     public DataOutputStream output;
     public DataInputStream input;

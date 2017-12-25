@@ -1,4 +1,4 @@
-package com.votafore.warlords.v2.test2;
+package com.votafore.warlords.v2.versions;
 
 /**
  * @author Votafore

@@ -1,4 +1,4 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
 
 import java.net.InetAddress;
 

@@ -1,4 +1,4 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
 
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -8,8 +8,10 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v2.IAdapter;
 import com.votafore.warlords.v2.ServiceInfo;
+import com.votafore.warlords.v2.Channel;
+import com.votafore.warlords.v2.IChannel;
+import com.votafore.warlords.v2.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;

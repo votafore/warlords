@@ -1,4 +1,6 @@
-package com.votafore.warlords.v2.test2;
+package com.votafore.warlords.v2.versions;
+
+import com.votafore.warlords.v2.versions.EndPoint;
 
 /**
  * @author Votafore

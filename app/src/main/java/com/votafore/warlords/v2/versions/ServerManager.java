@@ -1,11 +1,11 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.util.Log;
 
-import com.votafore.warlords.v2.IAdapter;
-import com.votafore.warlords.v2.ServiceInfo;
+import com.votafore.warlords.v2.*;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -33,7 +33,7 @@ public class ServerManager {
     String ServiceName = "Warlords";
 
     private Context mContext;
-    private com.votafore.warlords.v2.IAdapter mAdapter;
+    private IAdapter mAdapter;
 
     public ServerManager(Context ctx, IAdapter adapter){
 
@@ -119,7 +119,7 @@ public class ServerManager {
                 .subscribe(new Consumer<ServiceInfo>() {
             @Override
             public void accept(ServiceInfo serviceInfo) throws Exception {
-                mAdapter.addServer(serviceInfo);
+                //mAdapter.addServer(serviceInfo);
                 //Log.v("TESTRX", "server is added to list");
             }
         });
@@ -168,7 +168,7 @@ public class ServerManager {
                 .subscribe(new Consumer<ServiceInfo>() {
                     @Override
                     public void accept(ServiceInfo serviceInfo) throws Exception {
-                        mAdapter.removeServer(serviceInfo);
+                        //mAdapter.removeServer(serviceInfo);
                         //Log.v("TESTRX", "server is removed from list");
                     }
                 });

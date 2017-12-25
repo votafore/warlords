@@ -1,5 +1,7 @@
 package com.votafore.warlords.v2.test;
 
+import com.votafore.warlords.v2.versions.IChannel_v1;
+
 import org.json.JSONObject;
 
 import io.reactivex.disposables.Disposable;

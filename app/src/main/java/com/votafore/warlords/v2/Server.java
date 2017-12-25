@@ -1,22 +1,15 @@
-package com.votafore.warlords.v2.test2;
+package com.votafore.warlords.v2;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.util.Log;
 
-import com.votafore.warlords.v2.AdapterServerList;
-import com.votafore.warlords.v2.test.Channel;
-import com.votafore.warlords.v2.test.Constants;
-import com.votafore.warlords.v2.test.IChannel;
-import com.votafore.warlords.v2.test.IDataListener;
-import com.votafore.warlords.v2.test.ISocket;
-import com.votafore.warlords.v2.test.Socket;
+import com.votafore.warlords.v2.versions.EndPoint;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.Date;
@@ -25,9 +18,6 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.ObservableSource;
-import io.reactivex.Single;
-import io.reactivex.SingleEmitter;
-import io.reactivex.SingleOnSubscribe;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;

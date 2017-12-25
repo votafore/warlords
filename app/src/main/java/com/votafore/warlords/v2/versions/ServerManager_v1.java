@@ -1,9 +1,10 @@
-package com.votafore.warlords.v2;
+package com.votafore.warlords.v2.versions;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.util.Log;
+
+import com.votafore.warlords.v2.ServiceInfo;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -26,14 +27,14 @@ import io.reactivex.functions.Predicate;
  *      - making list of available games(or servers)
  */
 
-public class ServerManager {
+public class ServerManager_v1 {
 
     String ServiceName = "Warlords";
 
     private Context mContext;
     private IAdapter mAdapter;
 
-    public ServerManager(Context ctx, IAdapter adapter){
+    public ServerManager_v1(Context ctx, IAdapter adapter){
 
         mContext = ctx;
         mAdapter = adapter;

@@ -1,4 +1,4 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
 
 import android.util.Log;
 
@@ -26,7 +26,7 @@ import io.reactivex.schedulers.Schedulers;
  * represent a client
  */
 
-public class EndPointClient extends EndPoint {
+public class EndPointClient extends com.votafore.warlords.v2.test.EndPoint {
 
     public EndPointClient(InetAddress ip, int port){
 

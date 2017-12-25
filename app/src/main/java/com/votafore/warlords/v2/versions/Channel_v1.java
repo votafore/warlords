@@ -1,17 +1,12 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
+
+import com.votafore.warlords.v2.Socket;
 
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
@@ -47,7 +42,7 @@ public abstract class Channel_v1 {
         receiver = consumer;
     }
 
-    protected void onSocketAdded(final com.votafore.warlords.v2.test.Socket socket){
+    protected void onSocketAdded(final Socket socket){
 
 //        mDisposable.add(sender.subscribe(new Consumer<JSONObject>() {
 //            @Override

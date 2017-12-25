@@ -1,6 +1,9 @@
-package com.votafore.warlords.v2.test;
+package com.votafore.warlords.v2.versions;
 
 import android.util.Log;
+
+import com.votafore.warlords.v2.IChannel;
+import com.votafore.warlords.v2.Socket;
 
 import org.json.JSONObject;
 

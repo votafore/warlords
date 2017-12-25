@@ -11,10 +11,6 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v2.test.Channel;
-import com.votafore.warlords.v2.test.Constants;
-import com.votafore.warlords.v2.test.IChannel;
-import com.votafore.warlords.v2.test.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
