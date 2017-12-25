@@ -186,32 +186,8 @@ public class Server extends EndPoint {
 
 
 
-
-    /*************** settings for game that user may adjust *****************/
-
-    private String userName = "<...>";
-
-
-
-
-
-
-    /******** JSON handler *********/
-
-
-
-
-
-    /****** TESTS **********/
-
     public AdapterServerList.ListItem getLocalItem(){
-
-        Log.v("TESTRX", "SERVER >>>>>>>    create local item");
-
-        LocalItem item = new LocalItem();
-
-        return item;
-
+        return new LocalItem();
     }
 
 
@@ -252,4 +228,30 @@ public class Server extends EndPoint {
             });
         }
     }
+
+
+
+
+
+    /*************** settings for game that user may adjust *****************/
+
+    private String userName = "<...>";
+
+
+
+
+
+
+    /******** JSON handler *********/
+
+
+
+
+
+    /****** TESTS **********/
+
+
+
+
+
 }

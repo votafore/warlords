@@ -109,10 +109,10 @@ public class App extends Application {
 
     public void finishListPage(){
 
-//        mServerManager.stopScanning();
-//
+        mServerListAdapter.stopScan();
+
 //        mServerManager = null;
-//        mServerListAdapter = null;
+        mServerListAdapter = null;
     }
 
 
