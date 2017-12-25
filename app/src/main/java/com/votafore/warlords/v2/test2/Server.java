@@ -3,7 +3,9 @@ package com.votafore.warlords.v2.test2;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
+import android.util.Log;
 
+import com.votafore.warlords.v2.AdapterServerList;
 import com.votafore.warlords.v2.test.Channel;
 import com.votafore.warlords.v2.test.Constants;
 import com.votafore.warlords.v2.test.IChannel;
@@ -11,6 +13,7 @@ import com.votafore.warlords.v2.test.IDataListener;
 import com.votafore.warlords.v2.test.ISocket;
 import com.votafore.warlords.v2.test.Socket;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
@@ -51,7 +54,9 @@ public class Server extends EndPoint {
         mReceiver = new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject jsonObject) throws Exception {
-                //Log.v("TESTRX", ">>>>>>>>> query has been received <<<<<<<<<<");
+
+                Log.v("TESTRX", "SERVER >>>>>>> query has been received");
+
                 if(jsonObject.getString("type").equals("request") && jsonObject.getString("data").equals("ServerInfo")){
 
                     JSONObject response = new JSONObject();
@@ -167,6 +172,8 @@ public class Server extends EndPoint {
         );
 
         obs.connect();
+
+        Log.v("TESTRX", "SERVER >>>>>>>    started");
     }
 
     public void stop(){
@@ -197,21 +204,52 @@ public class Server extends EndPoint {
 
     /****** TESTS **********/
 
-    public IChannel getLocalChannel(){
+    public AdapterServerList.ListItem getLocalItem(){
 
-        return new IChannel() {
-            @Override
-            public PublishProcessor<JSONObject> getSender() {
-                PublishProcessor<JSONObject> localSender = PublishProcessor.create();
-                localSender.subscribe(mReceiver);
+        Log.v("TESTRX", "SERVER >>>>>>>    create local item");
 
-                return localSender;
-            }
+        LocalItem item = new LocalItem();
 
-            @Override
-            public void setReceiver(Consumer<JSONObject> c) {
-                mChannel.getSender().subscribe(c);
-            }
-        };
+        return item;
+
+    }
+
+
+    public class LocalItem extends AdapterServerList.ListItem{
+
+        public LocalItem(){
+
+            mChannel = new IChannel() {
+                @Override
+                public PublishProcessor<JSONObject> getSender() {
+                    PublishProcessor<JSONObject> localSender = PublishProcessor.create();
+                    localSender.subscribe(mReceiver);
+
+                    return localSender;
+                }
+
+                @Override
+                public void setReceiver(Consumer<JSONObject> c) {
+                    Server.this.mChannel.getSender().subscribe(c);
+                }
+            };
+
+            mChannel.setReceiver(new Consumer<JSONObject>() {
+                @Override
+                public void accept(JSONObject jsonObject) throws Exception {
+
+                    Log.v("TESTRX", "SERVER >>>>>>> LIST ITEM >>>>>>>   receiver is called");
+
+                    try {
+                        ownerName = jsonObject.getString("owner");
+                        playerCount = jsonObject.getString("playerCount");
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                    mListener.onItemChanged();
+                }
+            });
+        }
     }
 }

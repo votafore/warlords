@@ -14,6 +14,11 @@ import android.util.Log;
 
 import com.votafore.warlords.v2.test2.Server;
 
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
+
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
@@ -120,9 +125,12 @@ public class App extends Application {
         mServer = new Server();
         mServer.start(getApplicationContext());
 
+        mServerListAdapter.addLocalItem(mServer.getLocalItem());
+
     }
 
     public void TEST_stopServer(){
+        mServerListAdapter.removeLocalItem();
         mServer.stop();
     }
 
@@ -143,10 +151,33 @@ public class App extends Application {
 
     private String mDeviceIP = "";
 
+    public String getDeviceIP(){
+        return mDeviceIP;
+    }
+
     private void refreshIP(){
 
-        WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
-        mDeviceIP = Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+        int ip = wifiManager.getConnectionInfo().getIpAddress();
+        mDeviceIP = Formatter.formatIpAddress(ip);
         //String ip = "/" + Formatter.formatIpAddress(wm.getConnectionInfo().getIpAddress());
+
+        try {
+            for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();){
+
+                NetworkInterface intf = en.nextElement();
+
+                for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+
+                    InetAddress inetAddress = enumIpAddr.nextElement();
+
+                    if (!inetAddress.isLoopbackAddress() && inetAddress instanceof Inet4Address) {
+                        mDeviceIP = inetAddress.getHostAddress().toString();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            Log.e("IP Address", ex.toString());
+        }
     }
 }

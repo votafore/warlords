@@ -258,6 +258,10 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                 return false;
                         }
 
+                        // or this game was created on current device
+                        if(((App)context.getApplicationContext()).getDeviceIP().equals(serviceInfo.info.getHost().toString().replace("/", "")))
+                            return false;
+
                         return true;
                     }
                 })
@@ -270,7 +274,13 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                             @Override
                             public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
 
-                                ListItem item = new ListItem();
+                                final ListItem item = new ListItem();
+                                item.setListener(new IItemChangeListener() {
+                                    @Override
+                                    public void onItemChanged() {
+                                        notifyItemChanged(mList.indexOf(item));
+                                    }
+                                });
                                 item.connectTo(serviceInfo.info.getHost(), serviceInfo.info.getPort());
                                 item.getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
                                 e.onNext(item);
@@ -380,6 +390,42 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
 
 
+    private ListItem mLocalItem;
+
+    public void addLocalItem(final ListItem item){
+
+        item.setListener(new IItemChangeListener() {
+            @Override
+            public void onItemChanged() {
+                Log.v("TESTRX", "ADAPTER >>>>>>>    onItemChanged");
+                notifyItemChanged(mList.indexOf(item));
+            }
+        });
+
+        mLocalItem = item;
+        mList.add(mLocalItem);
+        notifyItemInserted(mList.size()-1);
+
+
+        try {
+            item.getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        Log.v("TESTRX", "ADAPTER >>>>>>>    add local item");
+    }
+
+    public void removeLocalItem(){
+
+        int index = mList.indexOf(mLocalItem);
+
+        mList.remove(index);
+        notifyItemRemoved(index);
+    }
+
+
+
 
 
 
@@ -387,26 +433,28 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     private List<ListItem> mList;
 
-    public class ListItem{
+    public static class ListItem{
 
-        String ownerName;
-        String playerCount;
+        public String ownerName;
+        public String playerCount;
 
-        private InetAddress mIP;
+        protected InetAddress mIP;
 
-        private Channel mChanel;
+        protected IChannel mChannel;
 
-        private Disposable dsp_socket;
+        protected Disposable dsp_socket;
+
+        protected IItemChangeListener mListener;
 
         public ListItem(){
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel");
 
-            mChanel = new Channel();
+            mChannel = new Channel();
 
             //Log.v("TESTRX", ">>>>>>>>> ListItem - createChanel. created");
 
-            mChanel.setReceiver(new Consumer<JSONObject>() {
+            mChannel.setReceiver(new Consumer<JSONObject>() {
                 @Override
                 public void accept(JSONObject jsonObject) throws Exception {
 
@@ -419,7 +467,8 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         e.printStackTrace();
                     }
 
-                    AdapterServerList.this.notifyItemChanged(mList.indexOf(ListItem.this));
+                    mListener.onItemChanged();
+                    //adapter.notifyItemChanged(mList.indexOf(ListItem.this));
                 }
             });
 
@@ -441,8 +490,12 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
                     e.onComplete();
                 }
-            }).subscribe(mChanel.getSubscriber());
+            }).subscribe(((Channel)mChannel).getSubscriber());
 
+        }
+
+        public void setListener(IItemChangeListener listner){
+            mListener = listner;
         }
 
         // TODO: 23.12.2017 create local connection
@@ -451,16 +504,25 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
 
         public IChannel getChanel(){
-            return mChanel;
+            return mChannel;
         }
 
         public void close(){
-            dsp_socket.dispose();
+            if(dsp_socket != null)
+                dsp_socket.dispose();
         }
 
         @Override
         public String toString() {
-            return mIP.toString();
+            if(mIP != null)
+                return mIP.toString();
+
+            return "0.0.0.0";
         }
+    }
+
+
+    public interface IItemChangeListener{
+        void onItemChanged();
     }
 }
