@@ -213,7 +213,7 @@ public class Server extends EndPoint {
                         e.printStackTrace();
                     }
 
-                    mListener.onItemChanged();
+                    mListener.onItemChanged(LocalItem.this);
                 }
             });
         }

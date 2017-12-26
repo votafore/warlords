@@ -87,20 +87,20 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         @Override
         public void onClick(View v) {
             //Log.v("TESTRX", ">>>>>>>>> request: get info");
-//            try {
-//                mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
+            try {
+                mList.get(getAdapterPosition()).getChanel().getSender().onNext(new JSONObject("{type:request, data:ServerInfo}"));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+//            App app = (App) mContext.getApplicationContext();
+//            app.setSelected(mList.get(getAdapterPosition()));
 //
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-
-            App app = (App) mContext.getApplicationContext();
-            app.setSelected(mList.get(getAdapterPosition()));
-
-            Intent i = new Intent(mContext, ActivityGame.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            mContext.startActivity(i);
+//            Intent i = new Intent(mContext, ActivityGame.class);
+//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//            mContext.startActivity(i);
         }
     }
 
@@ -284,11 +284,11 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                             @Override
                             public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
 
-                                final ListItem item = new ListItem();
+                                ListItem item = new ListItem();
                                 item.setListener(new IItemChangeListener() {
                                     @Override
-                                    public void onItemChanged() {
-                                        notifyItemChanged(mList.indexOf(item));
+                                    public void onItemChanged(ListItem i) {
+                                        notifyItemChanged(mList.indexOf(i));
                                     }
                                 });
                                 item.connectTo(serviceInfo.info.getHost(), serviceInfo.info.getPort());
@@ -406,9 +406,9 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
         item.setListener(new IItemChangeListener() {
             @Override
-            public void onItemChanged() {
+            public void onItemChanged(ListItem i) {
                 Log.v("TESTRX", "ADAPTER >>>>>>>    onItemChanged");
-                notifyItemChanged(mList.indexOf(item));
+                notifyItemChanged(mList.indexOf(i));
             }
         });
 
@@ -477,7 +477,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         e.printStackTrace();
                     }
 
-                    mListener.onItemChanged();
+                    mListener.onItemChanged(ListItem.this);
                     //adapter.notifyItemChanged(mList.indexOf(ListItem.this));
                 }
             });
@@ -533,6 +533,6 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
 
     public interface IItemChangeListener{
-        void onItemChanged();
+        void onItemChanged(ListItem item);
     }
 }
