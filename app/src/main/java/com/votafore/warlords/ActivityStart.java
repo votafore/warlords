@@ -11,8 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
-import com.votafore.warlords.v2.AdapterServerList;
-import com.votafore.warlords.v2.App;
+import com.votafore.warlords.v3.AdapterServerList;
+import com.votafore.warlords.v3.App;
 
 
 public class ActivityStart extends AppCompatActivity {
@@ -46,7 +46,7 @@ public class ActivityStart extends AppCompatActivity {
 
         serverList.setAdapter(adapter);
 
-        adapter.startScan(this);
+        //adapter.startScan(this);
 
 //        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
 //            @Override
@@ -108,6 +108,17 @@ public class ActivityStart extends AppCompatActivity {
 
                 //mFactory.exit();
                 mApp.TEST_stopServer();
+                break;
+
+            case R.id.start_scan:
+
+                mApp.getAdapter().startScan(this);
+                break;
+
+            case R.id.stop_scanning:
+
+                mApp.getAdapter().stopScan();
+                break;
         }
 
         return super.onOptionsItemSelected(item);

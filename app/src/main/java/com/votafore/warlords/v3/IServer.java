@@ -14,9 +14,27 @@ import io.reactivex.functions.Consumer;
  */
 
 public interface IServer {
+
+    /**
+     *
+     * @param receiver
+     */
     void setReceiver(Consumer<JSONObject> receiver);
+
+    /**
+     *
+     * @param data
+     */
     void send(JSONObject data);
 
+    /**
+     * method for starting server
+     * @param context
+     */
     void start(Context context);
+
+    /**
+     * method for stopping server
+     */
     void stop();
 }

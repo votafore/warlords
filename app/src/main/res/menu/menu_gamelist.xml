@@ -10,4 +10,16 @@
           android:id="@+id/exit"/>
     <item android:title="call someFunc()"
           android:id="@+id/call_someFunc"/>
+
+    <group>
+
+        <item
+            android:id="@+id/start_scan"
+            android:title="start scanning"/>
+
+        <item
+            android:id="@+id/stop_scanning"
+            android:title="stop scanning"/>
+
+    </group>
 </menu>
