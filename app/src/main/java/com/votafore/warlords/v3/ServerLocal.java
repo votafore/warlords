@@ -208,6 +208,8 @@ public class ServerLocal implements IServer {
         }
 
         // TODO: 26.12.2017 check if dispose in map_dsp is necessary
+
+        // TODO: 27.12.2017 may be it is worth to place all observers in CompositeDisposable
     }
 
 

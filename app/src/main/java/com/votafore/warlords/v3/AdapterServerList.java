@@ -463,9 +463,6 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             }
         });
 
-        Log.v(TAG, String.format(format2, prefix, localTAG, "start server"));
-        server.start(mContext);
-
         mLocalItem = item;
 
         Log.v(TAG, String.format(format2, prefix, localTAG, "add item to list"));

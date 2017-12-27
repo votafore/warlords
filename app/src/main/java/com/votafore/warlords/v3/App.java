@@ -141,15 +141,17 @@ public class App extends Application {
         Log.v(TAG, String.format(format1, prefix, "createServer"));
 
         Log.v(TAG, String.format(format2, prefix, "createServer", "create local server"));
-        ServerLocal server = new ServerLocal();
+        mServer = new ServerLocal();
         Log.v(TAG, String.format(format2, prefix, "createServer", "server has been created"));
 
+        Log.v(TAG, String.format(format2, prefix, "createServer", "start server"));
+        mServer.start(this);
+        Log.v(TAG, String.format(format2, prefix, "createServer", "server has been started"));
+
         Log.v(TAG, String.format(format2, prefix, "createServer", "add server to list"));
-        mServerListAdapter.addLocalServer(server);
+        mServerListAdapter.addLocalServer(mServer);
         Log.v(TAG, String.format(format2, prefix, "createServer", "server has been added to list"));
 
-        //server.start(getApplicationContext());
-        mServer = server;
     }
 
     public void TEST_stopServer(){
