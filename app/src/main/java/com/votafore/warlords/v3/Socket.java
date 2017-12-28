@@ -12,7 +12,10 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.processors.PublishProcessor;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * @author Votafore
@@ -22,14 +25,6 @@ import io.reactivex.processors.PublishProcessor;
  */
 
 public class Socket implements ISocket {
-
-//    String TAG = Constants.TAG;
-//    String prefix= Constants.PFX_SOCKET;
-//
-//    String format1 = Constants.format1;
-//    String format2 = Constants.format2;
-//    String format3 = Constants.format3;
-//    String format4 = Constants.format4;
 
     /**
      * current connection
@@ -45,6 +40,11 @@ public class Socket implements ISocket {
      * object that read data from net
      */
     private DataInputStream input;
+
+    /**
+     * emitter for incoming data
+     */
+    private PublishProcessor<JSONObject> emitter;
 
     private Socket(InetAddress ip, int port){
 
@@ -74,13 +74,51 @@ public class Socket implements ISocket {
             e.printStackTrace();
         }
 
-        while(!mSocket.isConnected()){
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "create emitter for incoming data"));
+
+        emitter = PublishProcessor.create();
+        emitter.subscribeOn(Schedulers.newThread());
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                String data;
+
+                while(mSocket.isConnected()){
+
+                    try {
+                        data = input.readUTF();
+                    } catch (IOException exception) {
+                        exception.printStackTrace();
+                        data = null;
+                    }
+
+                    //Log.v(TAG, String.format(format2, prefix, "SOCKET", "new data received"));
+
+                    if(data == null) {
+
+                        emitter.onComplete();
+
+                        try {
+                            mSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+
+                    }else{
+
+                        try {
+                            emitter.onNext(new JSONObject(data));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }
             }
-        }
+        }).start();
     }
 
 
@@ -101,60 +139,13 @@ public class Socket implements ISocket {
     }
 
     @Override
-    public void setReceiver(final PublishProcessor<JSONObject> receiver) {
-
-        //Log.v(TAG, String.format(format1, prefix, "setListener"));
-
-        // TODO: 26.12.2017 may be one thread should be for all sockets
-
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                while(mSocket.isConnected()){
-
-                    String data = "";
-
-                    try {
-                        //data = null;
-                        data = input.readUTF();
-                    } catch (IOException exception) {
-                        exception.printStackTrace();
-                    }
-
-                    //Log.v(TAG, String.format(format2, prefix, "SOCKET", "new data received"));
-
-                    //listener.onDataReceived(data);
-
-                    if(data == null) {
-
-                        receiver.onComplete();
-
-                        try {
-                            mSocket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-
-                        break;
-
-                    }else{
-
-                        try {
-                            receiver.onNext(new JSONObject(data));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }
-        }).start();
+    public Disposable setReceiver(Consumer<JSONObject> consumer) {
+        return emitter.subscribe(consumer);
     }
 
     @Override
     public void close() {
 
-        //Log.v(TAG, String.format(format1, prefix, "close"));
         android.util.Log.d(Constants.SOCKET_CLOSE, "closing...");
 
         try {
