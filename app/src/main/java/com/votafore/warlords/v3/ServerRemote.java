@@ -31,13 +31,13 @@ import io.reactivex.processors.PublishProcessor;
 
 public class ServerRemote implements IServer {
 
-    String TAG = Constants.TAG;
-    String prefix= Constants.PFX_REMOTE_SERVER;
-
-    String format1 = Constants.format1;
-    String format2 = Constants.format2;
-    String format3 = Constants.format3;
-    String format4 = Constants.format4;
+//    String TAG = Constants.TAG;
+//    String prefix= Constants.PFX_REMOTE_SERVER;
+//
+//    String format1 = Constants.format1;
+//    String format2 = Constants.format2;
+//    String format3 = Constants.format3;
+//    String format4 = Constants.format4;
 
 
     /********************* IServer ********************/
@@ -52,17 +52,17 @@ public class ServerRemote implements IServer {
      */
     private Disposable dsp_receiver;
 
-    private Consumer<JSONObject> mReceiver;
+    private PublishProcessor<JSONObject> mReceiver;
 
     @Override
-    public void setReceiver(Consumer<JSONObject> receiver) {
-        Log.v(TAG, String.format(format1, prefix, "client's receiver set"));
-        mReceiver = receiver;
+    public Disposable setReceiver(Consumer<JSONObject> receiver) {
+        //Log.v(TAG, String.format(format1, prefix, "client's receiver set"));
+        return mReceiver.subscribe(receiver); // TODO: 28.12.2017
     }
 
     @Override
     public void send(JSONObject data) {
-        Log.v(TAG, String.format(format1, prefix, "send"));
+        //Log.v(TAG, String.format(format1, prefix, "send"));
         sender.onNext(data);
     }
 
@@ -70,67 +70,86 @@ public class ServerRemote implements IServer {
     @Override
     public void start(Context context) {
 
-        Log.v(TAG, String.format(format1, prefix, "start"));
+        //Log.v(TAG, String.format(format1, prefix, "start"));
 
         final ISocket socket = Socket.create(mIP, mPort);
-        Log.v(TAG, String.format(format2, prefix, "start", "socket created"));
+        //Log.v(TAG, String.format(format2, prefix, "start", "socket created"));
 
         sender.subscribe(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject object) throws Exception {
-                Log.v(TAG, String.format(format2, prefix, "SOCKET", "send data"));
+                //Log.v(TAG, String.format(format2, prefix, "SOCKET", "send data"));
                 socket.send(object);
             }
         });
 
-        Log.v(TAG, String.format(format2, prefix, "start", "socket set as subscriber for sender"));
+        //Log.v(TAG, String.format(format2, prefix, "start", "socket set as subscriber for sender"));
 
-        dsp_receiver = Observable.create(new ObservableOnSubscribe<JSONObject>() {
+        socket.setListener(new IDataReceiver<String>() {
             @Override
-            public void subscribe(final ObservableEmitter<JSONObject> e) throws Exception {
+            public void onDataReceived(String data) {
 
-                Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "set listener for incoming data"));
+                if(data == null) {
+                    mReceiver.onComplete();
+                }else{
 
-                socket.setListener(new IDataReceiver<String>() {
-                    @Override
-                    public void onDataReceived(String data) {
-
-                        if(data == null) {
-                            Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "null, close socket"));
-                            e.onComplete();
-                            // TODO: 21.12.2017 close socket
-                        }else{
-                            Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "data received"));
-                            try {
-                                e.onNext(new JSONObject(data));
-                            } catch (JSONException e1) {
-                                e1.printStackTrace();
-                            }
-                        }
+                    try {
+                        mReceiver.onNext(new JSONObject(data));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
                     }
-                });
-            }
-        }).subscribe(mReceiver, new Consumer<Throwable>() {
-            @Override
-            public void accept(Throwable throwable) throws Exception {
-
-            }
-        }, new Action() {
-            @Override
-            public void run() throws Exception {
-                // TODO: 21.12.2017 check if current disposable is disposed
-                //dsp_receiver.dispose();
+                }
             }
         });
+
+//        dsp_receiver = Observable.create(new ObservableOnSubscribe<JSONObject>() {
+//            @Override
+//            public void subscribe(final ObservableEmitter<JSONObject> e) throws Exception {
+//
+//                Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "set listener for incoming data"));
+//
+//                socket.setListener(new IDataReceiver<String>() {
+//                    @Override
+//                    public void onDataReceived(String data) {
+//
+//                        if(data == null) {
+//                            Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "null, close socket"));
+//                            e.onComplete();
+//                            // TODO: 21.12.2017 close socket
+//                        }else{
+//                            Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "data received"));
+//                            try {
+//                                e.onNext(new JSONObject(data));
+//                            } catch (JSONException e1) {
+//                                e1.printStackTrace();
+//                            }
+//                        }
+//                    }
+//                });
+//            }
+//        }).subscribe(mReceiver, new Consumer<Throwable>() {
+//            @Override
+//            public void accept(Throwable throwable) throws Exception {
+//
+//            }
+//        }, new Action() {
+//            @Override
+//            public void run() throws Exception {
+//                // TODO: 21.12.2017 check if current disposable is disposed
+//                //dsp_receiver.dispose();
+//            }
+//        });
     }
 
     @Override
     public void stop() {
 
-        Log.v(TAG, String.format(format1, prefix, "stop"));
+        //Log.v(TAG, String.format(format1, prefix, "stop"));
 
         sender.onComplete();
-        Log.v(TAG, String.format(format2, prefix, "stop", "sender.onComplete"));
+        //Log.v(TAG, String.format(format2, prefix, "stop", "sender.onComplete"));
+
+        mReceiver.onComplete();
 
         // TODO: 26.12.2017 проверить надо ли диспосить dsp_receiver
     }
@@ -147,12 +166,13 @@ public class ServerRemote implements IServer {
 
     public ServerRemote(InetAddress ip, int port){
 
-        Log.v(TAG, String.format(format1, prefix, "ServerRemote"));
+        //Log.v(TAG, String.format(format1, prefix, "ServerRemote"));
 
         sender = PublishProcessor.create();
+        mReceiver = PublishProcessor.create();
         // TODO: 26.12.2017 specify thread for broadcaster
 
-        Log.v(TAG, String.format(format2, prefix, "ServerRemote", "sender created"));
+        //Log.v(TAG, String.format(format2, prefix, "ServerRemote", "sender created"));
 
         mIP = ip;
         mPort = port;

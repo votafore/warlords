@@ -3,15 +3,12 @@ package com.votafore.warlords.v3;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-//import android.util.Log;
 
 import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v2.IDataListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.util.Date;
@@ -31,6 +28,8 @@ import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
+//import android.util.Log;
+
 /**
  * @author Votafore
  * Created on 26.12.2017.
@@ -38,7 +37,7 @@ import io.reactivex.schedulers.Schedulers;
  * implementation for IServer (for local server)
  */
 
-public class ServerLocal implements IServer {
+public class ServerLocal_log_v1 implements IServer {
 
     String TAG = Constants.TAG;
     String prefix= Constants.PFX_LOCAL_SERVER;
@@ -82,110 +81,128 @@ public class ServerLocal implements IServer {
     @Override
     public void start(final Context context) {
 
-        Log.d("create ServerSocket");
-        final ServerSocket serverSocket;
+        //Log.v(TAG, String.format(format1, prefix, "start"));
 
-        try {
-            serverSocket = new ServerSocket(0);
-        } catch (IOException e) {
-            e.printStackTrace();
-            return;
-        }
+        // TODO: 27.12.2017 check if observable for creating ServerSocket is necessary
 
-        Log.d("create appender");
+        // general observable
+        ConnectableObservable<ServerSocket> obs = Observable.create(new ObservableOnSubscribe<ServerSocket>() {
+            @Override
+            public void subscribe(ObservableEmitter<ServerSocket> e) throws Exception {
+                //Log.v(TAG, String.format(format2, prefix, "con. obs-r", "create ServerSocket"));
+                final ServerSocket serverSocket = new ServerSocket(0);
+                e.onNext(serverSocket);
+            }
+        }).publish();
+
 
         // appender of sockets to channel
-        dsp_sockets = Observable.create(new ObservableOnSubscribe<ISocket>() {
+        dsp_sockets = obs.flatMap(new Function<ServerSocket, ObservableSource<ISocket>>() {
             @Override
-            public void subscribe(ObservableEmitter<ISocket> e) throws Exception {
+            public ObservableSource<ISocket> apply(final ServerSocket serverSocket) throws Exception {
 
-                while(!serverSocket.isClosed()){
-                    try{
-                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "waiting for connection"));
-                        Log.d("waiting for connection");
-                        ISocket s = Socket.create(serverSocket.accept());
-                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "new socket created"));
-                        e.onNext(s);
-                    }catch(SocketException ex){
-                        ex.printStackTrace();
+                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "create observable for create sockets"));
+
+                return Observable.create(new ObservableOnSubscribe<ISocket>() {
+                    @Override
+                    public void subscribe(ObservableEmitter<ISocket> e) throws Exception {
+
+                        while(!serverSocket.isClosed()){
+                            try{
+                                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "waiting for connection"));
+                                ISocket s = Socket.create(serverSocket.accept());
+                                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "new socket created"));
+                                e.onNext(s);
+                            }catch(SocketException ex){
+                                ex.printStackTrace();
+                            }
+                        }
                     }
-                }
+                }).subscribeOn(Schedulers.newThread());
             }
         })
-        .subscribeOn(Schedulers.io())
         .subscribe(getSocketAppender());
 
-
-        Log.d("create broadcaster of service");
-
         // observable/subscriber that trigger when server created for starting broadcast
-        dsp_broadcast = Observable.create(new ObservableOnSubscribe<Void>() {
+        dsp_broadcast = obs.flatMap(new Function<ServerSocket, ObservableSource<?>>() {
             @Override
-            public void subscribe(ObservableEmitter<Void> e) throws Exception {
+            public ObservableSource<?> apply(final ServerSocket serverSocket) throws Exception {
 
-                final NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-                final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
+                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "Broadcasting", "create observable for service broadcasting"));
+
+                return Observable.create(new ObservableOnSubscribe<Void>() {
                     @Override
-                    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onRegistrationFailed"));
-                        Log.d("onRegistrationFailed");
-                    }
+                    public void subscribe(ObservableEmitter<Void> e) throws Exception {
 
-                    @Override
-                    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onUnregistrationFailed"));
-                        Log.d("onUnregistrationFailed");
-                    }
+                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "Broadcasting", "subscribe - create a service"));
 
-                    @Override
-                    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onServiceRegistered"));
-                        Log.d("onServiceRegistered");
-                    }
+                        final NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+                        final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
+                            @Override
+                            public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "regist. listener", "onRegistrationFailed"));
+                            }
 
-                    @Override
-                    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onServiceUnregistered"));
-                        Log.d("onServiceUnregistered");
-                    }
-                };
+                            @Override
+                            public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "regist. listener", "onUnregistrationFailed"));
+                            }
 
-                NsdServiceInfo regInfo = new NsdServiceInfo();
-                regInfo.setServiceName(Constants.SERVICENAME);
-                regInfo.setServiceType(Constants.SERVICETYPE);
-                regInfo.setPort(serverSocket.getLocalPort());
+                            @Override
+                            public void onServiceRegistered(NsdServiceInfo serviceInfo) {
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "regist. listener", "onServiceRegistered"));
+                            }
 
-                Log.d("register service");
-                manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
+                            @Override
+                            public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "regist. listener", "onServiceUnregistered"));
+                            }
+                        };
 
-                e.setCancellable(new Cancellable() {
-                    @Override
-                    public void cancel() throws Exception {
-                        Log.d("unregister service");
-                        manager.unregisterService(listener);
-                        //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "subscribtion", "cancel: close server socket"));
-                        Log.d("close server socket");
-                        serverSocket.close();
+                        NsdServiceInfo regInfo = new NsdServiceInfo();
+                        regInfo.setServiceName(Constants.SERVICENAME);
+                        regInfo.setServiceType(Constants.SERVICETYPE);
+                        regInfo.setPort(serverSocket.getLocalPort());
+
+                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "Broadcasting", "subscribe - register service"));
+                        manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
+
+                        e.setCancellable(new Cancellable() {
+                            @Override
+                            public void cancel() throws Exception {
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "subscribtion", "cancel: unregister service"));
+                                manager.unregisterService(listener);
+                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "subscribtion", "cancel: close server socket"));
+                                serverSocket.close();
+                            }
+                        });
+
                     }
                 });
             }
-        }).subscribe();
+        })
+        .subscribe();
+
+        obs.connect();
     }
 
     @Override
     public void stop() {
 
-        Log.d("sender.onComplete()");
+        //Log.v(TAG, String.format(format1, prefix, "stop"));
+
         sender.onComplete();
+        //Log.v(TAG, String.format(format2, prefix, "stop", "sender.onComplete"));
+
 
         // TODO: 26.12.2017 define moments when these objects have to be disposed
-        Log.d("dispose socket observer");
+        //Log.v(TAG, String.format(format2, prefix, "stop", "socket observable disposing"));
         dsp_sockets.dispose();
 
         // for example broadcasting could be finished before server's Stop method called
         if(!dsp_broadcast.isDisposed())
         {
-            Log.d("dispose broadcasting observer");
+            //Log.v(TAG, String.format(format2, prefix, "stop", "broadcasting observable disposing"));
             dsp_broadcast.dispose();
         }
 
@@ -198,7 +215,7 @@ public class ServerLocal implements IServer {
 
     /****************** ServerLocal ******************/
 
-    public ServerLocal(){
+    public ServerLocal_log_v1(){
 
         Log.d("create sender");
         sender = PublishProcessor.create();

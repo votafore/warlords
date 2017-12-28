@@ -4,6 +4,7 @@ import android.content.Context;
 
 import org.json.JSONObject;
 
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
 /**
@@ -19,7 +20,7 @@ public interface IServer {
      *
      * @param receiver
      */
-    void setReceiver(Consumer<JSONObject> receiver);
+    Disposable setReceiver(Consumer<JSONObject> receiver);
 
     /**
      *
