@@ -3,6 +3,7 @@ package com.votafore.warlords.v3;
 import org.json.JSONObject;
 
 import io.reactivex.functions.Consumer;
+import io.reactivex.processors.PublishProcessor;
 
 /**
  * @author Votafore
@@ -11,7 +12,7 @@ import io.reactivex.functions.Consumer;
 
 public interface ISocket {
     void send(JSONObject data);
-    void setListener(IDataReceiver<String> listener);
+    void setReceiver(PublishProcessor<JSONObject> receiver);
 
     void close();
 }

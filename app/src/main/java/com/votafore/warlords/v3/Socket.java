@@ -1,15 +1,18 @@
 package com.votafore.warlords.v3;
 
-import android.util.Log;
+//import android.util.Log;
 
 import com.votafore.warlords.v2.Constants;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
+
+import io.reactivex.processors.PublishProcessor;
 
 /**
  * @author Votafore
@@ -20,13 +23,13 @@ import java.net.InetAddress;
 
 public class Socket implements ISocket {
 
-    String TAG = Constants.TAG;
-    String prefix= Constants.PFX_SOCKET;
-
-    String format1 = Constants.format1;
-    String format2 = Constants.format2;
-    String format3 = Constants.format3;
-    String format4 = Constants.format4;
+//    String TAG = Constants.TAG;
+//    String prefix= Constants.PFX_SOCKET;
+//
+//    String format1 = Constants.format1;
+//    String format2 = Constants.format2;
+//    String format3 = Constants.format3;
+//    String format4 = Constants.format4;
 
     /**
      * current connection
@@ -61,12 +64,12 @@ public class Socket implements ISocket {
 
     private void init(){
 
-        Log.v(TAG, String.format(format1, prefix, "Socket"));
+        android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "init"));
 
         try {
             input = new DataInputStream(mSocket.getInputStream());
             output = new DataOutputStream(mSocket.getOutputStream());
-            Log.v(TAG, String.format(format2, prefix, "Socket", "input and output created"));
+            android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "input and output created"));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,7 +91,7 @@ public class Socket implements ISocket {
     @Override
     public void send(JSONObject data) {
 
-        Log.v(TAG, String.format(format1, prefix, "send"));
+        //Log.v(TAG, String.format(format1, prefix, "send"));
 
         try {
             output.writeUTF(data.toString());
@@ -98,9 +101,9 @@ public class Socket implements ISocket {
     }
 
     @Override
-    public void setListener(final IDataReceiver<String> listener) {
+    public void setReceiver(final PublishProcessor<JSONObject> receiver) {
 
-        Log.v(TAG, String.format(format1, prefix, "setListener"));
+        //Log.v(TAG, String.format(format1, prefix, "setListener"));
 
         // TODO: 26.12.2017 may be one thread should be for all sockets
 
@@ -108,22 +111,42 @@ public class Socket implements ISocket {
             @Override
             public void run() {
 
-                while(!mSocket.isClosed()){
+                while(mSocket.isConnected()){
 
                     String data = "";
 
                     try {
-                        data = null;
+                        //data = null;
                         data = input.readUTF();
                     } catch (IOException exception) {
                         exception.printStackTrace();
                     }
 
-                    Log.v(TAG, String.format(format2, prefix, "SOCKET", "new data received"));
+                    //Log.v(TAG, String.format(format2, prefix, "SOCKET", "new data received"));
 
-                    listener.onDataReceived(data);
+                    //listener.onDataReceived(data);
+
+                    if(data == null) {
+
+                        receiver.onComplete();
+
+                        try {
+                            mSocket.close();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+
+                        break;
+
+                    }else{
+
+                        try {
+                            receiver.onNext(new JSONObject(data));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
                 }
-
             }
         }).start();
     }
@@ -131,16 +154,20 @@ public class Socket implements ISocket {
     @Override
     public void close() {
 
-        Log.v(TAG, String.format(format1, prefix, "close"));
+        //Log.v(TAG, String.format(format1, prefix, "close"));
+        android.util.Log.d(Constants.SOCKET_CLOSE, "closing...");
 
         try {
 
+            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close input"));
             if(input != null)
                 input.close();
 
+            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close output"));
             if(output != null)
                 output.close();
 
+            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close socket"));
             if(mSocket != null)
                 mSocket.close();
 
@@ -154,10 +181,21 @@ public class Socket implements ISocket {
     /****************** STATIC *********************/
 
     public static Socket create(InetAddress ip, int port){
-        return new Socket(ip, port);
+
+        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... create");
+        Socket s = new Socket(ip, port);
+        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... created");
+
+        return s;
+
     }
 
     public static Socket create(java.net.Socket socket){
-        return new Socket(socket);
+
+        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... create");
+        Socket s = new Socket(socket);
+        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... created");
+
+        return s;
     }
 }
