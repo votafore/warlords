@@ -3,7 +3,6 @@ package com.votafore.warlords.v3;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -12,26 +11,19 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v3.App;
-import com.votafore.warlords.v2.Channel;
 import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v2.IChannel;
 import com.votafore.warlords.v2.ServiceInfo;
-import com.votafore.warlords.v2.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.LogRecord;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
@@ -44,7 +36,7 @@ import io.reactivex.observables.ConnectableObservable;
  * Created on 18.12.2017.
  */
 
-public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.ViewHolder>{
+public class AdapterServerList_Log_v1 extends RecyclerView.Adapter<AdapterServerList_Log_v1.ViewHolder>{
 
     String TAG = Constants.TAG;
     String prefix= Constants.PFX_ADAPTER;
@@ -58,25 +50,21 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     private List<ListItem> mList;
 
-    private Handler mUIHandler;
-
-    public AdapterServerList(Context c){
+    public AdapterServerList_Log_v1(Context c){
         mContext = c;
         mList = new ArrayList<>();
-
-        mUIHandler = new Handler();
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View v = View.inflate(parent.getContext(), R.layout.item_found_game, null);
-        return new AdapterServerList.ViewHolder(v);
+        return new AdapterServerList_Log_v1.ViewHolder(v);
     }
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
 
-        com.votafore.warlords.v3.ListItem item = mList.get(position);
+        ListItem item = mList.get(position);
 
         //holder.mImageView.setImageResource(current.mResMap);
         holder.mOwnerName.setText(item.owner);
@@ -323,9 +311,6 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
                                 IServer server = new ServerRemote(serviceInfo.info.getHost(), serviceInfo.info.getPort());
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "start server"));
-                                server.start(mContext);
-
                                 Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "create ListItem"));
 
                                 ListItem item = new ListItem(server);
@@ -333,18 +318,12 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                     @Override
                                     public void onChange(ListItem item) {
                                         Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "adapter listener", "new data received"));
-                                        final int index = mList.indexOf(item);
-
-                                        if(index >= 0){
-                                            mUIHandler.post(new Runnable() {
-                                                @Override
-                                                public void run() {
-                                                    notifyItemChanged(index);
-                                                }
-                                            });
-                                        }
+                                        notifyItemChanged(mList.indexOf(item));
                                     }
                                 });
+
+                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "start server"));
+                                server.start(mContext);
 
                                 Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "send request"));
                                 server.send(new JSONObject("{type:request, data:ServerInfo}"));
@@ -474,17 +453,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             @Override
             public void onChange(ListItem item) {
                 Log.v(TAG, String.format(format2, prefix, "adapter listener", "new data received"));
-
-                final int index = mList.indexOf(item);
-
-                if(index >= 0){
-                    mUIHandler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            notifyItemChanged(index);
-                        }
-                    });
-                }
+                notifyItemChanged(mList.indexOf(item));
             }
         });
 

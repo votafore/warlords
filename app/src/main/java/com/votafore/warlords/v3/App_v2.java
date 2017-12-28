@@ -7,71 +7,63 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
 
+import com.votafore.warlords.v2.Constants;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
-import static com.votafore.warlords.v2.Constants.APP_START;
-import static com.votafore.warlords.v2.Constants.APP_STOP;
-import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
-import static com.votafore.warlords.v2.Constants.LVL_LOCAL_SERVER;
-import static com.votafore.warlords.v2.Constants.LVL_NW_WATCHER;
-import static com.votafore.warlords.v2.Constants.SRV_CRT;
-import static com.votafore.warlords.v2.Constants.SRV_START;
-import static com.votafore.warlords.v2.Constants.SRV_STOP;
-import static com.votafore.warlords.v2.Constants.format1;
+//import android.util.Log;
 
 /**
  * @author Vorafore
  * Created on 18.12.2017.
  */
 
-public class App extends Application {
+public class App_v2 extends Application {
 
-    private BroadcastReceiver mNetReceiver;
+    //String TAG = Constants.TAG;
+
+//    String TAG = String.format(Constants.format, Constants.TAG+"_"+Constants.SRV);
+//
+//
+//    String prefix= Constants.PFX_APP;
+//
+//    String format1 = Constants.format1;
+//    String format2 = Constants.format2;
+//    String format3 = Constants.format3;
+//    String format4 = Constants.format4;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
-        Log.setTAG(APP_START);
+        Log.setTAG(Constants.APP_START);
         Log.d("starting...");
 
         refreshIP();
 
-        Log.d(String.format(format1, LVL_NW_WATCHER, "create"));
-        mNetReceiver = new BroadcastReceiver() {
+        BroadcastReceiver receiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(String.format(format1, LVL_NW_WATCHER, "network state changed"));
+                Log.d(String.format(Constants.format2, "APP", "NETWORK_STATE_WATCHER", "onReceive"));
                 refreshIP();
             }
         };
 
+        Log.d(String.format(Constants.format1,"NETWORK_STATE_WATCHER", "created"));
+
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        registerReceiver(receiver, filter);
 
-        Log.d(String.format(format1, LVL_NW_WATCHER, "register"));
-        registerReceiver(mNetReceiver, filter);
+        Log.d(String.format(Constants.format1,"NETWORK_STATE_WATCHER", "registered"));
 
-        Log.d(String.format(format1, LVL_ADAPTER, "create"));
         mServerListAdapter = new AdapterServerList(this);
+        Log.d(String.format(Constants.format1,"ADAPTER", "created"));
 
         Log.reset();
     }
-
-    @Override
-    public void onTerminate() {
-        super.onTerminate();
-
-        // TODO: 28.12.2017  not work.. define where it can be done
-        Log.setTAG(APP_STOP);
-        Log.d("stopping...");
-
-        Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
-        unregisterReceiver(mNetReceiver);
-    }
-
 
 
 
@@ -88,7 +80,11 @@ public class App extends Application {
     private AdapterServerList mServerListAdapter;
 
     public AdapterServerList getAdapter(){
+
         Log.d("getAdapter");
+
+        if(mServerListAdapter == null)
+            initListPage();
 
         return mServerListAdapter;
     }
@@ -98,6 +94,11 @@ public class App extends Application {
 
 
 
+
+    private void initListPage(){
+        //Log.v(TAG, String.format(format1, prefix, "initListPage"));
+        mServerListAdapter  = new AdapterServerList(this);
+    }
 
     public void finishListPage(){
 
@@ -118,50 +119,37 @@ public class App extends Application {
 
     public void createServer(){
 
-        Log.setTAG(SRV_CRT);
-        Log.d("starting...");
+        //Log.v(TAG, String.format(format1, prefix, "createServer"));
 
-        Log.setLevel(LVL_LOCAL_SERVER);
-
-        Log.d("creating...");
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "create local server"));
         mServer = new ServerLocal();
-        Log.d("created");
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "server has been created"));
 
-        Log.reset();
-
-
-        Log.setTAG(SRV_START);
-        Log.setLevel(LVL_LOCAL_SERVER);
-
-        Log.d("starting...");
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "start server"));
         mServer.start(this);
-        Log.d("started");
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "server has been started"));
 
-
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "add server to list"));
         mServerListAdapter.addLocalServer(mServer);
+        //Log.v(TAG, String.format(format2, prefix, "createServer", "server has been added to list"));
 
-        Log.reset();
     }
 
     public void TEST_stopServer(){
 
+        //Log.v(TAG, String.format(format1, prefix, "TEST_stopServer"));
+
+        //Log.v(TAG, String.format(format2, prefix, "TEST_stopServer", "remove server form list"));
         mServerListAdapter.removeLocalServer();
+        //Log.v(TAG, String.format(format2, prefix, "TEST_stopServer", "server has been removed"));
 
-        Log.setTAG(SRV_STOP);
-        Log.d("stopping...");
-
-        Log.setLevel(LVL_LOCAL_SERVER);
-
-        Log.d("stopping...");
+        //Log.v(TAG, String.format(format2, prefix, "TEST_stopServer", "stop server"));
         mServer.stop();
-        Log.d("stopped");
-
-        Log.reset();
+        //Log.v(TAG, String.format(format2, prefix, "TEST_stopServer", "server has been stopped"));
     }
 
     public IServer getServer(){
-        Log.d("getServer");
-
+        //Log.v(TAG, String.format(format1, prefix, "getServer"));
         return mServer;
     }
 
@@ -179,13 +167,18 @@ public class App extends Application {
     private String mDeviceIP = "";
 
     public String getDeviceIP(){
-        Log.d("getDeviceIP");
-
+        //Log.v(TAG, String.format(format1, prefix, "getDeviceIP"));
         return mDeviceIP;
     }
 
     private void refreshIP(){
+
+        //Log.v(TAG, String.format(format1, prefix, "refreshIP"));
         Log.d("refreshIP");
+
+//        WifiManager wifiManager = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+//        int ip = wifiManager.getConnectionInfo().getIpAddress();
+//        mDeviceIP = Formatter.formatIpAddress(ip);
 
         try {
             for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();){
@@ -220,6 +213,16 @@ public class App extends Application {
      * transition: list of servers -> server settings
      */
 
+//    private com.votafore.warlords.v2.AdapterServerList.ListItem mSelected;
+//
+//    public void setSelected(com.votafore.warlords.v2.AdapterServerList.ListItem item){
+//        mSelected = item;
+//    }
+
+//    public AdapterServerList.ListItem getSelected(){
+//        return mSelected;
+//    }
+
 
 
     /**
@@ -228,7 +231,8 @@ public class App extends Application {
      * finish broadcasting
      */
     public void startGame(){
-        Log.d("starting game...");
+
+        //Log.v(TAG, String.format(format1, prefix, "startGame"));
 
         finishListPage();
 

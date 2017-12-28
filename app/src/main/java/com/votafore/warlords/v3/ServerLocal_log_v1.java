@@ -299,25 +299,25 @@ public class ServerLocal_log_v1 implements IServer {
 
                         //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "ServerSocket", "append socket", "set listener for incoming data"));
 
-                        iSocket.setListener(new IDataReceiver<String>() {
-                            @Override
-                            public void onDataReceived(String data) {
-
-                                if(data == null){
-                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "null, close socket"));
-                                    e.onComplete();
-                                    // TODO: 21.12.2017 close socket
-                                }else{
-                                    //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
-                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "data received"));
-                                    try {
-                                        e.onNext(new JSONObject(data));
-                                    } catch (JSONException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
+//                        iSocket.setListener(new IDataReceiver<String>() {
+//                            @Override
+//                            public void onDataReceived(String data) {
+//
+//                                if(data == null){
+//                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "null, close socket"));
+//                                    e.onComplete();
+//                                    // TODO: 21.12.2017 close socket
+//                                }else{
+//                                    //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
+//                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "data received"));
+//                                    try {
+//                                        e.onNext(new JSONObject(data));
+//                                    } catch (JSONException ex) {
+//                                        ex.printStackTrace();
+//                                    }
+//                                }
+//                            }
+//                        });
                     }
                 })
                         //.subscribeOn(Schedulers.newThread())

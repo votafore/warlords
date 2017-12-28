@@ -46,6 +46,9 @@ public class Socket implements ISocket {
      */
     private PublishProcessor<JSONObject> emitter;
 
+
+
+
     private Socket(InetAddress ip, int port){
 
         try {
@@ -64,20 +67,19 @@ public class Socket implements ISocket {
 
     private void init(){
 
-        android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "init"));
+        Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "init"));
 
         try {
             input = new DataInputStream(mSocket.getInputStream());
             output = new DataOutputStream(mSocket.getOutputStream());
-            android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "input and output created"));
+            Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "input and output created"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        android.util.Log.d(Constants.SOCKET_CRT, String.format(Constants.format1, Constants.LVL_SOCKET, "create emitter for incoming data"));
+        Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "create emitter for incoming data"));
 
         emitter = PublishProcessor.create();
-        emitter.subscribeOn(Schedulers.newThread());
 
         new Thread(new Runnable() {
             @Override
@@ -93,8 +95,6 @@ public class Socket implements ISocket {
                         exception.printStackTrace();
                         data = null;
                     }
-
-                    //Log.v(TAG, String.format(format2, prefix, "SOCKET", "new data received"));
 
                     if(data == null) {
 
@@ -173,9 +173,11 @@ public class Socket implements ISocket {
 
     public static Socket create(InetAddress ip, int port){
 
-        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... create");
+        Log.setTAG(Constants.SOCKET_CRT);
+
+        Log.d("new socket connected... create");
         Socket s = new Socket(ip, port);
-        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... created");
+        Log.d("new socket connected... created");
 
         return s;
 

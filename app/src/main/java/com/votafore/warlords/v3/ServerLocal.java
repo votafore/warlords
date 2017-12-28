@@ -163,7 +163,6 @@ public class ServerLocal implements IServer {
                     public void cancel() throws Exception {
                         Log.d("unregister service");
                         manager.unregisterService(listener);
-                        //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "Broadcasting", "subscribtion", "cancel: close server socket"));
                         Log.d("close server socket");
                         serverSocket.close();
                     }
@@ -198,6 +197,8 @@ public class ServerLocal implements IServer {
 
     /****************** ServerLocal ******************/
 
+    private Consumer<JSONObject> receiver;
+
     public ServerLocal(){
 
         Log.d("create sender");
@@ -207,10 +208,18 @@ public class ServerLocal implements IServer {
         Log.d("create maps");
         map_dsp_sender = new HashMap<>();
         map_dsp_receiver = new HashMap<>();
+
+        Log.d("create server receiver");
+        receiver = new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject object) throws Exception {
+                handleRequest(object);
+            }
+        };
     }
 
 
-    private void handleRequest(JSONObject data){
+    synchronized private void handleRequest(JSONObject data){
 
         //Log.v(TAG, String.format(format1, prefix, "handleRequest"));
 
@@ -276,59 +285,9 @@ public class ServerLocal implements IServer {
                     }
                 }));
 
-                map_dsp_receiver.put(iSocket, Observable.create(new ObservableOnSubscribe<JSONObject>() {
-                    @Override
-                    public void subscribe(final ObservableEmitter<JSONObject> e) throws Exception {
+                map_dsp_receiver.put(iSocket, iSocket.setReceiver(receiver));
 
-                        //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "ServerSocket", "append socket", "set listener for incoming data"));
-
-                        iSocket.setListener(new IDataReceiver<String>() {
-                            @Override
-                            public void onDataReceived(String data) {
-
-                                if(data == null){
-                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "null, close socket"));
-                                    e.onComplete();
-                                    // TODO: 21.12.2017 close socket
-                                }else{
-                                    //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
-                                    //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "data received"));
-                                    try {
-                                        e.onNext(new JSONObject(data));
-                                    } catch (JSONException ex) {
-                                        ex.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
-                    }
-                })
-                        //.subscribeOn(Schedulers.newThread())
-                        .subscribe(new Consumer<JSONObject>() {
-                            @Override
-                            public void accept(JSONObject object) throws Exception {
-                                //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "SOCKET", "incoming data", "send for handling"));
-                                handleRequest(object);
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-
-                            }
-                        }, new Action() {
-                            @Override
-                            public void run() throws Exception {
-
-                                //Log.v("TESTRX", ">>>>>>>>> Channel - socket . FINISH ?????");
-                                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "SOCKET", "FINISH"));
-
-                                map_dsp_receiver.get(iSocket).dispose();
-                                map_dsp_sender.remove(iSocket);
-
-                                // TODO: 21.12.2017 check if current disposable is disposed
-                                map_dsp_sender.remove(iSocket);
-                            }
-                        }));
+                // TODO: 28.12.2017 check closing of sockets
             }
         };
     }
