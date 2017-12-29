@@ -39,7 +39,7 @@ public class App_v2 extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.setTAG(Constants.APP_START);
+        Log.setTAG(Constants.TAG_APP_START);
         Log.d("starting...");
 
         refreshIP();

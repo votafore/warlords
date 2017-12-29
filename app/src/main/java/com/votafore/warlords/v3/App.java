@@ -12,14 +12,15 @@ import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
-import static com.votafore.warlords.v2.Constants.APP_START;
-import static com.votafore.warlords.v2.Constants.APP_STOP;
+import static com.votafore.warlords.v2.Constants.LVL_APP;
+import static com.votafore.warlords.v2.Constants.TAG_APP_START;
+import static com.votafore.warlords.v2.Constants.TAG_APP_STOP;
 import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
 import static com.votafore.warlords.v2.Constants.LVL_LOCAL_SERVER;
 import static com.votafore.warlords.v2.Constants.LVL_NW_WATCHER;
-import static com.votafore.warlords.v2.Constants.SRV_CRT;
-import static com.votafore.warlords.v2.Constants.SRV_START;
-import static com.votafore.warlords.v2.Constants.SRV_STOP;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
 import static com.votafore.warlords.v2.Constants.format1;
 
 /**
@@ -35,29 +36,27 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        Log.setTAG(APP_START);
-        Log.d("starting...");
+        Log.d(TAG_APP_START, "starting...");
 
         refreshIP();
 
-        Log.d(String.format(format1, LVL_NW_WATCHER, "create"));
+        Log.d1(TAG_APP_START, LVL_NW_WATCHER, "create");
         mNetReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                Log.d(String.format(format1, LVL_NW_WATCHER, "network state changed"));
+                Log.d1("", LVL_NW_WATCHER, "network state changed");
                 refreshIP();
             }
         };
 
         IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
 
-        Log.d(String.format(format1, LVL_NW_WATCHER, "register"));
+        Log.d1(TAG_APP_START, LVL_NW_WATCHER, "register");
         registerReceiver(mNetReceiver, filter);
 
-        Log.d(String.format(format1, LVL_ADAPTER, "create"));
+        Log.d1(TAG_APP_START, LVL_ADAPTER, "create");
         mServerListAdapter = new AdapterServerList(this);
 
-        Log.reset();
     }
 
     @Override
@@ -65,7 +64,7 @@ public class App extends Application {
         super.onTerminate();
 
         // TODO: 28.12.2017  not work.. define where it can be done
-        Log.setTAG(APP_STOP);
+        Log.setTAG(TAG_APP_STOP);
         Log.d("stopping...");
 
         Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
@@ -95,45 +94,53 @@ public class App extends Application {
 
     public void createServer(){
 
-        Log.setTAG(SRV_CRT);
-        Log.d("starting...");
+        Log.d1(TAG_SRV_CRT, LVL_APP, "starting...");
 
-        Log.setLevel(LVL_LOCAL_SERVER);
+//        Log.setLevel(LVL_LOCAL_SERVER);
+//        Log.d("creating...");
 
-        Log.d("creating...");
+        Log.d1(TAG_SRV_CRT, LVL_APP, "creating...");
         mServer = new ServerLocal();
-        Log.d("created");
+        Log.d1(TAG_SRV_CRT, LVL_APP, "created");
+        //Log.d("created");
 
-        Log.reset();
+        //Log.reset();
 
 
-        Log.setTAG(SRV_START);
-        Log.setLevel(LVL_LOCAL_SERVER);
+//        Log.setTAG(TAG_SRV_START);
+//        Log.setLevel(LVL_LOCAL_SERVER);
+//
+//        Log.d("starting...");
 
-        Log.d("starting...");
+        Log.d1(TAG_SRV_START, LVL_APP, "starting...");
         mServer.start(this);
-        Log.d("started");
+        Log.d1(TAG_SRV_START, LVL_APP, "started");
+        //Log.d("started");
 
 
         mServerListAdapter.addLocalServer(mServer);
 
-        Log.reset();
+        //Log.reset();
     }
 
     public void stopServer(){
 
+        Log.d1(TAG_SRV_STOP, LVL_APP, "stopping...");
+
         mServerListAdapter.removeLocalServer();
 
-        Log.setTAG(SRV_STOP);
-        Log.d("stopping...");
+//        Log.setTAG(TAG_SRV_STOP);
+//        Log.d("stopping...");
 
-        Log.setLevel(LVL_LOCAL_SERVER);
+        //Log.setLevel(LVL_LOCAL_SERVER);
 
-        Log.d("stopping...");
+        //Log.d("stopping...");
         mServer.stop();
-        Log.d("stopped");
+        //Log.d("stopped");
 
-        Log.reset();
+        Log.d1(TAG_SRV_STOP, LVL_APP, "stopped");
+
+        //Log.reset();
     }
 
 
