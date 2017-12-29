@@ -76,15 +76,16 @@ public final class Constants {
 
 
     // combinations of TAGs
-    public static String APP_START         = String.format(format, TAG + "_" + APP + "_" + START);
-    public static String APP_STOP          = String.format(format, TAG + "_" + APP + "_" + STOP);
+    public static String TAG_APP_START     = String.format(format, TAG + "_" + APP + "_" + START);
+    public static String TAG_APP_STOP      = String.format(format, TAG + "_" + APP + "_" + STOP);
 
-    public static String SRV_CRT           = String.format(format, TAG + "_" + SRV + "_" + CRT);
-    public static String SRV_START         = String.format(format, TAG + "_" + SRV + "_" + START);
-    public static String SRV_STOP          = String.format(format, TAG + "_" + SRV + "_" + STOP);
+    public static String TAG_SRV_CRT       = String.format(format, TAG + "_" + SRV + "_" + CRT);
+    public static String TAG_SRV_START     = String.format(format, TAG + "_" + SRV + "_" + START);
+    public static String TAG_SRV_STOP      = String.format(format, TAG + "_" + SRV + "_" + STOP);
 
-    public static String SOCKET_CRT        = String.format(format, TAG + "_" + SOCKET + "_" + CRT);
-    public static String SOCKET_CLOSE      = String.format(format, TAG + "_" + SOCKET + "_" + CLOSE);
+    public static String TAG_SOCKET        = String.format(format, TAG + "_" + SOCKET);
+    public static String TAG_SOCKET_CRT    = String.format(format, TAG + "_" + SOCKET + "_" + CRT);
+    public static String TAG_SOCKET_CLOSE  = String.format(format, TAG + "_" + SOCKET + "_" + CLOSE);
 
 
     // TAG описывает происходящее действие
