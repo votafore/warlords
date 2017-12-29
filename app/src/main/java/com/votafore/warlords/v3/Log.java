@@ -51,24 +51,24 @@ public class Log {
 
 
 
-    public static void d(String tag, String msg){
-        android.util.Log.d(tag, msg);
+    public static void d(String tag, String message){
+        android.util.Log.d(tag, message);
     }
 
-    public static void d1(String tag, String... msg){
-        android.util.Log.d(tag, String.format(Constants.format1, msg[0], msg[1]));
+    public static void d1(String tag, String... messages){
+        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1]));
     }
 
-    public static void d2(String tag, String... msg){
-        android.util.Log.d(tag, String.format(Constants.format1, msg[0], msg[1], msg[2]));
+    public static void d2(String tag, String... messages){
+        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2]));
     }
 
-    public static void d3(String tag, String... msg){
-        android.util.Log.d(tag, String.format(Constants.format1, msg[0], msg[1], msg[2], msg[3]));
+    public static void d3(String tag, String... messages){
+        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3]));
     }
 
-    public static void d4(String tag, String... msg){
-        android.util.Log.d(tag, String.format(Constants.format1, msg[0], msg[1], msg[2], msg[3], msg[4]));
+    public static void d4(String tag, String... messages){
+        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3], messages[4]));
     }
 
 

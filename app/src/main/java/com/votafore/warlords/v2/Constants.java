@@ -40,11 +40,11 @@ public final class Constants {
     public static String CLOSE              = "CLOSE"; // tag for watching how processes closes
     public static String START              = "START"; // tag for watching how processes start
     public static String STOP               = "STOP"; // tag for watching how processes stop
+    public static String SEND               = "SEND";
+    public static String RECEIVE            = "RECEIVE";
     //???
     public static String ADD                = "ADD"; // tag for watching how processes add
     public static String REMOVE             = "REMOVE"; // tag for watching how processes remove
-    public static String SEND               = "SEND";
-    public static String RECEIVE            = "RECEIVE";
 
 
 
@@ -53,7 +53,7 @@ public final class Constants {
     public static String SRV                = "SRV";  // tag for server processes
     public static String SOCKET             = "SOCKET";  // tag for socket processes
     public static String SCAN               = "SCAN";  // tag for scanning/discovering processes
-    public static String REQUEST            = "REQUEST";
+    public static String DATA               = "DATA";
 
 
     // prefixes
@@ -76,16 +76,19 @@ public final class Constants {
 
 
     // combinations of TAGs
-    public static String TAG_APP_START     = String.format(format, TAG + "_" + APP + "_" + START);
-    public static String TAG_APP_STOP      = String.format(format, TAG + "_" + APP + "_" + STOP);
+    public static String TAG_APP_START        = String.format(format, TAG + "_" + APP + "_" + START);
+    public static String TAG_APP_STOP         = String.format(format, TAG + "_" + APP + "_" + STOP);
 
-    public static String TAG_SRV_CRT       = String.format(format, TAG + "_" + SRV + "_" + CRT);
-    public static String TAG_SRV_START     = String.format(format, TAG + "_" + SRV + "_" + START);
-    public static String TAG_SRV_STOP      = String.format(format, TAG + "_" + SRV + "_" + STOP);
+    public static String TAG_SRV_CRT          = String.format(format, TAG + "_" + SRV + "_" + CRT);
+    public static String TAG_SRV_START        = String.format(format, TAG + "_" + SRV + "_" + START);
+    public static String TAG_SRV_STOP         = String.format(format, TAG + "_" + SRV + "_" + STOP);
 
-    public static String TAG_SOCKET        = String.format(format, TAG + "_" + SOCKET);
-    public static String TAG_SOCKET_CRT    = String.format(format, TAG + "_" + SOCKET + "_" + CRT);
-    public static String TAG_SOCKET_CLOSE  = String.format(format, TAG + "_" + SOCKET + "_" + CLOSE);
+    public static String TAG_SOCKET           = String.format(format, TAG + "_" + SOCKET);
+    public static String TAG_SOCKET_CRT       = String.format(format, TAG + "_" + SOCKET + "_" + CRT);
+    public static String TAG_SOCKET_CLOSE     = String.format(format, TAG + "_" + SOCKET + "_" + CLOSE);
+
+    public static String TAG_DATA_SEND        = String.format(format, TAG + "_" + DATA + "_" + SEND);
+    public static String TAG_DATA_RECEIVE     = String.format(format, TAG + "_" + DATA + "_" + RECEIVE);
 
 
     // TAG описывает происходящее действие
