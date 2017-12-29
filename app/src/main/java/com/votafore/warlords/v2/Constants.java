@@ -87,6 +87,7 @@ public final class Constants {
     public static String TAG_SOCKET_CRT       = String.format(format, TAG + "_" + SOCKET + "_" + CRT);
     public static String TAG_SOCKET_CLOSE     = String.format(format, TAG + "_" + SOCKET + "_" + CLOSE);
 
+    public static String TAG_DATA             = String.format(format, TAG + "_" + DATA);
     public static String TAG_DATA_SEND        = String.format(format, TAG + "_" + DATA + "_" + SEND);
     public static String TAG_DATA_RECEIVE     = String.format(format, TAG + "_" + DATA + "_" + RECEIVE);
 
