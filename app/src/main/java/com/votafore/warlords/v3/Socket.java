@@ -4,7 +4,6 @@ package com.votafore.warlords.v3;
 
 import com.votafore.warlords.v2.Constants;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.DataInputStream;
@@ -12,9 +11,12 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.processors.PublishProcessor;
+import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -41,11 +43,17 @@ public class Socket implements ISocket {
      */
     private DataInputStream input;
 
+
+
     /**
      * emitter for incoming data
      */
-    private PublishProcessor<JSONObject> emitter;
+    private ConnectableObservable<JSONObject> emitter;
 
+    /**
+     * disposable for emitter
+     */
+    private Disposable dsp_emitter;
 
 
 
@@ -67,23 +75,23 @@ public class Socket implements ISocket {
 
     private void init(){
 
-        Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "init"));
+        Log.d1(Constants.TAG_SOCKET_CRT, Constants.LVL_SOCKET, "init");
 
         try {
+            Log.d1(Constants.TAG_SOCKET_CRT, Constants.LVL_SOCKET, "create input and output");
             input = new DataInputStream(mSocket.getInputStream());
             output = new DataOutputStream(mSocket.getOutputStream());
-            Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "input and output created"));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        Log.d(String.format(Constants.format1, Constants.LVL_SOCKET, "create emitter for incoming data"));
+        Log.d1(Constants.TAG_SOCKET_CRT, Constants.LVL_SOCKET, "create emitter for incoming data");
 
-        emitter = PublishProcessor.create();
-
-        new Thread(new Runnable() {
+        emitter = Observable.create(new ObservableOnSubscribe<JSONObject>() {
             @Override
-            public void run() {
+            public void subscribe(ObservableEmitter<JSONObject> e) throws Exception {
+
+                Log.d(Constants.TAG_SOCKET, "thread for incoming data started");
 
                 String data;
 
@@ -97,28 +105,26 @@ public class Socket implements ISocket {
                     }
 
                     if(data == null) {
+                        e.onComplete();
 
-                        emitter.onComplete();
-
-                        try {
-                            mSocket.close();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
+                        // TODO: 29.12.2017 test it for correct closing
+                        //mSocket.close();
+                        close();
 
                         break;
 
                     }else{
-
-                        try {
-                            emitter.onNext(new JSONObject(data));
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        Log.d1(Constants.TAG_DATA_RECEIVE, Constants.LVL_SOCKET, "new data received");
+                        e.onNext(new JSONObject(data));
                     }
                 }
             }
-        }).start();
+        })
+        .subscribeOn(Schedulers.newThread())
+        .publish();
+
+        Log.d1(Constants.TAG_SOCKET_CRT, Constants.LVL_SOCKET, "start emitting");
+        dsp_emitter = emitter.connect();
     }
 
 
@@ -129,42 +135,58 @@ public class Socket implements ISocket {
     @Override
     public void send(JSONObject data) {
 
-        //Log.v(TAG, String.format(format1, prefix, "send"));
+        Log.d1(Constants.TAG_DATA_SEND, Constants.LVL_SOCKET, "send data");
 
         try {
             output.writeUTF(data.toString());
         } catch (IOException e) {
             e.printStackTrace();
+            Log.d1(Constants.TAG_DATA_SEND, Constants.LVL_SOCKET, "data are not sent");
         }
     }
 
     @Override
     public Disposable setReceiver(Consumer<JSONObject> consumer) {
+        Log.d(Constants.TAG_SOCKET, "add new receiver");
         return emitter.subscribe(consumer);
     }
 
     @Override
     public void close() {
 
-        android.util.Log.d(Constants.SOCKET_CLOSE, "closing...");
+        Log.d(Constants.TAG_SOCKET_CLOSE, "closing...");
 
         try {
-
-            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close input"));
+            Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "close input");
             if(input != null)
                 input.close();
 
-            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close output"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "close output");
             if(output != null)
                 output.close();
 
-            android.util.Log.d(Constants.SOCKET_CLOSE, String.format(Constants.format1, Constants.LVL_SOCKET, "close socket"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try {
+            Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "close socket");
             if(mSocket != null)
                 mSocket.close();
 
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "stop emitting data");
+        dsp_emitter.dispose();
+
+        android.util.Log.d(Constants.TAG_SOCKET_CLOSE, "socket closed");
     }
 
 
@@ -173,11 +195,9 @@ public class Socket implements ISocket {
 
     public static Socket create(InetAddress ip, int port){
 
-        Log.setTAG(Constants.SOCKET_CRT);
-
-        Log.d("new socket connected... create");
+        Log.d(Constants.TAG_SOCKET_CRT, "new socket connected... create");
         Socket s = new Socket(ip, port);
-        Log.d("new socket connected... created");
+        Log.d(Constants.TAG_SOCKET_CRT, "new socket connected... created");
 
         return s;
 
@@ -185,9 +205,9 @@ public class Socket implements ISocket {
 
     public static Socket create(java.net.Socket socket){
 
-        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... create");
+        Log.d(Constants.TAG_SOCKET_CRT, "new socket connected... create");
         Socket s = new Socket(socket);
-        android.util.Log.d(Constants.SOCKET_CRT, "new socket connected... created");
+        Log.d(Constants.TAG_SOCKET_CRT, "new socket connected... created");
 
         return s;
     }
