@@ -112,20 +112,20 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
             Log.v(TAG, String.format(format2, prefix, "RECYCLER_VIEW", "onClick"));
 
-//            try {
-//                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
+            try {
+                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+
+//            App app = (App) mContext.getApplicationContext();
+//            app.setSelected(mList.get(getAdapterPosition()).getServer());
 //
-//            } catch (JSONException e) {
-//                e.printStackTrace();
-//            }
-
-            App app = (App) mContext.getApplicationContext();
-            app.setSelected(mList.get(getAdapterPosition()).getServer());
-
-            Intent i = new Intent(mContext, ActivityGame.class);
-            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
-            mContext.startActivity(i);
+//            Intent i = new Intent(mContext, ActivityGame.class);
+//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//
+//            mContext.startActivity(i);
         }
     }
 
@@ -305,9 +305,10 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                 return false;
                         }
 
-                        // or this game was created on current device
-                        if(((App)context.getApplicationContext()).getDeviceIP().equals(serviceInfo.info.getHost().toString().replace("/", "")))
-                            return false;
+                        // TODO: 29.12.2017 test
+//                        // or this game was created on current device
+//                        if(((App)context.getApplicationContext()).getDeviceIP().equals(serviceInfo.info.getHost().toString().replace("/", "")))
+//                            return false;
 
                         return true;
                     }
