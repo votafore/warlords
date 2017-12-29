@@ -1,7 +1,5 @@
 package com.votafore.warlords.v3;
 
-//import android.util.Log;
-
 import com.votafore.warlords.v2.Constants;
 
 import org.json.JSONObject;
@@ -15,8 +13,10 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Action;
 import io.reactivex.functions.Consumer;
 import io.reactivex.observables.ConnectableObservable;
+import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -54,6 +54,11 @@ public class Socket implements ISocket {
      * disposable for emitter
      */
     private Disposable dsp_emitter;
+
+    /**
+     * object allows unsubscribes from sender's messages
+     */
+    private Disposable dsp_subscriber;
 
 
 
@@ -186,9 +191,36 @@ public class Socket implements ISocket {
         Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "stop emitting data");
         dsp_emitter.dispose();
 
-        android.util.Log.d(Constants.TAG_SOCKET_CLOSE, "socket closed");
+        Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "disconnect server and socket");
+        dsp_subscriber.dispose();
+
+        Log.d(Constants.TAG_SOCKET_CLOSE, "socket closed");
     }
 
+    @Override
+    public void subscribeSocket(PublishProcessor<JSONObject> sender){
+
+        Log.d1(Constants.TAG_SOCKET_CRT, Constants.LVL_SOCKET, "connect socket as subscriber for server's sender");
+
+        dsp_subscriber = sender.subscribe(new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject data) throws Exception {
+                Log.d1(Constants.TAG_DATA_SEND, Constants.LVL_SOCKET, "send data");
+                output.writeUTF(data.toString());
+            }
+        }, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+
+            }
+        }, new Action() {
+            @Override
+            public void run() throws Exception {
+                // TODO: 29.12.2017 check if it is necessary
+                close();
+            }
+        });
+    }
 
 
     /****************** STATIC *********************/
@@ -211,4 +243,14 @@ public class Socket implements ISocket {
 
         return s;
     }
+
+
+
+
+
+
+
+
+
+
 }
