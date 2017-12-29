@@ -40,13 +40,13 @@ public class Log {
             prefix = prefix + String.format(Constants.format+"|| ", pfx);
         }
 
-        String tag = TAG.isEmpty() ? Constants.TAG : TAG;
-        tag = String.format(Constants.format+":", tag);
-
-        android.util.Log.d(tag, prefix.concat(msg));
+        android.util.Log.d(handleTAG(TAG), prefix.concat(msg));
     }
 
-
+    private static String handleTAG(String tag){
+         String hTAG = tag.isEmpty() ? Constants.TAG : tag;
+         return String.format(Constants.format+":", hTAG);
+    }
 
 
 
@@ -56,19 +56,19 @@ public class Log {
     }
 
     public static void d1(String tag, String... messages){
-        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1]));
+        android.util.Log.d(handleTAG(tag), String.format(Constants.format1, messages[0], messages[1]));
     }
 
     public static void d2(String tag, String... messages){
-        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2]));
+        android.util.Log.d(handleTAG(tag), String.format(Constants.format1, messages[0], messages[1], messages[2]));
     }
 
     public static void d3(String tag, String... messages){
-        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3]));
+        android.util.Log.d(handleTAG(tag), String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3]));
     }
 
     public static void d4(String tag, String... messages){
-        android.util.Log.d(tag, String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3], messages[4]));
+        android.util.Log.d(handleTAG(tag), String.format(Constants.format1, messages[0], messages[1], messages[2], messages[3], messages[4]));
     }
 
 
