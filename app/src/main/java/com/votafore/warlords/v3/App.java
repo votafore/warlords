@@ -118,7 +118,7 @@ public class App extends Application {
         //Log.d("started");
 
 
-        mServerListAdapter.addLocalServer(mServer);
+        //mServerListAdapter.addLocalServer(mServer); // TODO: 29.12.2017 VERNUT
 
         //Log.reset();
     }
@@ -127,7 +127,7 @@ public class App extends Application {
 
         Log.d1(TAG_SRV_STOP, LVL_APP, "stopping...");
 
-        mServerListAdapter.removeLocalServer();
+        //mServerListAdapter.removeLocalServer(); // TODO: 29.12.2017 VERNUT
 
 //        Log.setTAG(TAG_SRV_STOP);
 //        Log.d("stopping...");
