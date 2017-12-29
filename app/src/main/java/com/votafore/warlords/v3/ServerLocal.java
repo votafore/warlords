@@ -291,40 +291,13 @@ public class ServerLocal implements IServer {
             @Override
             public void accept(final ISocket iSocket) throws Exception {
 
-                //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "append socket"));
-
                 Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set up socket in server");
-
 
                 Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set socket as subscriber for sender");
                 iSocket.subscribeSocket(sender);
 
                 Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "subscribe server to incoming data");
                 map_dsp_receiver.put(iSocket, iSocket.setReceiver(receiver));
-
-//                map_dsp_sender.put(iSocket, sender.subscribe(new Consumer<JSONObject>() {
-//                    @Override
-//                    public void accept(JSONObject jsonObject) throws Exception {
-//                        //Log.v("TESTRX", ">>>>>>>>> Channel - socket subscriber. send request for server info into output: " + jsonObject.toString());
-//                        //Log.v(TAG, String.format(format4, prefix, "OBSERVER", "ServerSocket", "append socket", "socket set as subscriber of sender"));
-//                        iSocket.send(jsonObject);
-//                    }
-//                }, new Consumer<Throwable>() {
-//                    @Override
-//                    public void accept(Throwable throwable) throws Exception {
-//
-//                    }
-//                }, new Action() {
-//                    @Override
-//                    public void run() throws Exception {
-//                        Log.d1(TAG_SOCKET_CLOSE, LVL_LOCAL_SERVER, "close");
-//                        iSocket.close();
-//                        // method "dispose" will be called when receiver unsubscribe
-//                        // or, may be, it is not required
-//                    }
-//                }));
-
-                // TODO: 28.12.2017 check closing of sockets
             }
         };
     }

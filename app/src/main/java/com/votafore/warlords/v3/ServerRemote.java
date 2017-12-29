@@ -9,6 +9,14 @@ import java.net.InetAddress;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.processors.PublishProcessor;
+import io.reactivex.schedulers.Schedulers;
+
+import static com.votafore.warlords.v2.Constants.LVL_REMOTE_SERVER;
+import static com.votafore.warlords.v2.Constants.TAG_DATA_SEND;
+import static com.votafore.warlords.v2.Constants.TAG_SOCKET;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
 
 /**
  * @author Vorafore
@@ -26,49 +34,35 @@ public class ServerRemote implements IServer {
      */
     private PublishProcessor<JSONObject> sender;
 
-//    /**
-//     *
-//     */
-//    private Disposable dsp_receiver;
-
-    //private PublishProcessor<JSONObject> mReceiver;
-
     @Override
     public Disposable setReceiver(Consumer<JSONObject> receiver) {
+        Log.d1("", LVL_REMOTE_SERVER, "subscribe client to incoming data");
         return mSocket.setReceiver(receiver);
     }
 
     @Override
     public void send(JSONObject data) {
+        Log.d1(TAG_DATA_SEND, LVL_REMOTE_SERVER, "send data");
         sender.onNext(data);
     }
-
-
 
     private ISocket mSocket;
 
     @Override
     public void start(Context context) {
 
+        Log.d1(TAG_SRV_START, LVL_REMOTE_SERVER, "create socket");
         mSocket = Socket.create(mIP, mPort);
 
-        sender.subscribe(new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject object) throws Exception {
-                mSocket.send(object);
-            }
-        });
-
-        //socket.setReceiver(mReceiver);
+        Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set up socket in server");
+        Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set socket as subscriber for sender");
+        mSocket.subscribeSocket(sender);
     }
 
     @Override
     public void stop() {
-
+        Log.d1(TAG_SRV_STOP, LVL_REMOTE_SERVER, "sender.onComplete()");
         sender.onComplete();
-        //mReceiver.onComplete();
-
-        // TODO: 26.12.2017 проверить надо ли диспосить dsp_receiver
     }
 
 
@@ -83,9 +77,10 @@ public class ServerRemote implements IServer {
 
     public ServerRemote(InetAddress ip, int port){
 
+        Log.d1(TAG_SRV_CRT, LVL_REMOTE_SERVER, "create sender");
+
         sender = PublishProcessor.create();
-        //mReceiver = PublishProcessor.create();
-        // TODO: 26.12.2017 specify thread for broadcaster
+        sender.subscribeOn(Schedulers.io());
 
         mIP = ip;
         mPort = port;
