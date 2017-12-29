@@ -6,14 +6,22 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
-import com.votafore.warlords.v2.AdapterServerList;
-import com.votafore.warlords.v2.App;
+import com.votafore.warlords.v3.App;
+import com.votafore.warlords.v3.IServer;
+import com.votafore.warlords.v3.Log;
+
+import org.json.JSONObject;
+
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 
 public class ActivityGame extends AppCompatActivity {
 
     private App mApp;
 
-    private AdapterServerList.ListItem mItem;
+    private IServer mServer;
+
+    private Disposable dsp_receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,7 +29,8 @@ public class ActivityGame extends AppCompatActivity {
         setContentView(R.layout.activity_game);
 
         mApp = (App) getApplication();
-        mItem = mApp.getSelected();
+
+        mServer = mApp.getSelected();
 
         Button startGame = findViewById(R.id.start_game);
 
@@ -29,19 +38,32 @@ public class ActivityGame extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 mApp.startGame();
-
                 startActivity(new Intent(ActivityGame.this, ActivityMain.class));
-
                 finish();
             }
         });
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        dsp_receiver = mServer.setReceiver(new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject object) throws Exception {
+
+                // TODO: 28.12.2017 implement reaction
+
+                Log.d("Activity: some data received");
+            }
+        });
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        dsp_receiver.dispose();
+    }
 
 
-
-
-
-
-    // TODO: 25.12.2017 implement IDataChange listener in current environment
 }

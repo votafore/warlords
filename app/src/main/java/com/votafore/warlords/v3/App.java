@@ -74,12 +74,6 @@ public class App extends Application {
 
 
 
-
-
-
-
-
-
     /***************** page before game *******************/
 
     /**
@@ -89,30 +83,13 @@ public class App extends Application {
 
     public AdapterServerList getAdapter(){
         Log.d("getAdapter");
-
         return mServerListAdapter;
     }
 
 
 
 
-
-
-
-    public void finishListPage(){
-
-        //Log.v(TAG, String.format(format1, prefix, "finishListPage"));
-
-        //Log.v(TAG, String.format(format2, prefix, "finishListPage", "stop scanning"));
-        mServerListAdapter.stopScan();
-        //Log.v(TAG, String.format(format2, prefix, "finishListPage", "scanning stopped"));
-
-//        mServerManager = null;
-        mServerListAdapter = null;
-    }
-
-
-    // TODO: 18.12.2017 make start of broadcasting
+    /***************** local server *******************/
 
     private IServer mServer;
 
@@ -143,7 +120,7 @@ public class App extends Application {
         Log.reset();
     }
 
-    public void TEST_stopServer(){
+    public void stopServer(){
 
         mServerListAdapter.removeLocalServer();
 
@@ -159,18 +136,22 @@ public class App extends Application {
         Log.reset();
     }
 
-    public IServer getServer(){
-        Log.d("getServer");
 
-        return mServer;
+
+
+    /***************** selected server *******************/
+
+    private IServer mSelected;
+
+    public void setSelected(IServer server){
+        Log.d("setSelected");
+        mSelected = server;
     }
 
-
-
-
-
-
-
+    public IServer getSelected(){
+        Log.d("getSelected");
+        return mSelected;
+    }
 
 
 
@@ -215,12 +196,7 @@ public class App extends Application {
 
     /*************** TESTS *********************/
 
-
-    /**
-     * transition: list of servers -> server settings
-     */
-
-
+    private Game mGame;
 
     /**
      * START GAME !!!!!!!!!!
@@ -230,9 +206,9 @@ public class App extends Application {
     public void startGame(){
         Log.d("starting game...");
 
-        finishListPage();
-
         // TODO: 25.12.2017 prepare objects for game
+
+        mGame = new Game(getApplicationContext());
     }
 
 

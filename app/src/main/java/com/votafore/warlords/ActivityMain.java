@@ -34,23 +34,23 @@ public class ActivityMain extends AppCompatActivity {
 
 
 
-        LinearLayout ll;
-        ll = new LinearLayout(this);
-        ll.setOrientation(LinearLayout.VERTICAL);
-
-        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-
-        TextView tv;
-
-        tv = new TextView(this);
-        tv.setGravity(Gravity.CENTER_HORIZONTAL);
-        tv.setText("just test text");
-        tv.setTextSize(18f);
-        tv.setPadding(5, 0, 0, 0);
-
-        ll.addView(tv, params);
-
-        addContentView(ll, params);
+//        LinearLayout ll;
+//        ll = new LinearLayout(this);
+//        ll.setOrientation(LinearLayout.VERTICAL);
+//
+//        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+//
+//        TextView tv;
+//
+//        tv = new TextView(this);
+//        tv.setGravity(Gravity.CENTER_HORIZONTAL);
+//        tv.setText("just test text");
+//        tv.setTextSize(18f);
+//        tv.setPadding(5, 0, 0, 0);
+//
+//        ll.addView(tv, params);
+//
+//        addContentView(ll, params);
     }
 
     @Override

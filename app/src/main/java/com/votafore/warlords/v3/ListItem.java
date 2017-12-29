@@ -72,6 +72,10 @@ public class ListItem {
         mListener = listener;
     }
 
+    public IServer getServer(){
+        return mServer;
+    }
+
 
 
 

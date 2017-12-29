@@ -1,6 +1,7 @@
 package com.votafore.warlords.v3;
 
 import android.content.Context;
+import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.votafore.warlords.ActivityGame;
 import com.votafore.warlords.R;
 import com.votafore.warlords.v3.App;
 import com.votafore.warlords.v2.Channel;
@@ -110,20 +112,20 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
             Log.v(TAG, String.format(format2, prefix, "RECYCLER_VIEW", "onClick"));
 
-            try {
-                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-
-//            App app = (App) mContext.getApplicationContext();
-//            app.setSelected(mList.get(getAdapterPosition()));
+//            try {
+//                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
 //
-//            Intent i = new Intent(mContext, ActivityGame.class);
-//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//
-//            mContext.startActivity(i);
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
+
+            App app = (App) mContext.getApplicationContext();
+            app.setSelected(mList.get(getAdapterPosition()).getServer());
+
+            Intent i = new Intent(mContext, ActivityGame.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+
+            mContext.startActivity(i);
         }
     }
 

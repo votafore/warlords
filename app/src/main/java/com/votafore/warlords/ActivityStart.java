@@ -107,7 +107,7 @@ public class ActivityStart extends AppCompatActivity {
             case R.id.exit:
 
                 //mFactory.exit();
-                mApp.TEST_stopServer();
+                mApp.stopServer();
                 break;
 
             case R.id.start_scan:
