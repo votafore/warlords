@@ -112,9 +112,9 @@ public class Socket implements ISocket {
                     if(data == null) {
                         e.onComplete();
 
-                        // TODO: 29.12.2017 test it for correct closing
-                        //mSocket.close();
-                        close();
+                        // send a notification that socket is closing
+                        // method "close" will be invoked when server close sender
+                        e.onNext(new JSONObject("{event: socket is closing}"));
 
                         break;
 
@@ -243,14 +243,5 @@ public class Socket implements ISocket {
 
         return s;
     }
-
-
-
-
-
-
-
-
-
 
 }
