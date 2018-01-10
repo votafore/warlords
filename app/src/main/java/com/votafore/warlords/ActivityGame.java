@@ -23,9 +23,11 @@ public class ActivityGame extends AppCompatActivity {
 
     private App mApp;
 
-    private IServer mServer;
+    //private IServer mServer;
 
     private Disposable dsp_receiver;
+
+    Button startGame;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,59 +36,54 @@ public class ActivityGame extends AppCompatActivity {
 
         mApp = (App) getApplication();
 
-        mServer = mApp.getSelected();
+        //mServer = mApp.getSelected();
 
-        Button startGame = findViewById(R.id.start_game);
+        startGame = findViewById(R.id.start_game);
+
+        mApp.createServer();
 
         startGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                mApp.startGame();
-//                startActivity(new Intent(ActivityGame.this, ActivityMain.class));
+                mApp.startGame();
+                startActivity(new Intent(ActivityGame.this, ActivityMain.class));
                 finish();
             }
         });
-
-        FragmentManager manager = getSupportFragmentManager();
-
-        if(manager.findFragmentById(R.id.settings) == null){
-
-            Fragment f;
-
-            boolean isLocalServer = true;
-
-            if(isLocalServer){
-                f = new FragmentLocalServerSettings();
-            }else{
-                f = new FragmentRemoteServerSettings();
-            }
-
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.settings ,f)
-                    .commit();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 
-        dsp_receiver = mServer.setReceiver(new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject object) throws Exception {
-
-                // TODO: 28.12.2017 implement reaction
-
-                Log.d("Activity: some data received");
-            }
-        });
+//        dsp_receiver = mServer.setReceiver(new Consumer<JSONObject>() {
+//            @Override
+//            public void accept(JSONObject object) throws Exception {
+//
+//                // TODO: 28.12.2017 implement reaction
+//
+//                Log.d("Activity: some data received");
+//            }
+//        });
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        dsp_receiver.dispose();
+        //dsp_receiver.dispose();
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
 
+        mApp.stopServer();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        mApp.stopServer();
+    }
 }

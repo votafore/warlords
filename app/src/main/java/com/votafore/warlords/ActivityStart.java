@@ -46,7 +46,7 @@ public class ActivityStart extends AppCompatActivity {
 
         serverList.setAdapter(adapter);
 
-        //adapter.startScan(this);
+        adapter.startScan(this);
 
 //        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
 //            @Override
@@ -76,6 +76,13 @@ public class ActivityStart extends AppCompatActivity {
 
         //Log.v(GameManager.TAG, "ActivityStart: onPause().");
         //mFactory.onActivityPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        mApp.getAdapter().stopScan();
     }
 
     @Override
