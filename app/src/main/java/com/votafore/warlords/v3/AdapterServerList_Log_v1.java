@@ -320,6 +320,11 @@ public class AdapterServerList_Log_v1 extends RecyclerView.Adapter<AdapterServer
                                         Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "adapter listener", "new data received"));
                                         notifyItemChanged(mList.indexOf(item));
                                     }
+
+                                    @Override
+                                    public void onDelete(ListItem item) {
+
+                                    }
                                 });
 
                                 Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "start server"));
@@ -454,6 +459,11 @@ public class AdapterServerList_Log_v1 extends RecyclerView.Adapter<AdapterServer
             public void onChange(ListItem item) {
                 Log.v(TAG, String.format(format2, prefix, "adapter listener", "new data received"));
                 notifyItemChanged(mList.indexOf(item));
+            }
+
+            @Override
+            public void onDelete(ListItem item) {
+
             }
         });
 

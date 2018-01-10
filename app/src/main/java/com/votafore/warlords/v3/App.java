@@ -16,7 +16,6 @@ import static com.votafore.warlords.v2.Constants.LVL_APP;
 import static com.votafore.warlords.v2.Constants.TAG_APP_START;
 import static com.votafore.warlords.v2.Constants.TAG_APP_STOP;
 import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
-import static com.votafore.warlords.v2.Constants.LVL_LOCAL_SERVER;
 import static com.votafore.warlords.v2.Constants.LVL_NW_WATCHER;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
@@ -96,51 +95,31 @@ public class App extends Application {
 
         Log.d1(TAG_SRV_CRT, LVL_APP, "starting...");
 
-//        Log.setLevel(LVL_LOCAL_SERVER);
-//        Log.d("creating...");
-
         Log.d1(TAG_SRV_CRT, LVL_APP, "creating...");
         mServer = new ServerLocal();
         Log.d1(TAG_SRV_CRT, LVL_APP, "created");
-        //Log.d("created");
-
-        //Log.reset();
-
-
-//        Log.setTAG(TAG_SRV_START);
-//        Log.setLevel(LVL_LOCAL_SERVER);
-//
-//        Log.d("starting...");
 
         Log.d1(TAG_SRV_START, LVL_APP, "starting...");
         mServer.start(this);
         Log.d1(TAG_SRV_START, LVL_APP, "started");
-        //Log.d("started");
 
 
         //mServerListAdapter.addLocalServer(mServer); // TODO: 29.12.2017 VERNUT
-
-        //Log.reset();
     }
 
     public void stopServer(){
 
         Log.d1(TAG_SRV_STOP, LVL_APP, "stopping...");
 
+        if(mServer != null)
+            mServer.stop();
+
+        mServer = null;
+
         //mServerListAdapter.removeLocalServer(); // TODO: 29.12.2017 VERNUT
 
-//        Log.setTAG(TAG_SRV_STOP);
-//        Log.d("stopping...");
-
-        //Log.setLevel(LVL_LOCAL_SERVER);
-
-        //Log.d("stopping...");
-        mServer.stop();
-        //Log.d("stopped");
 
         Log.d1(TAG_SRV_STOP, LVL_APP, "stopped");
-
-        //Log.reset();
     }
 
 
@@ -168,7 +147,6 @@ public class App extends Application {
 
     public String getDeviceIP(){
         Log.d("getDeviceIP");
-
         return mDeviceIP;
     }
 
