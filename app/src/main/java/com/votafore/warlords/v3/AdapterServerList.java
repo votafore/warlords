@@ -6,7 +6,6 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Handler;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -14,31 +13,33 @@ import android.widget.TextView;
 
 import com.votafore.warlords.ActivityGame;
 import com.votafore.warlords.R;
-import com.votafore.warlords.v3.App;
-import com.votafore.warlords.v2.Channel;
 import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v2.IChannel;
 import com.votafore.warlords.v2.ServiceInfo;
-import com.votafore.warlords.v2.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.LogRecord;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.observables.ConnectableObservable;
+
+import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
+import static com.votafore.warlords.v2.Constants.LVL_SCAN;
+import static com.votafore.warlords.v2.Constants.TAG_DATA_RECEIVE;
+import static com.votafore.warlords.v2.Constants.TAG_DATA_SEND;
+import static com.votafore.warlords.v2.Constants.TAG_SCAN;
+import static com.votafore.warlords.v2.Constants.TAG_SCAN_START;
+import static com.votafore.warlords.v2.Constants.TAG_SCAN_STOP;
+import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
 
 
 /**
@@ -47,14 +48,6 @@ import io.reactivex.observables.ConnectableObservable;
  */
 
 public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.ViewHolder>{
-
-    String TAG = Constants.TAG;
-    String prefix= Constants.PFX_ADAPTER;
-
-    String format1 = Constants.format1;
-    String format2 = Constants.format2;
-    String format3 = Constants.format3;
-    String format4 = Constants.format4;
 
     private Context mContext;
 
@@ -90,7 +83,6 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         return mList.size();
     }
 
-
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener{
 
         public ImageView mImageView;
@@ -110,22 +102,20 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
         @Override
         public void onClick(View v) {
 
-            Log.v(TAG, String.format(format2, prefix, "RECYCLER_VIEW", "onClick"));
+//            Log.d1(TAG_DATA_SEND, "LIST ITEM", "onClick... send request");
+//            try {
+//                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
+//            } catch (JSONException e) {
+//                e.printStackTrace();
+//            }
 
-            try {
-                mList.get(getAdapterPosition()).send(new JSONObject("{type:request, data:ServerInfo}"));
+            App app = (App) mContext.getApplicationContext();
+            app.setSelected(mList.get(getAdapterPosition()).getServer());
 
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
+            Intent i = new Intent(mContext, ActivityGame.class);
+            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
-//            App app = (App) mContext.getApplicationContext();
-//            app.setSelected(mList.get(getAdapterPosition()).getServer());
-//
-//            Intent i = new Intent(mContext, ActivityGame.class);
-//            i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//
-//            mContext.startActivity(i);
+            mContext.startActivity(i);
         }
     }
 
@@ -139,16 +129,17 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
     private CompositeDisposable dsp_scanner;
 
     public void stopScan(){
-        Log.v(TAG, String.format(format1, prefix, "stopScan"));
+        Log.d(TAG_SCAN_STOP, "stopScan");
         dsp_scanner.dispose();
     }
 
     public void startScan(final Context context){
 
-        Log.v(TAG, String.format(format1, prefix, "startScan"));
+        Log.d(TAG_SCAN_START, "starting...");
 
         dsp_scanner = new CompositeDisposable();
 
+        Log.d1(TAG_SCAN_START, LVL_ADAPTER, "create connectable observable");
         // common observable that generates initial data
         // in code below two subscribers are defined. They handle with that data
         ConnectableObservable<ServiceInfo> obs_discovery = Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
@@ -159,22 +150,19 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 final NsdManager.DiscoveryListener listener = new NsdManager.DiscoveryListener() {
                     @Override
                     public void onStartDiscoveryFailed(String serviceType, int errorCode) {
-                        //Log.v("TESTRX", "onStartDiscoveryFailed");
-                        // TODO: 22.12.2017 handler ommited
-                        //e.onError(new Throwable(serviceType));
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onStartDiscoveryFailed");
                     }
 
                     @Override
                     public void onStopDiscoveryFailed(String serviceType, int errorCode) {
-                        //Log.v("TESTRX", "onStopDiscoveryFailed");
-                        // TODO: 22.12.2017 handler ommited
-                        //e.onError(new Throwable(serviceType));
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onStopDiscoveryFailed");
                     }
 
                     @Override
                     public void onDiscoveryStarted(String serviceType) {
 
                         // TODO: 22.12.2017 check if in is necessary
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onDiscoveryStarted");
 
 //                        Log.v("TESTRX", "onDiscoveryStarted");
 
@@ -189,6 +177,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     public void onDiscoveryStopped(String serviceType) {
 
                         // TODO: 22.12.2017 check if in is necessary
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onDiscoveryStopped");
 
 //                        Log.v("TESTRX", "onDiscoveryStopped");
 //
@@ -202,7 +191,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     @Override
                     public void onServiceFound(NsdServiceInfo serviceInfo) {
 
-                        //Log.v("TESTRX", "onServiceFound");
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceFound");
 
                         ServiceInfo svc_info = new ServiceInfo();
                         svc_info.messageType = ServiceInfo.SERVICE_FOUND;
@@ -214,7 +203,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     @Override
                     public void onServiceLost(NsdServiceInfo serviceInfo) {
 
-                        //Log.v("TESTRX", "onServiceLost");
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceLost");
 
                         ServiceInfo svc_info = new ServiceInfo();
                         svc_info.messageType = ServiceInfo.SERVICE_LOST;
@@ -224,15 +213,15 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     }
                 };
 
+                Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "create disc. listener, start discover");
                 manager.discoverServices(Constants.SERVICETYPE, NsdManager.PROTOCOL_DNS_SD, listener);
 
-                Log.v(TAG, String.format(format2, prefix, "OBSERVABLE - NSD", "discovery started"));
 
                 e.setCancellable(new Cancellable() {
                     @Override
                     public void cancel() throws Exception {
+                        Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "cancel. stop discovery");
                         manager.stopServiceDiscovery(listener);
-                        Log.v(TAG, String.format(format3, prefix, "OBSERVABLE - NSD", "CANCEL", "discovery stopped (cancelled)"));
                     }
                 });
             }
@@ -245,6 +234,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             }
         }).publish();
 
+        Log.d1(TAG_SCAN_START, LVL_ADAPTER, "add FIND observer");
         // actions when service found
         dsp_scanner.add(
 
@@ -261,27 +251,25 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     @Override
                     public Observable<ServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
 
-                        Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "create observable for resolving"));
+                        Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
 
                         return Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
                             @Override
                             public void subscribe(final ObservableEmitter<ServiceInfo> e) {
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "create observable for resolving - subscribe"));
+                                Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
 
                                 NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
                                 manager.resolveService(serviceInfo.info, new NsdManager.ResolveListener() {
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                                        //Log.v("TESTRX", "2. onResolveFailed");
-                                        // TODO: 21.12.2017 consumer is missed
-                                        //e.onError(new Throwable(String.valueOf(errorCode)));
+                                        Log.d3(TAG_SCAN_START, "CONN OBSERVABLE", "FOUND", "RESOLVE", "onResolveFailed");
                                     }
 
                                     @Override
                                     public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
-                                        Log.v(TAG, String.format(format4, prefix, "OBSERVABLE", "FOUND", "RESOLVE", "resolved"));
+                                        Log.d3(TAG_SCAN_START, "CONN OBSERVABLE", "FOUND", "RESOLVE", "onServiceResolved");
 
                                         ServiceInfo svc_info = new ServiceInfo();
                                         svc_info.messageType = ServiceInfo.SERVICE_FOUND;
@@ -322,20 +310,22 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                             @Override
                             public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "create remote server"));
+                                Log.d2(TAG_SCAN, LVL_ADAPTER, "FOUND", "create remote server");
 
+                                Log.d1(TAG_SRV_CRT, LVL_SCAN, "create");
                                 IServer server = new ServerRemote(serviceInfo.info.getHost(), serviceInfo.info.getPort());
+                                Log.d1(TAG_SRV_CRT, LVL_SCAN, "created");
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "start server"));
+                                Log.d1(TAG_SRV_CRT, LVL_SCAN, "start");
                                 server.start(mContext);
-
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "create ListItem"));
+                                Log.d1(TAG_SRV_CRT, LVL_SCAN, "started");
 
                                 ListItem item = new ListItem(server);
                                 item.setListener(new ListItem.IItemChangeListener() {
                                     @Override
                                     public void onChange(ListItem item) {
-                                        Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "adapter listener", "new data received"));
+
+                                        Log.d2(TAG_DATA_RECEIVE, LVL_ADAPTER, "LIST_ITEM", "data received");
                                         final int index = mList.indexOf(item);
 
                                         if(index >= 0){
@@ -347,9 +337,27 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                             });
                                         }
                                     }
+
+                                    @Override
+                                    public void onDelete(final ListItem item) {
+
+                                        final int index = mList.indexOf(item);
+
+                                        item.stop();
+
+                                        if(index >= 0){
+                                            mUIHandler.post(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    mList.remove(item);
+                                                    notifyItemRemoved(index);
+                                                }
+                                            });
+                                        }
+                                    }
                                 });
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "FOUND", "send request"));
+                                Log.d1(TAG_DATA_SEND, LVL_ADAPTER, "send request");
                                 server.send(new JSONObject("{type:request, data:ServerInfo}"));
 
                                 e.onNext(item);
@@ -360,13 +368,12 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                 .subscribe(new Consumer<ListItem>() {
                     @Override
                     public void accept(ListItem item) throws Exception {
-                        Log.v(TAG, String.format(format4, prefix, "OBSERVABLE", "LOST", "FINAL", "add item to list"));
                         mList.add(item);
                         notifyItemInserted(mList.size()-1);
                     }
                 }));
 
-
+        Log.d1(TAG_SCAN_START, LVL_ADAPTER, "add LOST observer");
 
         // actions when service lost
         dsp_scanner.add(
@@ -384,25 +391,24 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                             @Override
                             public Observable<ServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
 
-                                Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "LOST", "create observable for resolving"));
+                                //Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "LOST", "create observable for resolving"));
+                                Log.d3(TAG_SCAN, LVL_ADAPTER, "LOST", "RESOLVE", "create observable");
 
                                 return Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
                                     @Override
                                     public void subscribe(final ObservableEmitter<ServiceInfo> e) {
-                                        //Log.v("TESTRX", "2. subscribe");
+                                        Log.d3(TAG_SCAN, LVL_ADAPTER, "LOST", "RESOLVE", "start");
                                         NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
                                         manager.resolveService(serviceInfo.info, new NsdManager.ResolveListener() {
                                             @Override
                                             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                                                //Log.v("TESTRX", "2. onResolveFailed");
-                                                // TODO: 21.12.2017 consumer is missed
-                                                //e.onError(new Throwable(String.valueOf(errorCode)));
+                                                Log.d3(TAG_SCAN_START, "CONN OBSERVABLE", "LOST", "RESOLVE", "onResolveFailed");
                                             }
 
                                             @Override
                                             public void onServiceResolved(NsdServiceInfo serviceInfo) {
 
-                                                Log.v(TAG, String.format(format4, prefix, "OBSERVABLE", "LOST", "RESOLVE", "resolved"));
+                                                Log.d3(TAG_SCAN_START, "CONN OBSERVABLE", "LOST", "RESOLVE", "onServiceResolved");
 
                                                 ServiceInfo svc_info = new ServiceInfo();
                                                 svc_info.messageType = ServiceInfo.SERVICE_LOST;
@@ -441,10 +447,8 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
                                     int index = mList.indexOf(item);
 
-                                    Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "LOST", "stop item"));
                                     item.stop();
 
-                                    Log.v(TAG, String.format(format3, prefix, "OBSERVABLE", "LOST", "delete from list"));
                                     mList.remove(item);
 
                                     notifyItemRemoved(index);
@@ -455,6 +459,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         })
         );
 
+        Log.d(TAG_SCAN_START, "start all observables");
         dsp_scanner.add(obs_discovery.connect());
 
     }
@@ -465,19 +470,17 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     public void addLocalServer(IServer server){
 
-        final String localTAG = "addLocalServer";
-
-        Log.v(TAG, String.format(format1, prefix, localTAG));
-
-        Log.v(TAG, String.format(format2, prefix, localTAG, "create ListItem"));
         ListItem item = new ListItem(server);
 
-        Log.v(TAG, String.format(format2, prefix, "adapter listener", "set listener to item"));
         item.setListener(new ListItem.IItemChangeListener() {
             @Override
-            public void onChange(ListItem item) {
-                Log.v(TAG, String.format(format2, prefix, "adapter listener", "new data received"));
+            public void onDelete(ListItem item) {
 
+            }
+
+            @Override
+            public void onChange(ListItem item) {
+                Log.d2(TAG_DATA_RECEIVE, LVL_ADAPTER, "LIST_ITEM", "data received");
                 final int index = mList.indexOf(item);
 
                 if(index >= 0){
@@ -488,18 +491,18 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         }
                     });
                 }
+
+
             }
         });
 
         mLocalItem = item;
 
-        Log.v(TAG, String.format(format2, prefix, localTAG, "add item to list"));
         mList.add(mLocalItem);
         notifyItemInserted(mList.size()-1);
 
 
         try {
-            Log.v(TAG, String.format(format2, prefix, localTAG, "send request"));
             item.send(new JSONObject("{type:request, data:ServerInfo}"));
         } catch (JSONException e) {
             e.printStackTrace();
@@ -508,11 +511,9 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 
     public void removeLocalServer(){
 
-        Log.v(TAG, String.format(format1, prefix, "removeLocalServer"));
         int index = mList.indexOf(mLocalItem);
 
         mList.remove(index);
-        Log.v(TAG, String.format(format2, prefix, "removeLocalServer", "ListItem has been removed"));
         notifyItemRemoved(index);
     }
 

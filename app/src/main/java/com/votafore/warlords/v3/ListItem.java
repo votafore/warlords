@@ -45,6 +45,14 @@ public class ListItem {
         mServer.setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject object) throws Exception {
+
+                if(object.has("event")){
+                    if(object.getString("event").equals("socket is closing")){
+                        mListener.onDelete(ListItem.this);
+                        return;
+                    }
+                }
+
                 owner = object.getString("owner");
                 count = object.getString("count");
 
@@ -86,5 +94,6 @@ public class ListItem {
 
     public interface IItemChangeListener{
         void onChange(ListItem item);
+        void onDelete(ListItem item);
     }
 }
