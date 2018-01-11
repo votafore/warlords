@@ -132,21 +132,21 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     @Override
                     public void onStartDiscoveryFailed(String serviceType, int errorCode) {
                         //Log.v("TESTRX", "onStartDiscoveryFailed");
-                        // TODO: 22.12.2017 handler ommited
+                        // T-ODO: 22.12.2017 handler ommited
                         //e.onError(new Throwable(serviceType));
                     }
 
                     @Override
                     public void onStopDiscoveryFailed(String serviceType, int errorCode) {
                         //Log.v("TESTRX", "onStopDiscoveryFailed");
-                        // TODO: 22.12.2017 handler ommited
+                        // T-ODO: 22.12.2017 handler ommited
                         //e.onError(new Throwable(serviceType));
                     }
 
                     @Override
                     public void onDiscoveryStarted(String serviceType) {
 
-                        // TODO: 22.12.2017 check if in is necessary
+                        // T-ODO: 22.12.2017 check if in is necessary
 
 //                        Log.v("TESTRX", "onDiscoveryStarted");
 
@@ -160,7 +160,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                     @Override
                     public void onDiscoveryStopped(String serviceType) {
 
-                        // TODO: 22.12.2017 check if in is necessary
+                        // T-ODO: 22.12.2017 check if in is necessary
 
 //                        Log.v("TESTRX", "onDiscoveryStopped");
 //
@@ -239,7 +239,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                         //Log.v("TESTRX", "2. onResolveFailed");
-                                        // TODO: 21.12.2017 consumer is missed
+                                        // T-ODO: 21.12.2017 consumer is missed
                                         //e.onError(new Throwable(String.valueOf(errorCode)));
                                     }
 
@@ -332,7 +332,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                                             @Override
                                             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                                 //Log.v("TESTRX", "2. onResolveFailed");
-                                                // TODO: 21.12.2017 consumer is missed
+                                                // T-ODO: 21.12.2017 consumer is missed
                                                 //e.onError(new Throwable(String.valueOf(errorCode)));
                                             }
 
@@ -369,7 +369,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
                         .flatMap(new Function<ServiceInfo, Observable<ListItem>>() {
                             @Override
                             public Observable<ListItem> apply(final ServiceInfo serviceInfo) throws Exception {
-                                // TODO: 23.12.2017 may be this step is redundant, it might be done in last step
+                                // T-ODO: 23.12.2017 may be this step is redundant, it might be done in last step
                                 return Observable.create(new ObservableOnSubscribe<ListItem>() {
                                     @Override
                                     public void subscribe(ObservableEmitter<ListItem> e) throws Exception {
@@ -508,7 +508,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
             mListener = listner;
         }
 
-        // TODO: 23.12.2017 create local connection
+        // T-ODO: 23.12.2017 create local connection
 
 
 

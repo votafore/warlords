@@ -31,7 +31,7 @@ import io.reactivex.schedulers.Schedulers;
 
 public class Channel implements IChannel {
 
-    // TODO: 21.12.2017 check if using of interface is necessary
+    // T-ODO: 21.12.2017 check if using of interface is necessary
     
     protected PublishProcessor<JSONObject> sender;
     protected Consumer<JSONObject> receiver;
@@ -122,7 +122,7 @@ public class Channel implements IChannel {
                             public void onDataReceived(String data) {
                                 if(data == null){
                                     e.onComplete();
-                                    // TODO: 21.12.2017 close socket
+                                    // T-ODO: 21.12.2017 close socket
                                 }else{
                                     //Log.v("TESTRX", ">>>>>>>>> Channel - socket input. got data!!!! yahooooo");
                                     try {
@@ -150,7 +150,7 @@ public class Channel implements IChannel {
                                 receiver_map_dsp.get(socket).dispose();
                                 receiver_map_dsp.remove(socket);
 
-                                // TODO: 21.12.2017 check if current disposable is disposed
+                                // T-ODO: 21.12.2017 check if current disposable is disposed
                                 sender_map_dsp.remove(socket);
                             }
                         }));

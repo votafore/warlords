@@ -113,7 +113,7 @@ public class App extends Application {
     }
 
 
-    // TODO: 18.12.2017 make start of broadcasting
+    // T-ODO: 18.12.2017 make start of broadcasting
 
     private Server mServer;
 
@@ -212,7 +212,7 @@ public class App extends Application {
     public void startGame(){
         finishListPage();
 
-        // TODO: 25.12.2017 prepare objects for game
+        // T-ODO: 25.12.2017 prepare objects for game
     }
 
 

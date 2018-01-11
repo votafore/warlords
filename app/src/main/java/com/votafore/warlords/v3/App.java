@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.wifi.WifiManager;
+import android.opengl.GLSurfaceView;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -102,9 +103,6 @@ public class App extends Application {
         Log.d1(TAG_SRV_START, LVL_APP, "starting...");
         mServer.start(this);
         Log.d1(TAG_SRV_START, LVL_APP, "started");
-
-
-        //mServerListAdapter.addLocalServer(mServer); // TODO: 29.12.2017 VERNUT
     }
 
     public void stopServer(){
@@ -116,13 +114,12 @@ public class App extends Application {
 
         mServer = null;
 
-        //mServerListAdapter.removeLocalServer(); // TODO: 29.12.2017 VERNUT
-
-
         Log.d1(TAG_SRV_STOP, LVL_APP, "stopped");
     }
 
-
+    public IServer getServer(){
+        return mServer;
+    }
 
 
     /***************** selected server *******************/
@@ -183,6 +180,7 @@ public class App extends Application {
 
     private Game mGame;
 
+
     /**
      * START GAME !!!!!!!!!!
      * finish scanning for services/servers
@@ -194,8 +192,13 @@ public class App extends Application {
         // TODO: 25.12.2017 prepare objects for game
 
         mGame = new Game(getApplicationContext());
+        mGame.setServer(getSelected());
+        mGame.start();
+
     }
 
-
+    public GLSurfaceView getView(){
+        return mGame.getSurfaceView();
+    }
 
 }

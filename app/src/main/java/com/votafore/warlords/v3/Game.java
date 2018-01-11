@@ -6,13 +6,14 @@ import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.test.MeshUnit;
-import com.votafore.warlords.test.MotionHandlerJoystick;
 import com.votafore.warlords.v3.glsupport.GLRenderer;
 import com.votafore.warlords.v3.glsupport.GLShader;
-import com.votafore.warlords.v3.glsupport.GLUnit;
 import com.votafore.warlords.v3.glsupport.GLView;
 import com.votafore.warlords.v3.glsupport.GLWorld;
+
+import org.json.JSONObject;
+
+import io.reactivex.functions.Consumer;
 
 /**
  * @author Vorafore
@@ -21,70 +22,121 @@ import com.votafore.warlords.v3.glsupport.GLWorld;
 
 public class Game {
 
-    private Context mContext;
+    /****************** Game ******************/
 
-    private GLSurfaceView mSurfaceView;
+    private Context mContext;
 
     public Game(Context c){
         mContext = c;
     }
 
-//    @SuppressLint("WrongConstant")
-//    public void start(Context context){
-//
-//        GLWorld mWorld;
-//        GLShader mShader;
-//        GLRenderer mRenderer;
-//
-//        mWorld = new GLWorld();
-//        mWorld.camMove(GLWorld.AXIS_Y, 3f);
-//
-//        mShader    = new GLShader(context, R.raw.shader_vertex, R.raw.shader_fragment);
-//        mRenderer  = new GLRenderer(mWorld, this, mShader);
-//
-//        mSurfaceView = new GLView(context, mWorld, mRenderer) {
-//            @Override
-//            protected void init() {
-//
-//                //mHandler = new MotionHandlerJoystick(mContext);
-//
-//                //mHandler.setChanel(mClientChanel);
-//            }
-//
-//            private MotionHandlerJoystick mHandler;
-//
-//            @Override
-//            public boolean onTouchEvent(MotionEvent event) {
-//                return true; //mHandler.onHandleEvent(event);
-//            }
-//        };
-//
-//        //((Instance)mClient).start();
-//        //((Instance)mClient).setCamera(mWorld);
-//    }
-//
-//
-//
-//
-//
-//    /**************** for renderer *********************/
-//
-//    public GLUnit mBase;
-//    private GLUnit mMap;
-//
-//    public void setMap(GLUnit map){
-//        mMap = map;
-//    }
-//
-//    public GLUnit getMap(){
-//        return mMap;
-//    }
-//
-//    public void start(){
-//
-//        mBase = new MeshUnit(mContext);
-//        mBase.init();
-//
-//        mMap.init();
-//    }
+    @SuppressLint("WrongConstant")
+    public void start(){
+
+        GLWorld    mGLWorld;
+        GLShader   mGLShader;
+        GLRenderer mGLRenderer;
+
+        mGLWorld = new GLWorld();
+        mGLWorld.camMove(GLWorld.AXIS_Y, 3f);
+
+        mICamera = mGLWorld;
+
+        mGameWorld = new World(mContext);
+
+        mGLShader    = new GLShader(mContext, R.raw.shader_vertex, R.raw.shader_fragment);
+        mGLRenderer  = new GLRenderer(mGLWorld, mGameWorld, mGLShader);
+
+        mSurfaceView = new GLView(mContext, mGLWorld, mGLRenderer) {
+            @Override
+            protected void init() {
+
+                mHandler = new MotionHandlerJoystick(mContext);
+
+                mHandler.setCameraListener(new MotionHandlerJoystick.ICameraListener() {
+                    @Override
+                    public void onCamMove(float deltaX, float deltaY) {
+                        mServer.send(Queries.getQueryCamMove(deltaX, deltaY));
+                    }
+
+                    @Override
+                    public void onCamRotate(float deltaX, float deltaY) {
+                        mServer.send(Queries.getQueryCamRotate(deltaX, deltaY));
+                    }
+                });
+            }
+
+            private MotionHandlerJoystick mHandler;
+
+            @Override
+            public boolean onTouchEvent(MotionEvent event) {
+                return mHandler.onHandleEvent(event);
+            }
+        };
+    }
+
+
+
+    /****************** for activity ******************/
+
+    private GLSurfaceView mSurfaceView;
+
+    public GLSurfaceView getSurfaceView(){
+        return mSurfaceView;
+    }
+
+
+
+
+
+
+    private World mGameWorld;
+
+
+
+
+    /****************** GL + network ******************/
+
+    private GLView.ICamera mICamera;
+
+
+    /****************** interaction with network ******************/
+
+    private IServer mServer;
+
+    public void setServer(IServer server){
+        mServer = server;
+
+        mServer.setReceiver(new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject object) throws Exception {
+                handleServerData(object);
+            }
+        });
+    }
+
+    /**
+     * everything that comes from server calculated here
+     * @param data
+     */
+    private void handleServerData(JSONObject data)throws Exception{
+
+
+        // TODO: 11.01.2018 analize data and make appropriate actions
+        switch(data.getString("command")){
+            case "camMove":
+
+                mICamera.camMove(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaX")));
+                mICamera.camMove(GLWorld.AXIS_Z, Float.valueOf(data.getString("deltaY")));
+
+                break;
+            case "camRotate":
+
+                mICamera.camRotate(GLWorld.AXIS_Y, Float.valueOf(data.getString("deltaX")));
+                mICamera.camRotate(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaY")));
+
+                break;
+        }
+
+    }
 }

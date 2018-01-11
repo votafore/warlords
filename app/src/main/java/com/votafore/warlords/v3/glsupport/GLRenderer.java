@@ -6,6 +6,7 @@ import android.opengl.Matrix;
 
 import com.votafore.warlords.game.Instance;
 import com.votafore.warlords.test.Constants;
+import com.votafore.warlords.v3.World;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -26,14 +27,14 @@ import static android.opengl.GLES20.glViewport;
 
 public  class GLRenderer implements Renderer {
 
-    private GLWorld mWorld;
-    private Instance    mInstance;
+    private GLWorld  mWorld;
+    private World    mGaveWorld;
     private GLShader mShader;
 
-    public GLRenderer(GLWorld world, Instance instance, GLShader shader) {
+    public GLRenderer(GLWorld GLworld, World world, GLShader shader) {
 
-        mWorld      = world;
-        mInstance   = instance;
+        mWorld      = GLworld;
+        mGaveWorld  = world;
         mShader     = shader;
     }
 
@@ -83,8 +84,6 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
-
-
         GLES20.glUniform3f(mShader.mParams.get("u_lightPosition")   , 0f  , 3f  , 6f);
         GLES20.glUniform4f(mShader.mParams.get("u_color")           , 0.3f, 0.9f, 0f, 1.0f);
 
@@ -100,20 +99,6 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glUniformMatrix4fv(mShader.mParams.get("u_Matrix"), 1, false, mat, 0);
 
-        // первым делом отрисовываем карту
-        // TODO: 29.12.2017 вернуть
-        //mInstance.getMap().draw(mShader);
-
-        // и базу
-        // TODO: 29.12.2017 вернуть
-        //mInstance.mBase.draw(mShader);
-
-
-        // потом все остальные объекты сцены
-//        List<GLUnit> objects = mInstance.getObjects();
-//
-//        for (GLUnit curr_obj : objects) {
-//            curr_obj.draw(mShader);
-//        }
+        mGaveWorld.draw(mShader);
     }
 }

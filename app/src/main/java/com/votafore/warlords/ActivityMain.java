@@ -9,10 +9,13 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.votafore.warlords.v3.App;
+
 public class ActivityMain extends AppCompatActivity {
 
     GLSurfaceView   mSurfaceView;
-    GameFactory mManager;
+
+    private App mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,32 +28,11 @@ public class ActivityMain extends AppCompatActivity {
                 |View.SYSTEM_UI_FLAG_FULLSCREEN);
 
 
-        mManager = GameFactory.getInstance();
-        mSurfaceView    = mManager.getSurfaceView();
+        mApp = (App)getApplication();
+        mSurfaceView = mApp.getView();
 
         setContentView(mSurfaceView);
 
-
-
-
-
-//        LinearLayout ll;
-//        ll = new LinearLayout(this);
-//        ll.setOrientation(LinearLayout.VERTICAL);
-//
-//        ViewGroup.LayoutParams params = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//
-//        TextView tv;
-//
-//        tv = new TextView(this);
-//        tv.setGravity(Gravity.CENTER_HORIZONTAL);
-//        tv.setText("just test text");
-//        tv.setTextSize(18f);
-//        tv.setPadding(5, 0, 0, 0);
-//
-//        ll.addView(tv, params);
-//
-//        addContentView(ll, params);
     }
 
     @Override
@@ -68,12 +50,5 @@ public class ActivityMain extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-
-        try {
-            ViewGroup parent = (ViewGroup) mManager.getSurfaceView().getParent();
-            parent.removeAllViews();
-        } catch (NullPointerException e) {
-            e.printStackTrace();
-        }
     }
 }

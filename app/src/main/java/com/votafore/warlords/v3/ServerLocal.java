@@ -50,15 +50,6 @@ import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
 
 public class ServerLocal implements IServer {
 
-//    String TAG = Constants.TAG;
-//    String prefix= Constants.PFX_LOCAL_SERVER;
-//
-//    String format1 = Constants.format1;
-//    String format2 = Constants.format2;
-//    String format3 = Constants.format3;
-//    String format4 = Constants.format4;
-
-
     /************* IServer *******************/
 
     /**
@@ -264,6 +255,9 @@ public class ServerLocal implements IServer {
 
                 Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "send response");
                 sender.onNext(response);
+            }else{
+                // just broadcast data to all connected devices
+                sender.onNext(data);
             }
 
         }catch(JSONException je){

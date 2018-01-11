@@ -36,8 +36,6 @@ public class ActivityGame extends AppCompatActivity {
 
         mApp = (App) getApplication();
 
-        //mServer = mApp.getSelected();
-
         startGame = findViewById(R.id.start_game);
 
         mApp.createServer();
@@ -45,6 +43,7 @@ public class ActivityGame extends AppCompatActivity {
         startGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mApp.setSelected(mApp.getServer());
                 mApp.startGame();
                 startActivity(new Intent(ActivityGame.this, ActivityMain.class));
                 finish();
@@ -71,13 +70,6 @@ public class ActivityGame extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         //dsp_receiver.dispose();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mApp.stopServer();
     }
 
     @Override

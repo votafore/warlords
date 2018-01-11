@@ -70,7 +70,7 @@ public class ServerManager_v1 {
 
     public void startScanning(){
 
-        // TODO: 18.12.2017 may be it is redundant
+        // T-ODO: 18.12.2017 may be it is redundant
         if(isScanningStarted)
             return;
 
@@ -95,7 +95,7 @@ public class ServerManager_v1 {
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                         //Log.v("TESTRX", "2. onResolveFailed");
-                                        // TODO: 21.12.2017 consumer is missed
+                                        // T-ODO: 21.12.2017 consumer is missed
                                         //e.onError(new Throwable(String.valueOf(errorCode)));
                                     }
 
@@ -144,7 +144,7 @@ public class ServerManager_v1 {
                                     @Override
                                     public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
                                         //Log.v("TESTRX", "2. onResolveFailed");
-                                        // TODO: 21.12.2017 consumer is missed
+                                        // T-ODO: 21.12.2017 consumer is missed
                                         //e.onError(new Throwable(String.valueOf(errorCode)));
                                     }
 
@@ -175,7 +175,7 @@ public class ServerManager_v1 {
 
     public void stopScanning(){
 
-        // TODO: 18.12.2017 mey be it is redundant
+        // T-ODO: 18.12.2017 mey be it is redundant
         if(!isScanningStarted)
             return;
 

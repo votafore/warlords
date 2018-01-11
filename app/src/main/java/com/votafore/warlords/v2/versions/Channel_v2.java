@@ -50,7 +50,7 @@ public abstract class Channel_v2 implements IChannel {
 
         sender.onComplete();
 
-        // TODO: 21.12.2017 check if code below is redundant
+        // T-ODO: 21.12.2017 check if code below is redundant
         for(Socket s: receiver_map_dsp.keySet()){
             receiver_map_dsp.get(s).dispose();
         }
@@ -141,7 +141,7 @@ public abstract class Channel_v2 implements IChannel {
 
                     if(data == null){
                         e.onComplete();
-                        // TODO: 21.12.2017 close socket
+                        // T-ODO: 21.12.2017 close socket
                     }else{
                         e.onNext(new JSONObject(data));
                     }
@@ -160,7 +160,7 @@ public abstract class Channel_v2 implements IChannel {
                         receiver_map_dsp.get(socket).dispose();
                         receiver_map_dsp.remove(socket);
 
-                        // TODO: 21.12.2017 check if current disposable is disposed
+                        // T-ODO: 21.12.2017 check if current disposable is disposed
                         sender_map_dsp.remove(socket);
                     }
                 }));
@@ -230,7 +230,7 @@ public abstract class Channel_v2 implements IChannel {
 
                             if(data == null){
                                 e.onComplete();
-                                // TODO: 21.12.2017 close socket
+                                // T-ODO: 21.12.2017 close socket
                             }else{
                                 e.onNext(new JSONObject(data));
                             }
@@ -249,7 +249,7 @@ public abstract class Channel_v2 implements IChannel {
                                 receiver_map_dsp.get(socket).dispose();
                                 receiver_map_dsp.remove(socket);
 
-                                // TODO: 21.12.2017 check if current disposable is disposed
+                                // T-ODO: 21.12.2017 check if current disposable is disposed
                                 sender_map_dsp.remove(socket);
                             }
                         }));

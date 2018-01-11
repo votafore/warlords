@@ -13,12 +13,6 @@ public final class Constants {
 
 
 
-
-
-
-
-
-
     /***************** LOGGING *****************/
 
     public static String format = "%-23s";
@@ -27,8 +21,6 @@ public final class Constants {
     public static String format2 = format + "|| " + format1;
     public static String format3 = format + "|| " + format2;
     public static String format4 = format + "|| " + format3;
-
-
 
 
 
@@ -73,6 +65,7 @@ public final class Constants {
     public static String LVL_REMOTE_SERVER  = "REMOTE_SERVER";
     public static String LVL_SOCKET         = "SOCKET";
     public static String LVL_NW_WATCHER     = "NETWORK_STATE_WATCHER";
+    public static String LVL_SCAN           = "SCANNING";
 
 
     // combinations of TAGs
@@ -90,6 +83,10 @@ public final class Constants {
     public static String TAG_DATA             = String.format(format, TAG + "_" + DATA);
     public static String TAG_DATA_SEND        = String.format(format, TAG + "_" + DATA + "_" + SEND);
     public static String TAG_DATA_RECEIVE     = String.format(format, TAG + "_" + DATA + "_" + RECEIVE);
+
+    public static String TAG_SCAN             = String.format(format, TAG + "_" + SCAN);
+    public static String TAG_SCAN_START       = String.format(format, TAG + "_" + SCAN + "_" + START);
+    public static String TAG_SCAN_STOP        = String.format(format, TAG + "_" + SCAN+ "_" + STOP);
 
 
     // TAG описывает происходящее действие

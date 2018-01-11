@@ -17,5 +17,5 @@ public interface IChannel {
     PublishProcessor<JSONObject> getSender();
     void setReceiver(Consumer<JSONObject> c);
 
-    // TODO: 23.12.2017 add a "close" method to interface
+    // T-ODO: 23.12.2017 add a "close" method to interface
 }

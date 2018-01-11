@@ -1,7 +1,4 @@
-package com.votafore.warlords.support;
-
-import android.support.annotation.Nullable;
-import android.util.Log;
+package com.votafore.warlords.v3;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -55,50 +52,45 @@ public class Queries {
         return result;
     }
 
-    @Nullable
-    public static String getQueryCamMove(float deltaX, float deltaY){
+    public static JSONObject getQueryCamMove(float deltaX, float deltaY){
 
-        String result = "";
+        JSONObject message = new JSONObject();
 
         try {
-
-            JSONObject message = new JSONObject();
 
             message.put("clientID" , CLIENT_ID);
             message.put("type"     , "action");
             message.put("command"  , "camMove");
             message.put("queryType", QT_BROADCAST);
-            message.put("deltaX"   ,String.valueOf(deltaX));
-            message.put("deltaY"   ,String.valueOf(deltaY));
+            message.put("deltaX"   , String.valueOf(deltaX));
+            message.put("deltaY"   , String.valueOf(deltaY));
 
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return result;
+        return message;
     }
 
-    public static String getQueryCamRotate(float deltaX, float deltaY){
+    public static JSONObject getQueryCamRotate(float deltaX, float deltaY){
 
-        String result = "";
+        JSONObject message = new JSONObject();
 
         try {
-
-            JSONObject message = new JSONObject();
 
             message.put("clientID" , CLIENT_ID);
             message.put("type"     , "action");
             message.put("command"  , "camRotate");
             message.put("queryType", QT_BROADCAST);
-            message.put("deltaX"   ,String.valueOf(deltaX));
-            message.put("deltaY"   ,String.valueOf(deltaY));
+            message.put("deltaX"   , String.valueOf(deltaX));
+            message.put("deltaY"   , String.valueOf(deltaY));
 
 
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return result;
+        return message;
     }
 }
