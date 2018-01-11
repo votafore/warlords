@@ -56,12 +56,22 @@ public class Game {
                 mHandler.setCameraListener(new MotionHandlerJoystick.ICameraListener() {
                     @Override
                     public void onCamMove(float deltaX, float deltaY) {
-                        mServer.send(Queries.getQueryCamMove(deltaX, deltaY));
+
                     }
 
                     @Override
                     public void onCamRotate(float deltaX, float deltaY) {
+
+                    }
+
+                    @Override
+                    public void setRotationDelta(float deltaX, float deltaY) {
                         mServer.send(Queries.getQueryCamRotate(deltaX, deltaY));
+                    }
+
+                    @Override
+                    public void setMovingDelta(float deltaX, float deltaY) {
+                        mServer.send(Queries.getQueryCamMove(deltaX, deltaY));
                     }
                 });
             }
@@ -126,14 +136,14 @@ public class Game {
         switch(data.getString("command")){
             case "camMove":
 
-                mICamera.camMove(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaX")));
-                mICamera.camMove(GLWorld.AXIS_Z, Float.valueOf(data.getString("deltaY")));
+                mICamera.setMovingDelta(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaX")));
+                mICamera.setMovingDelta(GLWorld.AXIS_Z, Float.valueOf(data.getString("deltaY")));
 
                 break;
             case "camRotate":
 
-                mICamera.camRotate(GLWorld.AXIS_Y, Float.valueOf(data.getString("deltaX")));
-                mICamera.camRotate(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaY")));
+                mICamera.setRotationDelta(GLWorld.AXIS_Y, Float.valueOf(data.getString("deltaX")));
+                mICamera.setRotationDelta(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaY")));
 
                 break;
         }

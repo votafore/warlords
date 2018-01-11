@@ -82,6 +82,8 @@ public  class GLRenderer implements Renderer {
     @Override
     public void onDrawFrame(GL10 arg0) {
 
+        mWorld.onNewFrame();
+
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
         GLES20.glUniform3f(mShader.mParams.get("u_lightPosition")   , 0f  , 3f  , 6f);

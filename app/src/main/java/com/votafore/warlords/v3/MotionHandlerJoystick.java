@@ -8,9 +8,6 @@ import android.view.Display;
 import android.view.MotionEvent;
 import android.view.WindowManager;
 
-import com.votafore.warlords.net.IChanel;
-import com.votafore.warlords.support.Queries;
-
 
 /**
  * @author Votafore
@@ -50,6 +47,10 @@ public class MotionHandlerJoystick {
     public boolean onHandleEvent(MotionEvent event) {
 
         switch(MotionEventCompat.getActionMasked(event)){
+
+            // TODO: 11.01.2018 camera should moving even if user just taped screen
+            // in ACTION_DOWN and ACTION_POINTER_DOWN calculate delta
+
             case MotionEvent.ACTION_DOWN:
                 setID(event);
                 break;
@@ -79,7 +80,7 @@ public class MotionHandlerJoystick {
                         deltaX /= 650;
                         deltaY /= 650;
 
-                        mCameraListener.onCamMove(deltaX, deltaY);
+                        mCameraListener.setMovingDelta(deltaX, deltaY);
                     }
 
                     if (event.getPointerId(i) == mOrientationHandler) {
@@ -92,7 +93,7 @@ public class MotionHandlerJoystick {
                         deltaX /= 350;
                         deltaY /= 350;
 
-                        mCameraListener.onCamRotate(-deltaX, deltaY);
+                        mCameraListener.setRotationDelta(-deltaX, deltaY);
 
                     }
                 }
@@ -150,12 +151,16 @@ public class MotionHandlerJoystick {
 
             mPositionHandler = -1;
             Log.v("TEST","ИД управления положением сброшен");
+
+            mCameraListener.setMovingDelta(0, 0);
         }
 
         if(event.getPointerId(event.getActionIndex()) == mOrientationHandler && mOrientationHandler != -1){
 
             mOrientationHandler = -1;
             Log.v("TEST","ИД управления ориентацией сброшен");
+
+            mCameraListener.setRotationDelta(0,0);
         }
     }
 
@@ -180,5 +185,8 @@ public class MotionHandlerJoystick {
     public interface ICameraListener{
         void onCamMove(float deltaX, float deltaY);
         void onCamRotate(float deltaX, float deltaY);
+
+        void setRotationDelta(float deltaX, float deltaY);
+        void setMovingDelta(float deltaX, float deltaY);
     }
 }

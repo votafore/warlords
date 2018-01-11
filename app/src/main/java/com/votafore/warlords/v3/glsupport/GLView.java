@@ -42,6 +42,22 @@ public abstract class GLView extends GLSurfaceView {
          * реализация метода "поворачивает" камеру в пространстве
          */
         void camRotate(@GLWorld.Axis int axe, float value);
+
+
+        /*********** TESTS ************/
+
+        /**
+         * реализация метода устанавливает значение с которым "поворачивается" камера при каждом кадре
+         */
+        void setRotationDelta(@GLWorld.Axis int axe, float value);
+
+        /**
+         * реализация метода устанавливает значение с которым "передвигаетcя" камера при каждом кадре
+         */
+        void setMovingDelta(@GLWorld.Axis int axe, float value);
+
+        // TODO: 11.01.2018 доделать методы для установки постоянных значений изменения
+        // т.е. с какой скоростью меняется значение при каждом кадре
     }
 
     protected Context mContext;

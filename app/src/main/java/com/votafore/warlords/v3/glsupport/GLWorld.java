@@ -17,8 +17,6 @@ public class GLWorld implements GLView.ICamera {
         mOrientationMatrix     = new float[16];
         Matrix.setIdentityM(mOrientationMatrix, 0);
 
-        mObjects = new ArrayList<>();
-
         initCamera();
     }
 
@@ -155,24 +153,72 @@ public class GLWorld implements GLView.ICamera {
 
 
 
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-    // РАЗДЕЛ УПРАВЛЕНИЯ СЦЕНОЙ
-    // типа GLScene
-    // список отображаемых объектов, передача вызовов подготовки и отрисовки
-    // объектам
-    ////////////////////////////////////////////////////////////
-    ////////////////////////////////////////////////////////////
-
-    public volatile List<GLUnit> mObjects;
 
 
-    public void attachObject(GLUnit unit){
-        mObjects.add(unit);
+
+
+    /*************** tests **************/
+
+    public void onNewFrame(){
+
+        // rotation
+        if(rt_deltaX != 0)
+            camRotate(AXIS_X, rt_deltaX);
+
+        if(rt_deltaY != 0)
+            camRotate(AXIS_Y, rt_deltaY);
+
+        if(rt_deltaZ != 0)
+            camRotate(AXIS_Z, rt_deltaZ);
+
+
+        // moving
+        if(move_deltaX != 0)
+            camMove(AXIS_X, move_deltaX);
+
+        if(move_deltaY != 0)
+            camMove(AXIS_Y, move_deltaY);
+
+        if(move_deltaZ != 0)
+            camMove(AXIS_Z, move_deltaZ);
+
     }
 
-    public void deleteObject(GLUnit unit){
-        mObjects.remove(unit);
+    float rt_deltaX = 0;
+    float rt_deltaY = 0;
+    float rt_deltaZ = 0;
+
+    float move_deltaX = 0;
+    float move_deltaY = 0;
+    float move_deltaZ = 0;
+
+    @Override
+    public void setRotationDelta(@Axis int axe, float value){
+
+        switch (axe){
+            case AXIS_X:
+                rt_deltaX = value;
+                break;
+            case AXIS_Y:
+                rt_deltaY = value;
+                break;
+            case AXIS_Z:
+                rt_deltaZ = value;
+        }
     }
 
+    @Override
+    public void setMovingDelta(@Axis int axe, float value){
+
+        switch (axe){
+            case AXIS_X:
+                move_deltaX = value;
+                break;
+            case AXIS_Y:
+                move_deltaY = value;
+                break;
+            case AXIS_Z:
+                move_deltaZ = value;
+        }
+    }
 }
