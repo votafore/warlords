@@ -40,7 +40,8 @@ import static com.votafore.warlords.v2.Constants.format1;
 
 public class App extends Application {
 
-    private BroadcastReceiver mNetReceiver;
+    Disposable dsp_netWatcherEmitter;
+    Disposable dsp_netWatcherSubscriber;
 
     @Override
     public void onCreate() {
@@ -84,9 +85,9 @@ public class App extends Application {
         })
         .publish();
 
-        dsp_netWatcher = mNetWatcher.connect();
+        dsp_netWatcherEmitter = mNetWatcher.connect();
 
-        dsp_app_netWatcherSubscriber = mNetWatcher.subscribe(new Consumer<Intent>() {
+        dsp_netWatcherSubscriber = mNetWatcher.subscribe(new Consumer<Intent>() {
             @Override
             public void accept(Intent intent) throws Exception {
 
@@ -112,24 +113,18 @@ public class App extends Application {
         Log.setTAG(TAG_APP_STOP);
         Log.d("stopping...");
 
-        Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
-        unregisterReceiver(mNetReceiver);
+//        Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
+//        unregisterReceiver(mNetReceiver);
     }
 
-
-
-
-
-    Disposable dsp_netWatcher;
-    Disposable dsp_app_netWatcherSubscriber;
 
     public void stopApp(){
 
         // stop emitting new network state
-        dsp_netWatcher.dispose();
+        dsp_netWatcherEmitter.dispose();
 
         // stop observing network state
-        dsp_app_netWatcherSubscriber.dispose();
+        dsp_netWatcherSubscriber.dispose();
     }
 
 
@@ -277,4 +272,20 @@ public class App extends Application {
         return mGame.getSurfaceView();
     }
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    // для автоподключения устройств опробовать возможность использования WIFI_AWARE_SERVICE из getSystemService
+    // https://developer.android.com/guide/topics/connectivity/wifi-aware.html
 }
