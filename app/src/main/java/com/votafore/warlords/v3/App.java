@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.opengl.GLSurfaceView;
 
@@ -12,6 +13,15 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
+
+import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Cancellable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Predicate;
+import io.reactivex.observables.ConnectableObservable;
 
 import static com.votafore.warlords.v2.Constants.LVL_APP;
 import static com.votafore.warlords.v2.Constants.TAG_APP_START;
@@ -40,23 +50,58 @@ public class App extends Application {
 
         refreshIP();
 
-        Log.d1(TAG_APP_START, LVL_NW_WATCHER, "create");
-        mNetReceiver = new BroadcastReceiver() {
+        ConnectableObservable<Intent> mNetWatcher = Observable.create(new ObservableOnSubscribe<Intent>() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                Log.d1("", LVL_NW_WATCHER, "network state changed");
-                refreshIP();
+            public void subscribe(final ObservableEmitter<Intent> e) throws Exception {
+
+                Log.d1(TAG_APP_START, LVL_NW_WATCHER, "create");
+                final BroadcastReceiver receiver = new BroadcastReceiver() {
+                    @Override
+                    public void onReceive(Context context, Intent intent) {
+
+                        Log.d1("", LVL_NW_WATCHER, "onReceive");
+
+                        if(intent.getAction().equals(WifiManager.NETWORK_STATE_CHANGED_ACTION)){
+                            Log.d1("", LVL_NW_WATCHER, "network state changed");
+                            e.onNext(intent);
+                        }
+                    }
+                };
+
+                IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+
+                Log.d1(TAG_APP_START, LVL_NW_WATCHER, "register");
+                registerReceiver(receiver, filter);
+
+                e.setCancellable(new Cancellable() {
+                    @Override
+                    public void cancel() throws Exception {
+                        Log.d1(TAG_APP_START, LVL_NW_WATCHER, "unregister watcher");
+                        unregisterReceiver(receiver);
+                    }
+                });
             }
-        };
+        })
+        .publish();
 
-        IntentFilter filter = new IntentFilter(WifiManager.NETWORK_STATE_CHANGED_ACTION);
+        dsp_netWatcher = mNetWatcher.connect();
 
-        Log.d1(TAG_APP_START, LVL_NW_WATCHER, "register");
-        registerReceiver(mNetReceiver, filter);
+        dsp_app_netWatcherSubscriber = mNetWatcher.subscribe(new Consumer<Intent>() {
+            @Override
+            public void accept(Intent intent) throws Exception {
+
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+
+                mDeviceIP = "0.0.0.0";
+
+                if(info.isConnected())
+                    refreshIP();
+            }
+        });
+
 
         Log.d1(TAG_APP_START, LVL_ADAPTER, "create");
         mServerListAdapter = new AdapterServerList(this);
-
     }
 
     @Override
@@ -70,6 +115,37 @@ public class App extends Application {
         Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
         unregisterReceiver(mNetReceiver);
     }
+
+
+
+
+
+    Disposable dsp_netWatcher;
+    Disposable dsp_app_netWatcherSubscriber;
+
+    public void stopApp(){
+
+        // stop emitting new network state
+        dsp_netWatcher.dispose();
+
+        // stop observing network state
+        dsp_app_netWatcherSubscriber.dispose();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

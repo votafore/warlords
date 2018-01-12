@@ -19,7 +19,6 @@
         <activity android:name=".ActivityMain">
         </activity>
         <activity android:name=".ActivityStart">
-
         </activity>
         <activity android:name=".test.ActivityTestSocketClient">
         </activity>
