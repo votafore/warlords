@@ -46,6 +46,8 @@ public class ActivityGame extends AppCompatActivity {
                 mApp.setSelected(mApp.getServer());
                 mApp.startGame();
                 startActivity(new Intent(ActivityGame.this, ActivityMain.class));
+
+                // TODO: 11.01.2018 пока нельзя закрыть активити т.к. эта команда должна прийти с сервера
                 finish();
             }
         });

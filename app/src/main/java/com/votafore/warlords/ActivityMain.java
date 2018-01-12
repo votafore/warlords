@@ -47,8 +47,13 @@ public class ActivityMain extends AppCompatActivity {
         mSurfaceView.onResume();
     }
 
+
+
     @Override
-    protected void onStop() {
-        super.onStop();
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        mApp.stopServer();
     }
+
 }

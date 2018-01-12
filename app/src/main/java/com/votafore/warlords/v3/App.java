@@ -17,9 +17,11 @@ import java.util.Enumeration;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
+import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
+import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
 import io.reactivex.observables.ConnectableObservable;
 
@@ -51,7 +53,7 @@ public class App extends Application {
 
         refreshIP();
 
-        ConnectableObservable<Intent> mNetWatcher = Observable.create(new ObservableOnSubscribe<Intent>() {
+        ConnectableObservable<Boolean> mNetWatcher = Observable.create(new ObservableOnSubscribe<Intent>() {
             @Override
             public void subscribe(final ObservableEmitter<Intent> e) throws Exception {
 
@@ -83,19 +85,24 @@ public class App extends Application {
                 });
             }
         })
+        .map(new Function<Intent, Boolean>() {
+            @Override
+            public Boolean apply(Intent intent) throws Exception {
+                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+                return info.isConnected();
+            }
+        })
         .publish();
 
         dsp_netWatcherEmitter = mNetWatcher.connect();
 
-        dsp_netWatcherSubscriber = mNetWatcher.subscribe(new Consumer<Intent>() {
+        dsp_netWatcherSubscriber = mNetWatcher.subscribe(new Consumer<Boolean>() {
             @Override
-            public void accept(Intent intent) throws Exception {
-
-                NetworkInfo info = intent.getParcelableExtra(WifiManager.EXTRA_NETWORK_INFO);
+            public void accept(Boolean isConnected) throws Exception {
 
                 mDeviceIP = "0.0.0.0";
 
-                if(info.isConnected())
+                if(isConnected)
                     refreshIP();
             }
         });
@@ -176,6 +183,8 @@ public class App extends Application {
         Log.d1(TAG_SRV_START, LVL_APP, "started");
     }
 
+
+
     public void stopServer(){
 
         Log.d1(TAG_SRV_STOP, LVL_APP, "stopping...");
@@ -248,6 +257,44 @@ public class App extends Application {
 
 
     /*************** TESTS *********************/
+
+    /*** LOCAL ***/
+
+    IServer test_mServer;
+
+    public IServer test_startServer(){
+
+        ServerLocal  server = new ServerLocal();
+        server.start(getApplicationContext());
+
+        test_mServer = server;
+
+        return server;
+    }
+
+    public void test_stopServer(){
+
+        if(test_mServer == null)
+            return;
+
+        test_mServer.stop();
+
+        test_mServer = null;
+    }
+
+
+
+    /*** REMOTE ***/
+
+
+
+
+
+
+
+
+
+
 
     private Game mGame;
 

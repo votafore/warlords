@@ -3,10 +3,9 @@ package com.votafore.warlords.v3;
 import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
-//import android.util.Log;
+import android.os.Build;
 
 import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v2.IDataListener;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,22 +20,16 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Action;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.votafore.warlords.v2.Constants.LVL_APP;
 import static com.votafore.warlords.v2.Constants.LVL_LOCAL_SERVER;
 import static com.votafore.warlords.v2.Constants.TAG_DATA_RECEIVE;
 import static com.votafore.warlords.v2.Constants.TAG_DATA_SEND;
 import static com.votafore.warlords.v2.Constants.TAG_SOCKET;
-import static com.votafore.warlords.v2.Constants.TAG_SOCKET_CLOSE;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
@@ -78,7 +71,7 @@ public class ServerLocal implements IServer {
     public void send(JSONObject data) {
         Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "send data");
         try {
-            receiver.accept(data);
+            mServerReceiver.accept(data);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -99,7 +92,6 @@ public class ServerLocal implements IServer {
             return;
         }
 
-        //Log.d1(TAG_SRV_START, LVL_LOCAL_SERVER, "create appender");
         Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "APPENDER", "create");
 
         // appender of sockets to channel
@@ -109,10 +101,8 @@ public class ServerLocal implements IServer {
 
                 while(!serverSocket.isClosed()){
                     try{
-                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "waiting for connection"));
                         Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "APPENDER", "waiting for connection");
                         ISocket s = Socket.create(serverSocket.accept());
-                        //Log.v(TAG, String.format(format3, prefix, "OBSERVER", "ServerSocket", "new socket created"));
                         e.onNext(s);
                     }catch(SocketException ex){
                         ex.printStackTrace();
@@ -126,7 +116,6 @@ public class ServerLocal implements IServer {
         .subscribeOn(Schedulers.newThread())
         .subscribe(getSocketAppender());
 
-        //Log.d1(TAG_SRV_START, LVL_LOCAL_SERVER, "create broadcaster of service and start broadcasting");
         Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "create and start");
 
         // observable/subscriber that trigger when server created for starting broadcast
@@ -138,29 +127,21 @@ public class ServerLocal implements IServer {
                 final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
                     @Override
                     public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onRegistrationFailed"));
-                        //Log.d("onRegistrationFailed");
                         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onRegistrationFailed");
                     }
 
                     @Override
                     public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onUnregistrationFailed"));
-                        //Log.d("onUnregistrationFailed");
                         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onUnregistrationFailed");
                     }
 
                     @Override
                     public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onServiceRegistered"));
-                        //Log.d("onServiceRegistered");
                         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onServiceRegistered");
                     }
 
                     @Override
                     public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-                        //Log.d(String.format(Constants.format1, Constants.LVL_LOCAL_SERVER, "onServiceUnregistered"));
-                        //Log.d("onServiceUnregistered");
                         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onServiceUnregistered");
                     }
                 };
@@ -169,6 +150,11 @@ public class ServerLocal implements IServer {
                 regInfo.setServiceName(Constants.SERVICENAME);
                 regInfo.setServiceType(Constants.SERVICETYPE);
                 regInfo.setPort(serverSocket.getLocalPort());
+
+                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
+                    regInfo.setAttribute("ownerName" , "developer");
+                    regInfo.setAttribute("message"   , "welcome !!! )");
+                }
 
                 Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "register service");
                 manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
@@ -189,21 +175,16 @@ public class ServerLocal implements IServer {
     @Override
     public void stop() {
 
-        //Log.d("sender.onComplete()");
         Log.d1(TAG_SRV_STOP, LVL_LOCAL_SERVER, "sender.onComplete()");
         sender.onComplete();
 
         // TODO: 26.12.2017 define moments when these objects have to be disposed
-        //Log.d("dispose socket observer");
-        //Log.d1(TAG_SRV_STOP, LVL_LOCAL_SERVER, "dispose socket observer");
         Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "APPENDER", "stop");
         dsp_sockets.dispose();
 
         // for example broadcasting could be finished before server's Stop method called
         if(!dsp_broadcast.isDisposed())
         {
-            //Log.d("dispose broadcasting observer");
-            //Log.d1(TAG_SRV_STOP, LVL_LOCAL_SERVER, "dispose broadcasting observer");
             Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "BROADCASTER", "stop");
             dsp_broadcast.dispose();
         }
@@ -217,7 +198,10 @@ public class ServerLocal implements IServer {
 
     /****************** ServerLocal ******************/
 
-    private Consumer<JSONObject> receiver;
+    /**
+     * object that take incoming queries
+     */
+    private Consumer<JSONObject> mServerReceiver;
 
     public ServerLocal(){
 
@@ -230,14 +214,13 @@ public class ServerLocal implements IServer {
         map_dsp_receiver = new HashMap<>();
 
         Log.d1(TAG_SRV_CRT, LVL_LOCAL_SERVER, "create server receiver");
-        receiver = new Consumer<JSONObject>() {
+        mServerReceiver = new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject object) throws Exception {
                 handleRequest(object);
             }
         };
     }
-
 
     synchronized private void handleRequest(JSONObject data){
 
@@ -291,7 +274,7 @@ public class ServerLocal implements IServer {
                 iSocket.subscribeSocket(sender);
 
                 Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "subscribe server to incoming data");
-                map_dsp_receiver.put(iSocket, iSocket.setReceiver(receiver));
+                map_dsp_receiver.put(iSocket, iSocket.setReceiver(mServerReceiver));
             }
         };
     }
@@ -300,5 +283,10 @@ public class ServerLocal implements IServer {
     public String toString(){
         return "0.0.0.0";
     }
+
+
+
+    /**************** tests ******************/
+
 
 }
