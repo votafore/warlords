@@ -1,25 +1,22 @@
 package com.votafore.warlords;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v7.widget.Toolbar;
 
-import com.votafore.warlords.v3.AdapterServerList;
-import com.votafore.warlords.v3.App;
+
 
 
 public class ActivityStart extends AppCompatActivity {
 
     private GameFactory   mFactory;
 
-    private App mApp;
+    //private App mApp;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +26,7 @@ public class ActivityStart extends AppCompatActivity {
         Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
-        mApp = (App) getApplication();
+        //mApp = (App) getApplication();
 
 
         RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
@@ -42,11 +39,11 @@ public class ActivityStart extends AppCompatActivity {
 
         //mFactory.onActivityCreate(this);
 
-        AdapterServerList adapter = mApp.getAdapter();
-
-        serverList.setAdapter(adapter);
-
-        adapter.startScan(this);
+//        AdapterServerList adapter = mApp.getAdapter();
+//
+//        serverList.setAdapter(adapter);
+//
+//        adapter.startScan(this);
 
 //        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
 //            @Override
@@ -82,7 +79,7 @@ public class ActivityStart extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
 
-        mApp.getAdapter().stopScan();
+        //mApp.getAdapter().stopScan();
     }
 
     @Override
@@ -119,12 +116,12 @@ public class ActivityStart extends AppCompatActivity {
 
             case R.id.start_scan:
 
-                mApp.getAdapter().startScan(this);
+                //mApp.getAdapter().startScan(this);
                 break;
 
             case R.id.stop_scanning:
 
-                mApp.getAdapter().stopScan();
+                //mApp.getAdapter().stopScan();
                 break;
         }
 

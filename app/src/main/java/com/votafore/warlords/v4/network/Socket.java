@@ -1,8 +1,8 @@
 package com.votafore.warlords.v4.network;
 
 import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v3.ISocket;
-import com.votafore.warlords.v3.Log;
+import com.votafore.warlords.v4.constant.Log;
+
 
 import org.json.JSONObject;
 

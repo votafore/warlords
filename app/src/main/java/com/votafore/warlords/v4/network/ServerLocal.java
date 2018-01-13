@@ -5,11 +5,9 @@ import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 
-import com.votafore.warlords.v2.Constants;
-import com.votafore.warlords.v3.IServer;
-import com.votafore.warlords.v3.ISocket;
-import com.votafore.warlords.v3.Log;
-import com.votafore.warlords.v3.Socket;
+
+import com.votafore.warlords.v4.constant.Constants;
+import com.votafore.warlords.v4.constant.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;

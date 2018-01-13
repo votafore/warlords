@@ -25,17 +25,28 @@
         <activity android:name=".ActivityGame">
         </activity>
         <activity android:name=".Activity1">
+        </activity>
+        <activity android:name=".ActivityGameOver">
+        </activity>
+        <activity android:name=".ActivityTest">
+        </activity>
+
+
+        <!-- v4 -->
+
+        <activity android:name=".v4.activities.ActivityStart">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ActivityGameOver">
-        </activity>
-        <activity android:name=".ActivityTest">
+        <activity android:name=".v4.activities.ActivityGameLocal"/>
+        <activity android:name=".v4.activities.ActivityGameRemote"/>
+        <activity android:name=".v4.activities.ActivityGame"/>
+        <activity android:name=".v4.activities.ActivityGameOver"/>
 
-        </activity>
+
     </application>
 
 </manifest>

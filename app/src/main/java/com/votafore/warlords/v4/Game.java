@@ -6,14 +6,13 @@ import android.opengl.GLSurfaceView;
 import android.view.MotionEvent;
 
 import com.votafore.warlords.R;
-import com.votafore.warlords.v3.IServer;
-import com.votafore.warlords.v3.MotionHandlerJoystick;
-import com.votafore.warlords.v3.Queries;
-import com.votafore.warlords.v3.World;
-import com.votafore.warlords.v3.glsupport.GLRenderer;
-import com.votafore.warlords.v3.glsupport.GLShader;
-import com.votafore.warlords.v3.glsupport.GLView;
-import com.votafore.warlords.v3.glsupport.GLWorld;
+import com.votafore.warlords.v4.glsupport.GLRenderer;
+import com.votafore.warlords.v4.glsupport.GLShader;
+import com.votafore.warlords.v4.glsupport.GLView;
+import com.votafore.warlords.v4.glsupport.GLWorld;
+import com.votafore.warlords.v4.network.IServer;
+import com.votafore.warlords.v4.network.Queries;
+
 
 import org.json.JSONObject;
 
@@ -46,7 +45,7 @@ public class Game {
 
         mICamera = mGLWorld;
 
-        mGameWorld = new com.votafore.warlords.v3.World(mContext);
+        mGameWorld = new World(mContext);
 
         mGLShader    = new GLShader(mContext, R.raw.shader_vertex, R.raw.shader_fragment);
         mGLRenderer  = new GLRenderer(mGLWorld, mGameWorld, mGLShader);

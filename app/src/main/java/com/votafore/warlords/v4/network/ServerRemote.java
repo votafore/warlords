@@ -2,10 +2,8 @@ package com.votafore.warlords.v4.network;
 
 import android.content.Context;
 
-import com.votafore.warlords.v3.IServer;
-import com.votafore.warlords.v3.ISocket;
-import com.votafore.warlords.v3.Log;
-import com.votafore.warlords.v3.Socket;
+
+import com.votafore.warlords.v4.constant.Log;
 
 import org.json.JSONObject;
 

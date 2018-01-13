@@ -9,10 +9,10 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.opengl.GLSurfaceView;
 
-import com.votafore.warlords.v3.AdapterServerList;
-import com.votafore.warlords.v3.Game;
-import com.votafore.warlords.v3.IServer;
-import com.votafore.warlords.v3.Log;
+
+import com.votafore.warlords.v4.constant.Log;
+import com.votafore.warlords.v4.network.IServer;
+
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -71,7 +71,7 @@ public class App extends Application {
 
 
         Log.d1(TAG_APP_START, LVL_ADAPTER, "create");
-        mServerListAdapter = new AdapterServerList(this);
+        //mServerListAdapter = new AdapterServerList(this);
     }
 
     @Override
@@ -96,12 +96,12 @@ public class App extends Application {
     /**
      * adapter for list of servers
      */
-    private AdapterServerList mServerListAdapter;
-
-    public AdapterServerList getAdapter(){
-        Log.d("getAdapter");
-        return mServerListAdapter;
-    }
+//    private AdapterServerList mServerListAdapter;
+//
+//    public AdapterServerList getAdapter(){
+//        Log.d("getAdapter");
+//        return mServerListAdapter;
+//    }
 
 
 
@@ -121,9 +121,17 @@ public class App extends Application {
         Log.d1(TAG_SRV_CRT, LVL_APP, "setting server in the app...");
         mServer = server;
 
-        Log.d1(TAG_SRV_START, LVL_APP, "starting...");
-        mServer.start(getApplicationContext());
-        Log.d1(TAG_SRV_START, LVL_APP, "started");
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Log.d1(TAG_SRV_START, LVL_APP, "starting...");
+                mServer.start(getApplicationContext());
+                Log.d1(TAG_SRV_START, LVL_APP, "started");
+            }
+        });
+
+        thread.start();
     }
 
 

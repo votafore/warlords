@@ -20,6 +20,8 @@ public class ActivityGameLocal extends AppCompatActivity {
 
     private App mApp;
 
+    private ServerLocal mServerLocal;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,12 +29,11 @@ public class ActivityGameLocal extends AppCompatActivity {
 
         mApp = (App) getApplication();
 
-        final ServerLocal server;
-        server = new ServerLocal();
+        mServerLocal = new ServerLocal();
 
-        mApp.setServer(server);
+        mApp.setServer(mServerLocal);
 
-        server.startBroadcast(this);
+        mServerLocal.startBroadcast(this);
 
         Button startGame = findViewById(R.id.start_game);
 
@@ -44,9 +45,9 @@ public class ActivityGameLocal extends AppCompatActivity {
 
                 try {
                     query.put("ID"   , "112365312");
-                    query.put("state", "ready");
+                    query.put("state", "start");
 
-                    server.send(query);
+                    mServerLocal.send(query);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -55,14 +56,14 @@ public class ActivityGameLocal extends AppCompatActivity {
             }
         });
 
-        server.setReceiver(new Consumer<JSONObject>() {
+        mServerLocal.setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject object) throws Exception {
 
                 if(!object.has("event") || !object.getString("event").equals("StartGame"))
                     return;
 
-                server.stopBroadcast();
+                mServerLocal.stopBroadcast();
 
                 mApp.startGame();
                 startActivity(new Intent(ActivityGameLocal.this, ActivityMain.class));
@@ -78,7 +79,8 @@ public class ActivityGameLocal extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        mApp.getServer().stop();
+        mServerLocal.stopBroadcast();
+        mServerLocal.stop();
     }
 
 }

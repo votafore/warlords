@@ -1,23 +1,30 @@
 package com.votafore.warlords.v4.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 
-import com.votafore.warlords.GameFactory;
+import com.votafore.warlords.ActivityMain;
 import com.votafore.warlords.R;
-import com.votafore.warlords.v3.AdapterServerList;
-import com.votafore.warlords.v3.App;
+import com.votafore.warlords.v4.App;
+import com.votafore.warlords.v4.network.ServerRemote;
+
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+import io.reactivex.functions.Consumer;
 
 
 public class ActivityGameRemote extends AppCompatActivity {
-
-    private GameFactory   mFactory;
 
     private App mApp;
 
@@ -26,64 +33,61 @@ public class ActivityGameRemote extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
-        Toolbar mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
         mApp = (App) getApplication();
 
+        String ip = getIntent().getStringExtra("IP");
+        int port = getIntent().getIntExtra("port", 0);
 
-        RecyclerView serverList = (RecyclerView) findViewById(R.id.list_servers);
+        final ServerRemote server;
 
-        serverList.setHasFixedSize(true);
-        serverList.setItemAnimator(new DefaultItemAnimator());
-        serverList.setLayoutManager(new LinearLayoutManager(this));
+        try {
+            server = new ServerRemote(InetAddress.getByName(ip.replace("/", "")), port);
+        } catch (UnknownHostException e) {
+            e.printStackTrace();
+            return;
+        }
 
-        //mFactory = GameFactory.getInstance();
+        mApp.setServer(server);
 
-        //mFactory.onActivityCreate(this);
+        Button ready = findViewById(R.id.ready);
 
-        AdapterServerList adapter = mApp.getAdapter();
+        ready.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
 
-        serverList.setAdapter(adapter);
+                JSONObject query = new JSONObject();
 
-        adapter.startScan(this);
+                try {
+                    query.put("ID"   , "11236534");
+                    query.put("state", "ready");
 
-//        mFactory.getAdapter().setListener(new GameFactory.ClickListener() {
-//            @Override
-//            public void onClick(int position) {
-//
-//                mFactory.startGame(position, ActivityStart.this);
-//
-//                finish();
-//
-//                Intent i = new Intent(ActivityStart.this, ActivityMain.class);
-//                startActivity(i);
-//            }
-//        });
+                    server.send(query);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+
+        server.setReceiver(new Consumer<JSONObject>() {
+            @Override
+            public void accept(JSONObject object) throws Exception {
+
+                if(!object.has("event") || !object.getString("event").equals("StartGame"))
+                    return;
+
+                mApp.startGame();
+                startActivity(new Intent(ActivityGameRemote.this, ActivityMain.class));
+
+                // TODO: 11.01.2018 пока нельзя закрыть активити т.к. эта команда должна прийти с сервера
+                finish();
+            }
+        });
     }
 
-    @Override
-    public void onResume(){
-        super.onResume();
-
-        //Log.v(GameManager.TAG, "ActivityStart: onResume().");
-        //mFactory.onActivityResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-
-        //Log.v(GameManager.TAG, "ActivityStart: onPause().");
-        //mFactory.onActivityPause();
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-
-        mApp.getAdapter().stopScan();
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -119,12 +123,12 @@ public class ActivityGameRemote extends AppCompatActivity {
 
             case R.id.start_scan:
 
-                mApp.getAdapter().startScan(this);
+                //mApp.getAdapter().startScan(this);
                 break;
 
             case R.id.stop_scanning:
 
-                mApp.getAdapter().stopScan();
+                //mApp.getAdapter().stopScan();
                 break;
         }
 
