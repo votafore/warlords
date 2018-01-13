@@ -18,18 +18,7 @@
         android:theme="@style/AppTheme">
         <activity android:name=".ActivityMain">
         </activity>
-        <activity android:name=".ActivityStart">
-        </activity>
-        <activity android:name=".test.ActivityTestSocketClient">
-        </activity>
-        <activity android:name=".ActivityGame">
-        </activity>
-        <activity android:name=".Activity1">
-        </activity>
-        <activity android:name=".ActivityGameOver">
-        </activity>
-        <activity android:name=".ActivityTest">
-        </activity>
+
 
 
         <!-- v4 -->
@@ -41,8 +30,10 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".v4.activities.ActivityGameLocal"/>
-        <activity android:name=".v4.activities.ActivityGameRemote"/>
+        <activity android:name=".v4.activities.ActivityGameLocal"
+            android:parentActivityName=".v4.activities.ActivityStart"/>
+        <activity android:name=".v4.activities.ActivityGameRemote"
+                  android:parentActivityName=".v4.activities.ActivityStart"/>
         <activity android:name=".v4.activities.ActivityGame"/>
         <activity android:name=".v4.activities.ActivityGameOver"/>
 

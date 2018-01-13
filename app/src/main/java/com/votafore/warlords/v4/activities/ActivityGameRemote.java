@@ -4,8 +4,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 
@@ -69,53 +67,6 @@ public class ActivityGameRemote extends AppCompatActivity {
             }
         });
 
-    }
-
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_gamelist, menu);
-        return super.onCreateOptionsMenu(menu);
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-
-        switch(item.getItemId()){
-            case R.id.new_game:
-
-                //mFactory.createServer(this);
-                //mApp.createServer();
-
-                break;
-//            case R.id.start_game:
-//
-//                mFactory.startGame(0, this);
-//
-//                break;
-            case R.id.call_someFunc:
-
-                //mFactory.someFunc();
-
-                break;
-            case R.id.exit:
-
-                //mFactory.exit();
-//                mApp.stopServer();
-                break;
-
-            case R.id.start_scan:
-
-                //mApp.getAdapter().startScan(this);
-                break;
-
-            case R.id.stop_scanning:
-
-                //mApp.getAdapter().stopScan();
-                break;
-        }
-
-        return super.onOptionsItemSelected(item);
     }
 
     @Override

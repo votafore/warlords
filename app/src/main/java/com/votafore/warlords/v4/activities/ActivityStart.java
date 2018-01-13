@@ -26,7 +26,6 @@ import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.functions.Predicate;
-import io.reactivex.schedulers.Schedulers;
 
 import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
 import static com.votafore.warlords.v2.Constants.TAG_SCAN;
@@ -97,7 +96,9 @@ public class ActivityStart extends AppCompatActivity {
                         .filter(new Predicate<ServiceInfo>() {
                             @Override
                             public boolean test(ServiceInfo serviceInfo) throws Exception {
-                                return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME) && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND);
+                                return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME)
+                                        && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND)
+                                        && (!serviceInfo.info.getHost().toString().replace("/", "").equals(mApp.getDeviceIP()));
                             }
                         })
                         // convert unresolved NsdInfo into resolved NsdInfo
@@ -127,7 +128,6 @@ public class ActivityStart extends AppCompatActivity {
                                 });
                             }
                         })
-                        .observeOn(Schedulers.newThread())
                         .subscribe(new Consumer<NsdServiceInfo>() {
                             @Override
                             public void accept(NsdServiceInfo serviceInfo) throws Exception {
@@ -137,10 +137,6 @@ public class ActivityStart extends AppCompatActivity {
 
                                 startActivity(remote);
 
-                                finish();
-
-                                dsp_findServer.dispose();
-
                             }
                         });
 
@@ -149,4 +145,11 @@ public class ActivityStart extends AppCompatActivity {
     }
 
     Disposable dsp_findServer;
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        dsp_findServer.dispose();
+    }
 }

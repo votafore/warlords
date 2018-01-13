@@ -120,7 +120,7 @@ public class ServerLocal implements IServer {
         .subscribeOn(Schedulers.newThread())
         .subscribe(getSocketAppender());
 
-        Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "create and start");
+        //Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "create and start");
 
         // observable/subscriber that trigger when server created for starting broadcast
 //        dsp_broadcast = Observable.create(new ObservableOnSubscribe<Void>() {
