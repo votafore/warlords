@@ -1,21 +1,21 @@
-package com.votafore.warlords;
+package com.votafore.warlords.v4.activities;
 
-import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.support.v7.widget.Toolbar;
 
+import com.votafore.warlords.GameFactory;
+import com.votafore.warlords.R;
 import com.votafore.warlords.v3.AdapterServerList;
 import com.votafore.warlords.v3.App;
 
 
-public class ActivityStart extends AppCompatActivity {
+public class ActivityGameRemote extends AppCompatActivity {
 
     private GameFactory   mFactory;
 

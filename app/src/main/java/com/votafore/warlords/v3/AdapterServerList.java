@@ -110,7 +110,7 @@ public class AdapterServerList extends RecyclerView.Adapter<AdapterServerList.Vi
 //            }
 
             App app = (App) mContext.getApplicationContext();
-            app.setSelected(mList.get(getAdapterPosition()).getServer());
+            //app.setSelected(mList.get(getAdapterPosition()).getServer());
 
             Intent i = new Intent(mContext, ActivityGame.class);
             i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

@@ -1,4 +1,4 @@
-package com.votafore.warlords.v3;
+package com.votafore.warlords.v4;
 
 import android.app.Application;
 import android.content.BroadcastReceiver;
@@ -9,30 +9,23 @@ import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.opengl.GLSurfaceView;
 
+import com.votafore.warlords.v3.AdapterServerList;
+import com.votafore.warlords.v3.Game;
+import com.votafore.warlords.v3.IServer;
+import com.votafore.warlords.v3.Log;
+
 import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.util.Enumeration;
 
-import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Cancellable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
-import io.reactivex.functions.Predicate;
-import io.reactivex.observables.ConnectableObservable;
-
+import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
 import static com.votafore.warlords.v2.Constants.LVL_APP;
+import static com.votafore.warlords.v2.Constants.LVL_NW_WATCHER;
 import static com.votafore.warlords.v2.Constants.TAG_APP_START;
 import static com.votafore.warlords.v2.Constants.TAG_APP_STOP;
-import static com.votafore.warlords.v2.Constants.LVL_ADAPTER;
-import static com.votafore.warlords.v2.Constants.LVL_NW_WATCHER;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
 import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
-import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
 import static com.votafore.warlords.v2.Constants.format1;
 
 /**

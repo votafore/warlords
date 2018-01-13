@@ -1,4 +1,4 @@
-package com.votafore.warlords.v3;
+package com.votafore.warlords.v4.network;
 
 import android.content.Context;
 import android.net.nsd.NsdManager;
@@ -6,6 +6,10 @@ import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
 
 import com.votafore.warlords.v2.Constants;
+import com.votafore.warlords.v3.IServer;
+import com.votafore.warlords.v3.ISocket;
+import com.votafore.warlords.v3.Log;
+import com.votafore.warlords.v3.Socket;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,14 +24,8 @@ import java.util.Map;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
-import io.reactivex.Observer;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.BiFunction;
-import io.reactivex.functions.Cancellable;
 import io.reactivex.functions.Consumer;
-import io.reactivex.internal.operators.observable.ObservableCombineLatest;
-import io.reactivex.observables.ConnectableObservable;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
@@ -190,12 +188,12 @@ public class ServerLocal implements IServer {
         Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "APPENDER", "stop");
         dsp_sockets.dispose();
 
-        // for example broadcasting could be finished before server's Stop method called
-        if(!dsp_broadcast.isDisposed())
-        {
-            Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "BROADCASTER", "stop");
-            dsp_broadcast.dispose();
-        }
+//        // for example broadcasting could be finished before server's Stop method called
+//        if(!dsp_broadcast.isDisposed())
+//        {
+//            Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "BROADCASTER", "stop");
+//            dsp_broadcast.dispose();
+//        }
 
         // TODO: 26.12.2017 check if dispose in map_dsp is necessary
 

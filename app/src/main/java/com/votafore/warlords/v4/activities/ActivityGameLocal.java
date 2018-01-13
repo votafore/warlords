@@ -1,21 +1,22 @@
-package com.votafore.warlords;
+package com.votafore.warlords.v4.activities;
 
 import android.content.Intent;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
 
+import com.votafore.warlords.ActivityMain;
+import com.votafore.warlords.R;
 import com.votafore.warlords.v4.App;
 import com.votafore.warlords.v4.network.ServerLocal;
-
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import io.reactivex.functions.Consumer;
 
-public class ActivityGame extends AppCompatActivity {
+public class ActivityGameLocal extends AppCompatActivity {
 
     private App mApp;
 
@@ -64,7 +65,7 @@ public class ActivityGame extends AppCompatActivity {
                 server.stopBroadcast();
 
                 mApp.startGame();
-                startActivity(new Intent(ActivityGame.this, ActivityMain.class));
+                startActivity(new Intent(ActivityGameLocal.this, ActivityMain.class));
 
                 // TODO: 11.01.2018 пока нельзя закрыть активити т.к. эта команда должна прийти с сервера
                 finish();
