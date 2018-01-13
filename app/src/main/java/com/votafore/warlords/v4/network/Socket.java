@@ -112,11 +112,21 @@ public class Socket implements ISocket {
                     }
 
                     if(data == null) {
-                        e.onComplete();
 
-                        // send a notification that socket is closing
-                        // method "close" will be invoked when server close sender
-                        e.onNext(new JSONObject("{event: socket is closing}"));
+                        Log.d1(Constants.TAG_SOCKET_CLOSE, Constants.LVL_SOCKET, "notify socket is closing");
+
+                        if(e != null && ! e.isDisposed()){
+
+                            // send a notification that socket is closing
+                            // method "close" will be invoked when server close sender
+
+                            JSONObject notification = new JSONObject();
+                            notification.put("event", "socket is closing");
+
+                            e.onNext(notification);
+
+                            e.onComplete();
+                        }
 
                         break;
 

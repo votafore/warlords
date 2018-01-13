@@ -121,17 +121,17 @@ public class App extends Application {
         Log.d1(TAG_SRV_CRT, LVL_APP, "setting server in the app...");
         mServer = server;
 
-        Thread thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
+//        Thread thread = new Thread(new Runnable() {
+//            @Override
+//            public void run() {
 
                 Log.d1(TAG_SRV_START, LVL_APP, "starting...");
                 mServer.start(getApplicationContext());
                 Log.d1(TAG_SRV_START, LVL_APP, "started");
-            }
-        });
+        //    }
+        //});
 
-        thread.start();
+        //thread.start();
     }
 
 

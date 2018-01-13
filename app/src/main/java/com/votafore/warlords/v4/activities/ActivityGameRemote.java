@@ -2,7 +2,6 @@ package com.votafore.warlords.v4.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -13,13 +12,10 @@ import android.widget.Button;
 import com.votafore.warlords.ActivityMain;
 import com.votafore.warlords.R;
 import com.votafore.warlords.v4.App;
-import com.votafore.warlords.v4.network.ServerRemote;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 
 import io.reactivex.functions.Consumer;
 
@@ -38,20 +34,6 @@ public class ActivityGameRemote extends AppCompatActivity {
 
         mApp = (App) getApplication();
 
-        String ip = getIntent().getStringExtra("IP");
-        int port = getIntent().getIntExtra("port", 0);
-
-        final ServerRemote server;
-
-        try {
-            server = new ServerRemote(InetAddress.getByName(ip.replace("/", "")), port);
-        } catch (UnknownHostException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        mApp.setServer(server);
-
         Button ready = findViewById(R.id.ready);
 
         ready.setOnClickListener(new View.OnClickListener() {
@@ -64,7 +46,7 @@ public class ActivityGameRemote extends AppCompatActivity {
                     query.put("ID"   , "11236534");
                     query.put("state", "ready");
 
-                    server.send(query);
+                    mApp.getServer().send(query);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -72,7 +54,7 @@ public class ActivityGameRemote extends AppCompatActivity {
             }
         });
 
-        server.setReceiver(new Consumer<JSONObject>() {
+        mApp.getServer().setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject object) throws Exception {
 
@@ -86,6 +68,7 @@ public class ActivityGameRemote extends AppCompatActivity {
                 finish();
             }
         });
+
     }
 
 
@@ -133,5 +116,12 @@ public class ActivityGameRemote extends AppCompatActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        mApp.getServer().stop();
     }
 }
