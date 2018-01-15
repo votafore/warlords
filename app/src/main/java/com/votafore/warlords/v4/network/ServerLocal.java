@@ -296,7 +296,12 @@ public class ServerLocal implements IServer {
 
     private NsdManager mNSDManager;
 
+    private boolean isBroadcasting = false;
+
     public void startBroadcast(Context context){
+
+        if(isBroadcasting)
+            return;
 
         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "startBroadcast");
 
@@ -336,13 +341,19 @@ public class ServerLocal implements IServer {
         Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "register service");
         mNSDManager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, mNSDListener);
 
+        isBroadcasting = true;
     }
 
     public void stopBroadcast(){
+
+        if(!isBroadcasting)
+            return;
 
         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "stopBroadcast");
 
         Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "unregister service");
         mNSDManager.unregisterService(mNSDListener);
+
+        isBroadcasting = false;
     }
 }
