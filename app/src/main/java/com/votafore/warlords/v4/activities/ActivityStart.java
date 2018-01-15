@@ -88,6 +88,7 @@ public class ActivityStart extends AppCompatActivity {
                     @Override
                     public void onSearchingEnd() {
                         mDialog.dismiss();
+                        mApp.getServer().setSearchingListener(null);
                         startActivity(remote);
                     }
                 });

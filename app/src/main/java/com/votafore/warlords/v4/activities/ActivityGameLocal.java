@@ -16,13 +16,16 @@ import com.votafore.warlords.v4.App;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+
 import static com.votafore.warlords.v4.App.EVENT_GAME_START;
 
 public class ActivityGameLocal extends AppCompatActivity {
 
     private App mApp;
 
-    BroadcastReceiver mStartGameReceiver;
+    Disposable dsp_receiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,31 +56,20 @@ public class ActivityGameLocal extends AppCompatActivity {
             }
         });
 
-        mStartGameReceiver = new BroadcastReceiver() {
+        dsp_receiver = mApp.getServer().setReceiver(new Consumer<JSONObject>() {
             @Override
-            public void onReceive(Context context, Intent intent) {
-                startActivity(new Intent(context, ActivityMain.class));
-                finish();
+            public void accept(JSONObject object) throws Exception {
+
+                if(object.has("event") && object.getString("event").equals("StartGame")){
+
+                    mApp.startGame();
+
+                    startActivity(new Intent(ActivityGameLocal.this, ActivityMain.class));
+                    finish();
+                }
             }
-        };
+        });
 
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(EVENT_GAME_START);
-
-        registerReceiver(mStartGameReceiver, filter);
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-
-        unregisterReceiver(mStartGameReceiver);
     }
 
     @Override

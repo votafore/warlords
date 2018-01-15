@@ -210,6 +210,7 @@ public class App extends Application {
 
 
     public static final String EVENT_GAME_START  = "com.votafore.warlords.game_start";
+    public static final String EVENT_RS_STOPED   = "com.votafore.warlords.remoteServer.stopped";
 
 
     private void testFunc(){

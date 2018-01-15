@@ -186,6 +186,8 @@ public class ServerRemote implements IServer {
 
         if(mSearchingListener != null)
             mSearchingListener.onSearchingEnd();
+
+        mSearchingListener = null;
     }
 
     /****************** ServerRemote ******************/
