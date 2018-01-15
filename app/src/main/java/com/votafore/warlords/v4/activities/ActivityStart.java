@@ -71,7 +71,6 @@ public class ActivityStart extends AppCompatActivity {
             public void onClick(DialogInterface dialog, int which) {
                 mApp.getServer().setSearchingListener(null);
                 mApp.getServer().stopSearching();
-                dialog.dismiss();
             }
         });
 
@@ -101,6 +100,11 @@ public class ActivityStart extends AppCompatActivity {
         });
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mDialog.dismiss();
+    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {

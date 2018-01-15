@@ -30,9 +30,8 @@ public interface IServer {
 
     /**
      * method for starting server
-     * @param context
      */
-    void start(Context context);
+    void start();
 
     /**
      * method for stopping server

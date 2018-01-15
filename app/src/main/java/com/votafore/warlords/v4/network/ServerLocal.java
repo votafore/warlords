@@ -77,11 +77,9 @@ public class ServerLocal implements IServer {
     }
 
     @Override
-    public void start(final Context context) {
+    public void start() {
 
         Log.d1(TAG_SRV_START, LVL_LOCAL_SERVER, "create ServerSocket");
-
-        //final ServerSocket serverSocket;
 
         try {
             mServerSocket = new ServerSocket(0);
@@ -115,60 +113,6 @@ public class ServerLocal implements IServer {
         .subscribeOn(Schedulers.newThread())
         .subscribe(getSocketAppender());
 
-        //Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "create and start");
-
-        // observable/subscriber that trigger when server created for starting broadcast
-//        dsp_broadcast = Observable.create(new ObservableOnSubscribe<Void>() {
-//            @Override
-//            public void subscribe(ObservableEmitter<Void> e) throws Exception {
-//
-//                final NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-//                final NsdManager.RegistrationListener listener = new NsdManager.RegistrationListener() {
-//                    @Override
-//                    public void onRegistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onRegistrationFailed");
-//                    }
-//
-//                    @Override
-//                    public void onUnregistrationFailed(NsdServiceInfo serviceInfo, int errorCode) {
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onUnregistrationFailed");
-//                    }
-//
-//                    @Override
-//                    public void onServiceRegistered(NsdServiceInfo serviceInfo) {
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onServiceRegistered");
-//                    }
-//
-//                    @Override
-//                    public void onServiceUnregistered(NsdServiceInfo serviceInfo) {
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "onServiceUnregistered");
-//                    }
-//                };
-//
-//                NsdServiceInfo regInfo = new NsdServiceInfo();
-//                regInfo.setServiceName(Constants.SERVICENAME);
-//                regInfo.setServiceType(Constants.SERVICETYPE);
-//                regInfo.setPort(serverSocket.getLocalPort());
-//
-//                if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-//                    regInfo.setAttribute("ownerName" , "developer");
-//                    regInfo.setAttribute("message"   , "welcome !!! )");
-//                }
-//
-//                Log.d2(TAG_SRV_START, LVL_LOCAL_SERVER, "BROADCASTER", "register service");
-//                manager.registerService(regInfo, NsdManager.PROTOCOL_DNS_SD, listener);
-//
-//                e.setCancellable(new Cancellable() {
-//                    @Override
-//                    public void cancel() throws Exception {
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "unregister service");
-//                        manager.unregisterService(listener);
-//                        Log.d2("", LVL_LOCAL_SERVER, "BROADCASTER", "close server socket");
-//                        serverSocket.close();
-//                    }
-//                });
-//            }
-//        }).subscribe();
     }
 
     @Override

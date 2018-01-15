@@ -68,7 +68,7 @@ public class ServerRemote implements IServer {
     private ISocket mSocket;
 
     @Override
-    public void start(Context context) {
+    public void start() {
 
 //        Log.d1(TAG_SRV_START, LVL_REMOTE_SERVER, "create socket");
 //        mSocket = Socket.create(mIP, mPort);
@@ -82,6 +82,8 @@ public class ServerRemote implements IServer {
     public void stop() {
         Log.d1(TAG_SRV_STOP, LVL_REMOTE_SERVER, "sender.onComplete()");
         sender.onComplete();
+
+        mSearchingListener = null;
     }
 
 
