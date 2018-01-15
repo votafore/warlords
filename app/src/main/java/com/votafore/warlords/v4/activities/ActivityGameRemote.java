@@ -31,6 +31,7 @@ public class ActivityGameRemote extends AppCompatActivity {
         setSupportActionBar(mToolbar);
 
         mApp = (App) getApplication();
+        mApp.getServer().startSearching(this);
 
         Button ready = findViewById(R.id.ready);
 
@@ -73,6 +74,6 @@ public class ActivityGameRemote extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        mApp.getServer().stop();
+        mApp.dismissServer();
     }
 }

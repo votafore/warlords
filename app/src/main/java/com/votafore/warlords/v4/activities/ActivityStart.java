@@ -1,6 +1,8 @@
 package com.votafore.warlords.v4.activities;
 
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
@@ -14,6 +16,8 @@ import com.votafore.warlords.v2.Constants;
 import com.votafore.warlords.v2.ServiceInfo;
 import com.votafore.warlords.v3.Log;
 import com.votafore.warlords.v4.App;
+import com.votafore.warlords.v4.network.ISearchingListener;
+import com.votafore.warlords.v4.network.ServerLocal;
 import com.votafore.warlords.v4.network.ServerRemote;
 import com.votafore.warlords.v4.test.DiscoveryListener;
 import com.votafore.warlords.v4.test.ResolveListener;
@@ -35,6 +39,8 @@ public class ActivityStart extends AppCompatActivity {
 
     private App mApp;
 
+    private ProgressDialog mDialog;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -51,7 +57,21 @@ public class ActivityStart extends AppCompatActivity {
         create_btn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                mApp.setServer(new ServerLocal());
                 startActivity(local);
+            }
+        });
+
+        mDialog = new ProgressDialog(this);
+        mDialog.setTitle("searching...");
+        mDialog.setCancelable(false);
+        mDialog.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        mDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "stop", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                mApp.getServer().setSearchingListener(null);
+                mApp.getServer().stopSearching();
+                dialog.dismiss();
             }
         });
 
@@ -59,17 +79,40 @@ public class ActivityStart extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
+                mApp.setServer(new ServerRemote());
+                mApp.getServer().setSearchingListener(new ISearchingListener() {
+                    @Override
+                    public void onSearchingStart() {
+
+                    }
+
+                    @Override
+                    public void onSearchingEnd() {
+                        mDialog.dismiss();
+                        startActivity(remote);
+                    }
+                });
+
+                mDialog.show();
+
+                mApp.getServer().startSearching(ActivityStart.this);
 
             }
         });
     }
 
-    Disposable dsp_findServer;
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onSaveInstanceState(Bundle outState) {
+        outState.putBoolean("isSearching", mDialog.isShowing());
+        super.onSaveInstanceState(outState);
+    }
 
-        dsp_findServer.dispose();
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        if(savedInstanceState.getBoolean("isSearching"))
+            mDialog.show();
     }
 }

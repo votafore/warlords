@@ -147,6 +147,13 @@ public class App extends Application {
         Log.d1(TAG_SRV_START, LVL_APP, "started");
     }
 
+    public void dismissServer(){
+
+        mServer.stopSearching();
+        mServer.stop();
+        mServer = null;
+    }
+
 
 
 
@@ -209,10 +216,10 @@ public class App extends Application {
 
     /*************** TESTS *********************/
 
-    public static final String EVENT_LOCALSERVER_CREATE         = "com.votafore.warlords.local_server_create";
-    public static final String EVENT_LOCALSERVER_DISMISS        = "com.votafore.warlords.local_server_dismiss";
-    //public static final String EVENT_LOCALSERVER_STARTBROADCAST = "com.votafore.warlords.local_server_start_broadcast";
-    public static final String EVENT_LOCALSERVER_STOPBROADCAST  = "com.votafore.warlords.local_server_stop_broadcast";
+//    public static final String EVENT_LOCALSERVER_CREATE         = "com.votafore.warlords.local_server_create";
+//    public static final String EVENT_LOCALSERVER_DISMISS        = "com.votafore.warlords.local_server_dismiss";
+//    //public static final String EVENT_LOCALSERVER_STARTBROADCAST = "com.votafore.warlords.local_server_start_broadcast";
+//    public static final String EVENT_LOCALSERVER_STOPBROADCAST  = "com.votafore.warlords.local_server_stop_broadcast";
 
     public static final String EVENT_GAME_START  = "com.votafore.warlords.game_start";
 
@@ -221,21 +228,21 @@ public class App extends Application {
 
 
 
-    public static final String STATE_LS_CREATE    = "local server created";
-    public static final String STATE_LS_WAIT      = "local server is waiting for incoming connections";
-    public static final String STATE_RS_FIND      = "searching for remote server";
-    public static final String STATE_RS_CREATE    = "remote server created";
-    public static final String STATE_GAME_STARTED = "game started";
-
-    private Stack<IState> mStates;
-
-    private IState LS_create;
-    private IState LS_wait;
-
-    private IState RS_find;
-    private IState RS_create;
-
-    private IState startGame;
+//    public static final String STATE_LS_CREATE    = "local server created";
+//    public static final String STATE_LS_WAIT      = "local server is waiting for incoming connections";
+//    public static final String STATE_RS_FIND      = "searching for remote server";
+//    public static final String STATE_RS_CREATE    = "remote server created";
+//    public static final String STATE_GAME_STARTED = "game started";
+//
+//    private Stack<IState> mStates;
+//
+//    private IState LS_create;
+//    private IState LS_wait;
+//
+//    private IState RS_find;
+//    private IState RS_create;
+//
+//    private IState startGame;
 
     private void testFunc(){
 
@@ -282,123 +289,123 @@ public class App extends Application {
 //        registerReceiver(eventReceiver, filter);
 
 
-        mStates = new Stack<>();
-
-        LS_create = new IState() {
-            @Override
-            public void onStateStart() {
-                localServerCreate();
-            }
-
-            @Override
-            public void onStateEnd() {
-                localServerDismiss();
-            }
-        };
-        LS_wait   = new IState() {
-            @Override
-            public void onStateStart() {
-                mServerLocal.startBroadcast(getApplicationContext());
-            }
-
-            @Override
-            public void onStateEnd() {
-                mServerLocal.stopBroadcast();
-            }
-        };
-
-        RS_find   = new IState() {
-            @Override
-            public void onStateStart() {
-                remoteServerFind();
-            }
-
-            @Override
-            public void onStateEnd() {
-                dsp_findServer.dispose();
-            }
-        };
-        RS_create = new IState() {
-            @Override
-            public void onStateStart() {
-
-            }
-
-            @Override
-            public void onStateEnd() {
-                remoteServerDismiss();
-            }
-        };
-
-        startGame = new IState() {
-            @Override
-            public void onStateStart() {
-                startGame();
-            }
-
-            @Override
-            public void onStateEnd() {
-
-            }
-        };
+//        mStates = new Stack<>();
+//
+//        LS_create = new IState() {
+//            @Override
+//            public void onStateStart() {
+//                localServerCreate();
+//            }
+//
+//            @Override
+//            public void onStateEnd() {
+//                localServerDismiss();
+//            }
+//        };
+//        LS_wait   = new IState() {
+//            @Override
+//            public void onStateStart() {
+//                mServerLocal.startBroadcast(getApplicationContext());
+//            }
+//
+//            @Override
+//            public void onStateEnd() {
+//                mServerLocal.stopBroadcast();
+//            }
+//        };
+//
+//        RS_find   = new IState() {
+//            @Override
+//            public void onStateStart() {
+//                remoteServerFind();
+//            }
+//
+//            @Override
+//            public void onStateEnd() {
+//                dsp_findServer.dispose();
+//            }
+//        };
+//        RS_create = new IState() {
+//            @Override
+//            public void onStateStart() {
+//
+//            }
+//
+//            @Override
+//            public void onStateEnd() {
+//                remoteServerDismiss();
+//            }
+//        };
+//
+//        startGame = new IState() {
+//            @Override
+//            public void onStateStart() {
+//                startGame();
+//            }
+//
+//            @Override
+//            public void onStateEnd() {
+//
+//            }
+//        };
     }
 
 
 
-    public String getState(){
+//    public String getState(){
+//
+//        String result = "";
+//
+//        if(mStates.peek() == LS_create)
+//            result = STATE_LS_CREATE;
+//
+//        if(mStates.peek() == LS_wait)
+//            result = STATE_LS_WAIT;
+//
+//        if(mStates.peek() == RS_find)
+//            result = STATE_RS_FIND;
+//
+//        if(mStates.peek() == RS_create)
+//            result = STATE_RS_CREATE;
+//
+//        return result;
+//    }
 
-        String result = "";
+//    public void nextState(String state){
+//
+//        IState next;
+//
+//        switch(state){
+//            case STATE_LS_CREATE:
+//                next = LS_create;
+//                break;
+//            case STATE_LS_WAIT:
+//                next = LS_wait;
+//                break;
+//            case STATE_RS_FIND:
+//                next = RS_find;
+//                break;
+//            case STATE_RS_CREATE:
+//                next = RS_create;
+//                break;
+//            case STATE_GAME_STARTED:
+//                next = startGame;
+//                break;
+//            default:
+//                next = LS_create;
+//        }
+//
+//        mStates.push(next);
+//
+//        next.onStateStart();
+//    }
 
-        if(mStates.peek() == LS_create)
-            result = STATE_LS_CREATE;
-
-        if(mStates.peek() == LS_wait)
-            result = STATE_LS_WAIT;
-
-        if(mStates.peek() == RS_find)
-            result = STATE_RS_FIND;
-
-        if(mStates.peek() == RS_create)
-            result = STATE_RS_CREATE;
-
-        return result;
-    }
-
-    public void nextState(String state){
-
-        IState next;
-
-        switch(state){
-            case STATE_LS_CREATE:
-                next = LS_create;
-                break;
-            case STATE_LS_WAIT:
-                next = LS_wait;
-                break;
-            case STATE_RS_FIND:
-                next = RS_find;
-                break;
-            case STATE_RS_CREATE:
-                next = RS_create;
-                break;
-            case STATE_GAME_STARTED:
-                next = startGame;
-                break;
-            default:
-                next = LS_create;
-        }
-
-        mStates.push(next);
-
-        next.onStateStart();
-    }
-
-    public void changeState(String state){
-
-        mStates.pop().onStateEnd();
-
-        nextState(state);
-    }
+//    public void changeState(String state){
+//
+//        mStates.pop().onStateEnd();
+//
+//        nextState(state);
+//    }
 
 
 
@@ -426,6 +433,8 @@ public class App extends Application {
                 if(!object.has("event") || !object.getString("event").equals("StartGame"))
                     return;
 
+                startGame();
+
                 sendBroadcast(new Intent(EVENT_GAME_START));
             }
         });
@@ -445,99 +454,99 @@ public class App extends Application {
 
     /******* remote *******/
 
-    Disposable dsp_findServer;
+    //Disposable dsp_findServer;
 
     public void remoteServerFind(){
 
-        dsp_findServer = Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
-            @Override
-            public void subscribe(final ObservableEmitter<ServiceInfo> e){
-
-                final NsdManager manager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-                final DiscoveryListener listener = new DiscoveryListener(){
-                    @Override
-                    public void onServiceFound(NsdServiceInfo serviceInfo) {
-
-                        com.votafore.warlords.v3.Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceFound");
-
-                        ServiceInfo svc_info = new ServiceInfo();
-                        svc_info.messageType = ServiceInfo.SERVICE_FOUND;
-                        svc_info.info = serviceInfo;
-
-                        e.onNext(svc_info);
-                    }
-                };
-
-                com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "create disc. listener, start discover");
-                manager.discoverServices(Constants.SERVICETYPE, NsdManager.PROTOCOL_DNS_SD, listener);
-
-
-                e.setCancellable(new Cancellable() {
-                    @Override
-                    public void cancel() throws Exception {
-                        com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "cancel. stop discovery");
-                        manager.stopServiceDiscovery(listener);
-                    }
-                });
-            }
-        })
-                // check if it is one of game services
-                .filter(new Predicate<ServiceInfo>() {
-                    @Override
-                    public boolean test(ServiceInfo serviceInfo) throws Exception {
-                        return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME)
-                                && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND)
-                                && (!serviceInfo.info.getHost().toString().replace("/", "").equals(mDeviceIP));
-                    }
-                })
-                // convert unresolved NsdInfo into resolved NsdInfo
-                .flatMap(new Function<ServiceInfo, Observable<NsdServiceInfo>>() {
-                    @Override
-                    public Observable<NsdServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
-
-                        com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
-
-                        return Observable.create(new ObservableOnSubscribe<NsdServiceInfo>() {
-                            @Override
-                            public void subscribe(final ObservableEmitter<NsdServiceInfo> e) {
-
-                                com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
-
-                                NsdManager manager = (NsdManager) getSystemService(Context.NSD_SERVICE);
-                                manager.resolveService(serviceInfo.info, new ResolveListener() {
-
-                                    @Override
-                                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                                        super.onServiceResolved(serviceInfo);
-                                        e.onNext(serviceInfo);
-                                    }
-                                });
-
-                            }
-                        });
-                    }
-                })
-                .subscribe(new Consumer<NsdServiceInfo>() {
-                    @Override
-                    public void accept(NsdServiceInfo serviceInfo) throws Exception {
-
-                        remoteServerCreate(serviceInfo.getHost(), serviceInfo.getPort());
-
-                        mStates.pop().onStateEnd();
-                        mStates.push(RS_create);
-
-                        // TODO: 14.01.2018 notify activity that server was created
-
-                    }
-                });
+//        dsp_findServer = Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
+//            @Override
+//            public void subscribe(final ObservableEmitter<ServiceInfo> e){
+//
+//                final NsdManager manager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+//                final DiscoveryListener listener = new DiscoveryListener(){
+//                    @Override
+//                    public void onServiceFound(NsdServiceInfo serviceInfo) {
+//
+//                        com.votafore.warlords.v3.Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceFound");
+//
+//                        ServiceInfo svc_info = new ServiceInfo();
+//                        svc_info.messageType = ServiceInfo.SERVICE_FOUND;
+//                        svc_info.info = serviceInfo;
+//
+//                        e.onNext(svc_info);
+//                    }
+//                };
+//
+//                com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "create disc. listener, start discover");
+//                manager.discoverServices(Constants.SERVICETYPE, NsdManager.PROTOCOL_DNS_SD, listener);
+//
+//
+//                e.setCancellable(new Cancellable() {
+//                    @Override
+//                    public void cancel() throws Exception {
+//                        com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "cancel. stop discovery");
+//                        manager.stopServiceDiscovery(listener);
+//                    }
+//                });
+//            }
+//        })
+//                // check if it is one of game services
+//                .filter(new Predicate<ServiceInfo>() {
+//                    @Override
+//                    public boolean test(ServiceInfo serviceInfo) throws Exception {
+//                        return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME)
+//                                && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND)
+//                                && (!serviceInfo.info.getHost().toString().replace("/", "").equals(mDeviceIP));
+//                    }
+//                })
+//                // convert unresolved NsdInfo into resolved NsdInfo
+//                .flatMap(new Function<ServiceInfo, Observable<NsdServiceInfo>>() {
+//                    @Override
+//                    public Observable<NsdServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
+//
+//                        com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
+//
+//                        return Observable.create(new ObservableOnSubscribe<NsdServiceInfo>() {
+//                            @Override
+//                            public void subscribe(final ObservableEmitter<NsdServiceInfo> e) {
+//
+//                                com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
+//
+//                                NsdManager manager = (NsdManager) getSystemService(Context.NSD_SERVICE);
+//                                manager.resolveService(serviceInfo.info, new ResolveListener() {
+//
+//                                    @Override
+//                                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
+//                                        super.onServiceResolved(serviceInfo);
+//                                        e.onNext(serviceInfo);
+//                                    }
+//                                });
+//
+//                            }
+//                        });
+//                    }
+//                })
+//                .subscribe(new Consumer<NsdServiceInfo>() {
+//                    @Override
+//                    public void accept(NsdServiceInfo serviceInfo) throws Exception {
+//
+//                        remoteServerCreate();
+//
+//                        mStates.pop().onStateEnd();
+//                        mStates.push(RS_create);
+//
+//                        // TODO: 14.01.2018 notify activity that server was created
+//
+//                    }
+//                });
     }
 
 
     private ServerRemote mServerRemote;
 
-    public void remoteServerCreate(InetAddress ip, int port){
+    public void remoteServerCreate(){
 
-        mServerRemote = new ServerRemote(ip, port);
+        mServerRemote = new ServerRemote();
         mServerRemote.start(getApplicationContext());
     }
 

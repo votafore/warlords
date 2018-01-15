@@ -29,9 +29,8 @@ public class ActivityGameLocal extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
 
-        sendBroadcast(new Intent(App.EVENT_LOCALSERVER_CREATE));
-
         mApp = (App) getApplication();
+        mApp.getServer().startSearching(this);
 
         Button startGame = findViewById(R.id.start_game);
 
@@ -84,7 +83,8 @@ public class ActivityGameLocal extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        sendBroadcast(new Intent(App.EVENT_LOCALSERVER_DISMISS));
+
+        mApp.dismissServer();
     }
 
 }

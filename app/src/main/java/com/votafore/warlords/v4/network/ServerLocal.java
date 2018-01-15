@@ -56,11 +56,6 @@ public class ServerLocal implements IServer {
      */
     private Disposable dsp_sockets;
 
-    /**
-     * object for handling broadcasting
-     */
-    private Disposable dsp_broadcast;
-
 
     private ServerSocket mServerSocket;
 
@@ -186,19 +181,27 @@ public class ServerLocal implements IServer {
         Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "APPENDER", "stop");
         dsp_sockets.dispose();
 
-//        // for example broadcasting could be finished before server's Stop method called
-//        if(!dsp_broadcast.isDisposed())
-//        {
-//            Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "BROADCASTER", "stop");
-//            dsp_broadcast.dispose();
-//        }
-
         // TODO: 26.12.2017 check if dispose in map_dsp is necessary
 
         // TODO: 27.12.2017 may be it is worth to place all observers in CompositeDisposable
     }
 
 
+
+    @Override
+    public void startSearching(Context context) {
+        startBroadcast(context);
+    }
+
+    @Override
+    public void stopSearching() {
+        stopBroadcast();
+    }
+
+    @Override
+    public void setSearchingListener(ISearchingListener listener) {
+
+    }
 
     /****************** ServerLocal ******************/
 

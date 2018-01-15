@@ -38,4 +38,20 @@ public interface IServer {
      * method for stopping server
      */
     void stop();
+
+
+    /************ utils *************/
+
+    /**
+     * method for start searching connections
+     */
+    void startSearching(Context context);
+
+    /**
+     * method for stop searching connections
+     */
+    void stopSearching();
+
+
+    void setSearchingListener(ISearchingListener listener);
 }
