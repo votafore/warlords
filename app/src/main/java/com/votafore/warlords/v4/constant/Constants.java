@@ -89,6 +89,8 @@ public final class Constants {
     public static String TAG_SCAN_STOP        = String.format(format, TAG + "_" + SCAN+ "_" + STOP);
 
 
+    public static String TAG_ACTIVITY_CREATE  = String.format(format, TAG + "_ACTIVITY_" + CRT);
+
     // TAG описывает происходящее действие
     //      - старт/остановка приложения
     //      - старт/остановка сервера

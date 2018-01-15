@@ -101,7 +101,7 @@ public class ServerRemote implements IServer {
                     @Override
                     public void onServiceFound(NsdServiceInfo serviceInfo) {
 
-                        com.votafore.warlords.v3.Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceFound");
+                        Log.d1(TAG_SCAN_START, "CONN OBSERVABLE", "onServiceFound");
 
                         ServiceInfo svc_info = new ServiceInfo();
                         svc_info.messageType = ServiceInfo.SERVICE_FOUND;
@@ -111,14 +111,14 @@ public class ServerRemote implements IServer {
                     }
                 };
 
-                com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "create disc. listener, start discover");
+                Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "create disc. listener, start discover");
                 manager.discoverServices(Constants.SERVICETYPE, NsdManager.PROTOCOL_DNS_SD, listener);
 
 
                 e.setCancellable(new Cancellable() {
                     @Override
                     public void cancel() throws Exception {
-                        com.votafore.warlords.v3.Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "cancel. stop discovery");
+                        Log.d2(TAG_SCAN, LVL_ADAPTER, "CONN OBSERVABLE", "cancel. stop discovery");
                         manager.stopServiceDiscovery(listener);
                     }
                 });
@@ -138,13 +138,13 @@ public class ServerRemote implements IServer {
                     @Override
                     public Observable<NsdServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
 
-                        com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
+                        Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
 
                         return Observable.create(new ObservableOnSubscribe<NsdServiceInfo>() {
                             @Override
                             public void subscribe(final ObservableEmitter<NsdServiceInfo> e) {
 
-                                com.votafore.warlords.v3.Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
+                                Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
 
                                 NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
                                 manager.resolveService(serviceInfo.info, new ResolveListener() {

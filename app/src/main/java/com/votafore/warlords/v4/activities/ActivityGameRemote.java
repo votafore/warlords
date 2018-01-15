@@ -1,6 +1,9 @@
 package com.votafore.warlords.v4.activities;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -10,28 +13,33 @@ import android.widget.Button;
 import com.votafore.warlords.ActivityMain;
 import com.votafore.warlords.R;
 import com.votafore.warlords.v4.App;
+import com.votafore.warlords.v4.constant.Log;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
 
-import io.reactivex.functions.Consumer;
+import static com.votafore.warlords.v4.App.EVENT_GAME_START;
+import static com.votafore.warlords.v4.constant.Constants.TAG_ACTIVITY_CREATE;
 
 
 public class ActivityGameRemote extends AppCompatActivity {
 
     private App mApp;
 
+    BroadcastReceiver mStartGameReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
 
+        Log.d1(TAG_ACTIVITY_CREATE, "ACTIVITY", "onCreate");
+
         Toolbar mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
 
         mApp = (App) getApplication();
-        mApp.getServer().startSearching(this);
 
         Button ready = findViewById(R.id.ready);
 
@@ -53,20 +61,13 @@ public class ActivityGameRemote extends AppCompatActivity {
             }
         });
 
-        mApp.getServer().setReceiver(new Consumer<JSONObject>() {
+        mStartGameReceiver = new BroadcastReceiver() {
             @Override
-            public void accept(JSONObject object) throws Exception {
-
-                if(!object.has("event") || !object.getString("event").equals("StartGame"))
-                    return;
-
-                mApp.startGame();
-                startActivity(new Intent(ActivityGameRemote.this, ActivityMain.class));
-
-                // TODO: 11.01.2018 пока нельзя закрыть активити т.к. эта команда должна прийти с сервера
+            public void onReceive(Context context, Intent intent) {
+                startActivity(new Intent(context, ActivityMain.class));
                 finish();
             }
-        });
+        };
 
     }
 
@@ -74,6 +75,23 @@ public class ActivityGameRemote extends AppCompatActivity {
     public void onBackPressed() {
         super.onBackPressed();
 
-        mApp.dismissServer();
+        //mApp.dismissServer();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(EVENT_GAME_START);
+
+        registerReceiver(mStartGameReceiver, filter);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        unregisterReceiver(mStartGameReceiver);
     }
 }

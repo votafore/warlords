@@ -63,13 +63,9 @@ public class App extends Application {
 
     private BroadcastReceiver mNetReceiver;
 
-    private static App mThis;
-
     @Override
     public void onCreate() {
         super.onCreate();
-
-        mThis = this;
 
         Log.d(TAG_APP_START, "starting...");
 
@@ -118,10 +114,6 @@ public class App extends Application {
 
         //Log.d(String.format(format1, LVL_NW_WATCHER, "unregister"));
         unregisterReceiver(mNetReceiver);
-    }
-
-    public static App getInstance(){
-        return mThis;
     }
 
 
@@ -411,44 +403,44 @@ public class App extends Application {
 
 
 
-    private boolean isLocal = false;
-
-    /******* local *******/
-
-    private ServerLocal mServerLocal;
-
-
-    public void localServerCreate(){
-
-        mServerLocal = new ServerLocal();
-
-        setServer(mServerLocal);
-
-        //mServerLocal.startBroadcast(getApplicationContext());
-
-        mServerLocal.setReceiver(new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject object) throws Exception {
-
-                if(!object.has("event") || !object.getString("event").equals("StartGame"))
-                    return;
-
-                startGame();
-
-                sendBroadcast(new Intent(EVENT_GAME_START));
-            }
-        });
-
-        isLocal = true;
-    }
-
-    public void localServerDismiss(){
-
-        //mServerLocal.stopBroadcast();
-        mServerLocal.stop();
-
-        mServerLocal = null;
-    }
+//    private boolean isLocal = false;
+//
+//    /******* local *******/
+//
+//    private ServerLocal mServerLocal;
+//
+//
+//    public void localServerCreate(){
+//
+//        mServerLocal = new ServerLocal();
+//
+//        setServer(mServerLocal);
+//
+//        //mServerLocal.startBroadcast(getApplicationContext());
+//
+//        mServerLocal.setReceiver(new Consumer<JSONObject>() {
+//            @Override
+//            public void accept(JSONObject object) throws Exception {
+//
+//                if(!object.has("event") || !object.getString("event").equals("StartGame"))
+//                    return;
+//
+//                startGame();
+//
+//                sendBroadcast(new Intent(EVENT_GAME_START));
+//            }
+//        });
+//
+//        isLocal = true;
+//    }
+//
+//    public void localServerDismiss(){
+//
+//        //mServerLocal.stopBroadcast();
+//        mServerLocal.stop();
+//
+//        mServerLocal = null;
+//    }
 
 
 
@@ -456,7 +448,7 @@ public class App extends Application {
 
     //Disposable dsp_findServer;
 
-    public void remoteServerFind(){
+    //public void remoteServerFind(){
 
 //        dsp_findServer = Observable.create(new ObservableOnSubscribe<ServiceInfo>() {
 //            @Override
@@ -539,22 +531,22 @@ public class App extends Application {
 //
 //                    }
 //                });
-    }
+    //}
 
 
-    private ServerRemote mServerRemote;
-
-    public void remoteServerCreate(){
-
-        mServerRemote = new ServerRemote();
-        mServerRemote.start(getApplicationContext());
-    }
-
-    public void remoteServerDismiss(){
-
-        mServerRemote.stop();
-        mServerRemote = null;
-    }
+//    private ServerRemote mServerRemote;
+//
+//    public void remoteServerCreate(){
+//
+//        mServerRemote = new ServerRemote();
+//        mServerRemote.start(getApplicationContext());
+//    }
+//
+//    public void remoteServerDismiss(){
+//
+//        mServerRemote.stop();
+//        mServerRemote = null;
+//    }
 
 
 
