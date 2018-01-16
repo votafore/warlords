@@ -126,57 +126,73 @@ public class ServerRemote implements IServer {
                 });
             }
         })
-                // check if it is one of game services
-                .filter(new Predicate<ServiceInfo>() {
-                    @Override
-                    public boolean test(ServiceInfo serviceInfo) throws Exception {
-                        return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME)
-                                && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND);
-                                //&& (!serviceInfo.info.getHost().toString().replace("/", "").equals(App.getInstance().getDeviceIP()));
-                    }
-                })
-                // convert unresolved NsdInfo into resolved NsdInfo
-                .flatMap(new Function<ServiceInfo, Observable<NsdServiceInfo>>() {
-                    @Override
-                    public Observable<NsdServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
+        // check if it is one of game services
+        .filter(new Predicate<ServiceInfo>() {
+            @Override
+            public boolean test(ServiceInfo serviceInfo) throws Exception {
+                return serviceInfo.info.getServiceName().contains(Constants.SERVICENAME)
+                        && serviceInfo.messageType.equals(ServiceInfo.SERVICE_FOUND);
+                        //&& (!serviceInfo.info.getHost().toString().replace("/", "").equals(App.getInstance().getDeviceIP()));
+            }
+        })
+        // convert unresolved NsdInfo into resolved NsdInfo
+        .flatMap(new Function<ServiceInfo, Observable<NsdServiceInfo>>() {
+            @Override
+            public Observable<NsdServiceInfo> apply(final ServiceInfo serviceInfo) throws Exception {
 
-                        Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
+                Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "create observable");
 
-                        return Observable.create(new ObservableOnSubscribe<NsdServiceInfo>() {
+                return Observable.create(new ObservableOnSubscribe<NsdServiceInfo>() {
+                    @Override
+                    public void subscribe(final ObservableEmitter<NsdServiceInfo> e) {
+
+                        Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
+
+                        NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
+                        manager.resolveService(serviceInfo.info, new ResolveListener() {
+
                             @Override
-                            public void subscribe(final ObservableEmitter<NsdServiceInfo> e) {
-
-                                Log.d3(TAG_SCAN, LVL_ADAPTER, "FOUND", "RESOLVE", "start");
-
-                                NsdManager manager = (NsdManager) context.getSystemService(Context.NSD_SERVICE);
-                                manager.resolveService(serviceInfo.info, new ResolveListener() {
-
-                                    @Override
-                                    public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                                        super.onServiceResolved(serviceInfo);
-                                        e.onNext(serviceInfo);
-                                    }
-                                });
-
+                            public void onServiceResolved(NsdServiceInfo serviceInfo) {
+                                super.onServiceResolved(serviceInfo);
+                                e.onNext(serviceInfo);
                             }
                         });
-                    }
-                })
-                .subscribe(new Consumer<NsdServiceInfo>() {
-                    @Override
-                    public void accept(NsdServiceInfo serviceInfo) throws Exception {
-
-                        Log.d1(TAG_SRV_START, LVL_REMOTE_SERVER, "create socket");
-                        mSocket = Socket.create(serviceInfo.getHost(), serviceInfo.getPort());
-
-                        Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set up socket in server");
-                        Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set socket as subscriber for sender");
-                        mSocket.subscribeSocket(sender);
-
-                        stopSearching();
 
                     }
                 });
+            }
+        })
+        .subscribe(new Consumer<NsdServiceInfo>() {
+            @Override
+            public void accept(NsdServiceInfo serviceInfo) throws Exception {
+
+                Log.d1(TAG_SRV_START, LVL_REMOTE_SERVER, "create socket");
+                mSocket = Socket.create(serviceInfo.getHost(), serviceInfo.getPort());
+
+                Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set up socket in server");
+                Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set socket as subscriber for sender");
+                mSocket.subscribeSocket(sender);
+
+                mSocket.setReceiver(new Consumer<JSONObject>() {
+                    @Override
+                    public void accept(JSONObject response) throws Exception {
+
+                        if(response.get("type").equals("response")
+                                && response.get("data").equals("registration")){
+
+                            stopSearching();
+                        }
+                    }
+                });
+
+                JSONObject query = new JSONObject();
+                query.put("type", "info");
+                query.put("data", "registration");
+
+                mSocket.send(query);
+
+            }
+        });
     }
 
     @Override

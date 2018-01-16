@@ -95,13 +95,6 @@ public class App extends Application {
         Log.d1(TAG_APP_START, LVL_NW_WATCHER, "register");
         registerReceiver(mNetReceiver, filter);
 
-
-        Log.d1(TAG_APP_START, LVL_ADAPTER, "create");
-        //mServerListAdapter = new AdapterServerList(this);
-
-
-
-        testFunc();
     }
 
     @Override
@@ -201,21 +194,6 @@ public class App extends Application {
         } catch (Exception ex) {
             ex.printStackTrace();
         }
-    }
-
-
-
-
-    /*************** TESTS *********************/
-
-
-    public static final String EVENT_GAME_START  = "com.votafore.warlords.game_start";
-    public static final String EVENT_RS_STOPED   = "com.votafore.warlords.remoteServer.stopped";
-
-
-    private void testFunc(){
-
-
     }
 
 

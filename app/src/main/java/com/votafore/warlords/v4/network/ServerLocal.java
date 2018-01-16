@@ -8,15 +8,16 @@ import android.os.Build;
 
 import com.votafore.warlords.v4.constant.Constants;
 import com.votafore.warlords.v4.constant.Log;
+import com.votafore.warlords.v4.test.User;
 
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.SocketException;
-import java.util.Date;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import io.reactivex.Observable;
@@ -27,13 +28,12 @@ import io.reactivex.functions.Consumer;
 import io.reactivex.processors.PublishProcessor;
 import io.reactivex.schedulers.Schedulers;
 
-import static com.votafore.warlords.v2.Constants.LVL_LOCAL_SERVER;
-import static com.votafore.warlords.v2.Constants.TAG_DATA_RECEIVE;
-import static com.votafore.warlords.v2.Constants.TAG_DATA_SEND;
-import static com.votafore.warlords.v2.Constants.TAG_SOCKET;
-import static com.votafore.warlords.v2.Constants.TAG_SRV_CRT;
-import static com.votafore.warlords.v2.Constants.TAG_SRV_START;
-import static com.votafore.warlords.v2.Constants.TAG_SRV_STOP;
+import static com.votafore.warlords.v4.constant.Constants.LVL_LOCAL_SERVER;
+import static com.votafore.warlords.v4.constant.Constants.TAG_DATA_SEND;
+import static com.votafore.warlords.v4.constant.Constants.TAG_SOCKET;
+import static com.votafore.warlords.v4.constant.Constants.TAG_SRV_CRT;
+import static com.votafore.warlords.v4.constant.Constants.TAG_SRV_START;
+import static com.votafore.warlords.v4.constant.Constants.TAG_SRV_STOP;
 
 /**
  * @author Votafore
@@ -63,14 +63,17 @@ public class ServerLocal implements IServer {
     @Override
     public Disposable setReceiver(Consumer<JSONObject> receiver) {
         Log.d1("", LVL_LOCAL_SERVER, "set client");
-        return sender.subscribe(receiver);
+        localReceiver = receiver;
+        return sender.subscribe(localReceiver);
     }
 
     @Override
     public void send(JSONObject data) {
+
         Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "send data");
+
         try {
-            mServerReceiver.accept(data);
+            handleRequest(null, data);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -111,12 +114,35 @@ public class ServerLocal implements IServer {
             }
         })
         .subscribeOn(Schedulers.newThread())
-        .subscribe(getSocketAppender());
+        .subscribe(new Consumer<ISocket>() {
+            @Override
+            public void accept(final ISocket iSocket) throws Exception {
+
+                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set up socket in server");
+
+                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set socket as subscriber for sender");
+                iSocket.subscribeSocket(sender);
+
+                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "subscribe server to incoming data");
+
+                map_dsp_receiver.put(iSocket, iSocket.setReceiver(new Consumer<JSONObject>() {
+                    @Override
+                    public void accept(JSONObject request) throws Exception {
+                        handleRequest(iSocket, request);
+                    }
+                }));
+            }
+        });
 
     }
 
     @Override
     public void stop() {
+
+        Log.d1(TAG_SRV_STOP, LVL_LOCAL_SERVER, "unsubscribe server from socket emitter");
+        for(ISocket socket: map_dsp_receiver.keySet()){
+            map_dsp_receiver.get(socket).dispose();
+        }
 
         Log.d1(TAG_SRV_STOP, LVL_LOCAL_SERVER, "sender.onComplete()");
         sender.onComplete();
@@ -125,9 +151,6 @@ public class ServerLocal implements IServer {
         Log.d2(TAG_SRV_STOP, LVL_LOCAL_SERVER, "APPENDER", "stop");
         dsp_sockets.dispose();
 
-        // TODO: 26.12.2017 check if dispose in map_dsp is necessary
-
-        // TODO: 27.12.2017 may be it is worth to place all observers in CompositeDisposable
     }
 
 
@@ -149,54 +172,76 @@ public class ServerLocal implements IServer {
 
     /****************** ServerLocal ******************/
 
-    /**
-     * object that take incoming queries
-     */
-    private Consumer<JSONObject> mServerReceiver;
 
     public ServerLocal(){
 
         Log.d1(TAG_SRV_CRT, LVL_LOCAL_SERVER, "create sender");
+
         sender = PublishProcessor.create();
-        // TODO: 26.12.2017 specify thread for broadcaster
+        sender.subscribeOn(Schedulers.io());
 
         Log.d1(TAG_SRV_CRT, LVL_LOCAL_SERVER, "create maps");
-        map_dsp_sender = new HashMap<>();
         map_dsp_receiver = new HashMap<>();
 
-        Log.d1(TAG_SRV_CRT, LVL_LOCAL_SERVER, "create server receiver");
-        mServerReceiver = new Consumer<JSONObject>() {
-            @Override
-            public void accept(JSONObject object) throws Exception {
-                handleRequest(object);
-            }
-        };
+        mUsers = new ArrayList<>();
     }
 
-    synchronized private void handleRequest(JSONObject data){
+    synchronized private void handleRequest(ISocket socket, JSONObject data)throws Exception{
 
-        Log.d1(TAG_DATA_RECEIVE, LVL_LOCAL_SERVER, "handleRequest");
+        Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "handleRequest");
 
-        try{
+        if (data.get("type").equals("info")){
 
-            if(data.getString("type").equals("request") && data.getString("data").equals("ServerInfo")){
+            JSONObject response = new JSONObject();
 
-                Log.d1(TAG_DATA_RECEIVE, LVL_LOCAL_SERVER, "this is request about service info");
+            if(data.get("data").equals("registration")) {
 
-                JSONObject response = new JSONObject();
-                response.put("owner", new Date().toString());
-                response.put("count", "1");
+                // handshaking (registration of new connection)
 
-                Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "send response");
-                sender.onNext(response);
-            }else{
-                // just broadcast data to all connected devices
-                sender.onNext(data);
+                User user = new User();
+                user.ID = System.currentTimeMillis();
+
+                mUsers.add(user);
+
+                response.put("type"  , "response");
+                response.put("data"  , "registration");
+                response.put("userID", user.ID);
+
+            }else if(data.get("data").equals("CloseSocket")){
+
+                // client/socket disconnected
+
+                map_dsp_receiver.get(socket).dispose();
+                map_dsp_receiver.remove(socket);
+
+                return;
+
+            }else if(data.get("data").equals("state")){
+
+                // state of client has changed
+
+                // just register it
             }
 
-        }catch(JSONException je){
-            je.printStackTrace();
-            Log.d1(TAG_DATA_RECEIVE, LVL_LOCAL_SERVER, "handleRequest - error");
+            // specialty of this group is that response is sent only for request sender
+            if(socket != null){
+                socket.send(response);
+            }else{
+                localReceiver.accept(response);
+            }
+
+        }else if(data.get("type").equals("GlobalEvent")){
+
+            JSONObject response = new JSONObject();
+
+            if(data.get("event").equals("StartGame")){
+
+                response = data;
+            }
+
+            // specialty of this group is that response is sent for all
+            sender.onNext(response);
+
         }
     }
 
@@ -207,28 +252,7 @@ public class ServerLocal implements IServer {
 
     /**************** misc ******************/
 
-    private Map<ISocket, Disposable> map_dsp_sender;
     private Map<ISocket, Disposable> map_dsp_receiver;
-
-    /**
-     * @return object that specify behaviour when new socket connected
-     */
-    private Consumer<ISocket> getSocketAppender(){
-
-        return new Consumer<ISocket>() {
-            @Override
-            public void accept(final ISocket iSocket) throws Exception {
-
-                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set up socket in server");
-
-                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "set socket as subscriber for sender");
-                iSocket.subscribeSocket(sender);
-
-                Log.d1(TAG_SOCKET, LVL_LOCAL_SERVER, "subscribe server to incoming data");
-                map_dsp_receiver.put(iSocket, iSocket.setReceiver(mServerReceiver));
-            }
-        };
-    }
 
     @Override
     public String toString(){
@@ -238,6 +262,9 @@ public class ServerLocal implements IServer {
 
 
     /**************** tests ******************/
+
+
+    /*** searching ***/
 
     private NsdManager.RegistrationListener mNSDListener;
 
@@ -303,4 +330,13 @@ public class ServerLocal implements IServer {
 
         isBroadcasting = false;
     }
+
+
+
+
+    /****** handshaking ******/
+
+    List<User> mUsers;
+
+    Consumer<JSONObject> localReceiver;
 }

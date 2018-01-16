@@ -58,7 +58,7 @@ public class Socket implements ISocket {
     private Disposable dsp_emitter;
 
     /**
-     * object allows unsubscribes from sender's messages
+     * object allows to unsubscribe from sender's messages
      */
     private Disposable dsp_subscriber;
 
@@ -121,7 +121,8 @@ public class Socket implements ISocket {
                             // method "close" will be invoked when server close sender
 
                             JSONObject notification = new JSONObject();
-                            notification.put("event", "socket is closing");
+                            notification.put("type" , "info");
+                            notification.put("data", "CloseSocket");
 
                             e.onNext(notification);
 

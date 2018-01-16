@@ -44,8 +44,10 @@ public class ActivityGameRemote extends AppCompatActivity {
                 JSONObject query = new JSONObject();
 
                 try {
-                    query.put("ID"   , "11236534");
+                    query.put("type" , "info");
+                    query.put("data" , "state");
                     query.put("state", "ready");
+                    query.put("ID"   , "11236534");
 
                     mApp.getServer().send(query);
 
@@ -57,9 +59,10 @@ public class ActivityGameRemote extends AppCompatActivity {
 
         dsp_receiver = mApp.getServer().setReceiver(new Consumer<JSONObject>() {
             @Override
-            public void accept(JSONObject object) throws Exception {
+            public void accept(JSONObject response) throws Exception {
 
-                if(object.has("event") && object.getString("event").equals("socket is closing")){
+                if(response.get("type").equals("info")
+                        && response.get("data").equals("CloseSocket")){
 
                     dsp_receiver.dispose();
                     mApp.dismissServer();
@@ -67,11 +70,12 @@ public class ActivityGameRemote extends AppCompatActivity {
                     finish();
                 }
 
-                if(object.has("event") && object.getString("event").equals("StartGame")){
+                if(response.get("type").equals("GlobalEvent")
+                        && response.get("event").equals("StartGame")){
 
                     mApp.startGame();
 
-                    startActivity(new Intent(ActivityGameRemote.this, ActivityMain.class));
+                    startActivity(new Intent(ActivityGameRemote.this, ActivityGame.class));
                     finish();
                 }
             }

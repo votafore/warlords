@@ -5,7 +5,8 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.votafore.warlords.v3.App;
+import com.votafore.warlords.v4.App;
+
 
 public class ActivityGame extends AppCompatActivity {
 

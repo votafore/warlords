@@ -1,9 +1,6 @@
 package com.votafore.warlords.v4.activities;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
@@ -19,7 +16,6 @@ import org.json.JSONObject;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 
-import static com.votafore.warlords.v4.App.EVENT_GAME_START;
 
 public class ActivityGameLocal extends AppCompatActivity {
 
@@ -44,8 +40,9 @@ public class ActivityGameLocal extends AppCompatActivity {
                 JSONObject query = new JSONObject();
 
                 try {
-                    query.put("ID"   , "112365312");
-                    query.put("state", "start");
+
+                    query.put("type", "GlobalEvent");
+                    query.put("event", "StartGame");
 
                     mApp.getServer().send(query);
 
@@ -58,13 +55,16 @@ public class ActivityGameLocal extends AppCompatActivity {
 
         dsp_receiver = mApp.getServer().setReceiver(new Consumer<JSONObject>() {
             @Override
-            public void accept(JSONObject object) throws Exception {
+            public void accept(JSONObject response) throws Exception {
 
-                if(object.has("event") && object.getString("event").equals("StartGame")){
+                if(response.get("type").equals("GlobalEvent")
+                        && response.get("event").equals("StartGame")){
+
+                    mApp.getServer().stopSearching();
 
                     mApp.startGame();
 
-                    startActivity(new Intent(ActivityGameLocal.this, ActivityMain.class));
+                    startActivity(new Intent(ActivityGameLocal.this, ActivityGame.class));
                     finish();
                 }
             }
