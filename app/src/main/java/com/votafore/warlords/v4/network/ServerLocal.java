@@ -4,6 +4,7 @@ import android.content.Context;
 import android.net.nsd.NsdManager;
 import android.net.nsd.NsdServiceInfo;
 import android.os.Build;
+import android.os.Looper;
 
 
 import com.votafore.warlords.v4.constant.Constants;
@@ -68,15 +69,23 @@ public class ServerLocal implements IServer {
     }
 
     @Override
-    public void send(JSONObject data) {
+    public void send(final JSONObject data) {
 
         Log.d1(TAG_DATA_SEND, LVL_LOCAL_SERVER, "send data");
 
-        try {
-            handleRequest(null, data);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                Looper.prepare();
+
+                try {
+                    handleRequest(null, data);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     @Override
@@ -221,6 +230,9 @@ public class ServerLocal implements IServer {
                 // state of client has changed
 
                 // just register it
+
+                response.put("type", "notify");
+                response.put("data", "bla-bla-bla");
             }
 
             // specialty of this group is that response is sent only for request sender
@@ -241,6 +253,10 @@ public class ServerLocal implements IServer {
 
             // specialty of this group is that response is sent for all
             sender.onNext(response);
+
+        }else if(data.get("type").equals("data")){
+
+            sender.onNext(data);
 
         }
     }

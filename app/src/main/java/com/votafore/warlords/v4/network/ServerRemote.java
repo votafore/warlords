@@ -6,15 +6,12 @@ import android.net.nsd.NsdServiceInfo;
 
 
 import com.votafore.warlords.v2.ServiceInfo;
-import com.votafore.warlords.v4.App;
 import com.votafore.warlords.v4.constant.Constants;
 import com.votafore.warlords.v4.constant.Log;
 import com.votafore.warlords.v4.test.DiscoveryListener;
 import com.votafore.warlords.v4.test.ResolveListener;
 
 import org.json.JSONObject;
-
-import java.net.InetAddress;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
@@ -173,13 +170,14 @@ public class ServerRemote implements IServer {
                 Log.d1(TAG_SOCKET, LVL_REMOTE_SERVER, "set socket as subscriber for sender");
                 mSocket.subscribeSocket(sender);
 
-                mSocket.setReceiver(new Consumer<JSONObject>() {
+                dsp_waiterForRegistration = mSocket.setReceiver(new Consumer<JSONObject>() {
                     @Override
                     public void accept(JSONObject response) throws Exception {
 
                         if(response.get("type").equals("response")
                                 && response.get("data").equals("registration")){
 
+                            dsp_waiterForRegistration.dispose();
                             stopSearching();
                         }
                     }
@@ -194,6 +192,8 @@ public class ServerRemote implements IServer {
             }
         });
     }
+
+    Disposable dsp_waiterForRegistration;
 
     @Override
     public void stopSearching() {
@@ -216,7 +216,7 @@ public class ServerRemote implements IServer {
         Log.d1(TAG_SRV_CRT, LVL_REMOTE_SERVER, "create sender");
 
         sender = PublishProcessor.create();
-        sender.subscribeOn(Schedulers.io());
+        sender.observeOn(Schedulers.io());
 
 //        mIP = ip;
 //        mPort = port;

@@ -59,8 +59,8 @@ public class Queries {
         try {
 
             message.put("clientID" , CLIENT_ID);
-            message.put("type"     , "action");
-            message.put("command"  , "camMove");
+            message.put("type"     , "data");
+            message.put("event"  , "camMove");
             message.put("queryType", QT_BROADCAST);
             message.put("deltaX"   , String.valueOf(deltaX));
             message.put("deltaY"   , String.valueOf(deltaY));
@@ -80,8 +80,8 @@ public class Queries {
         try {
 
             message.put("clientID" , CLIENT_ID);
-            message.put("type"     , "action");
-            message.put("command"  , "camRotate");
+            message.put("type"     , "data");
+            message.put("event"  , "camRotate");
             message.put("queryType", QT_BROADCAST);
             message.put("deltaX"   , String.valueOf(deltaX));
             message.put("deltaY"   , String.valueOf(deltaY));

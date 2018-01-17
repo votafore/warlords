@@ -26,14 +26,14 @@ import static android.opengl.GLES20.glViewport;
 
 public  class GLRenderer implements Renderer {
 
-    private GLWorld mWorld;
-    private World    mGaveWorld;
+    private GLWorld  mWorld;
+    private World    mGameWorld;
     private GLShader mShader;
 
     public GLRenderer(GLWorld GLworld, World world, GLShader shader) {
 
         mWorld      = GLworld;
-        mGaveWorld  = world;
+        mGameWorld  = world;
         mShader     = shader;
     }
 
@@ -100,6 +100,6 @@ public  class GLRenderer implements Renderer {
 
         GLES20.glUniformMatrix4fv(mShader.mParams.get("u_Matrix"), 1, false, mat, 0);
 
-        mGaveWorld.draw(mShader);
+        mGameWorld.draw(mShader);
     }
 }

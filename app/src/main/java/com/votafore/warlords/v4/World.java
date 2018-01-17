@@ -38,6 +38,9 @@ public class World {
             object.draw(shader);
         }
 
+
+
+
         // первым делом отрисовываем карту
         // TODO: 29.12.2017 вернуть
         //mInstance.getMap().draw(mShader);

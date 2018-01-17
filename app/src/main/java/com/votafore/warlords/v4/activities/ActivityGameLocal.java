@@ -2,6 +2,7 @@ package com.votafore.warlords.v4.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.Button;
@@ -33,6 +34,8 @@ public class ActivityGameLocal extends AppCompatActivity {
 
         Button startGame = findViewById(R.id.start_game);
 
+        final Handler h = new Handler();
+
         startGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -61,11 +64,17 @@ public class ActivityGameLocal extends AppCompatActivity {
                         && response.get("event").equals("StartGame")){
 
                     mApp.getServer().stopSearching();
-
                     mApp.startGame();
 
-                    startActivity(new Intent(ActivityGameLocal.this, ActivityGame.class));
-                    finish();
+                    // старт игры запускаем в основном потоке
+                    h.post(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            startActivity(new Intent(ActivityGameLocal.this, ActivityGame.class));
+                            finish();
+                        }
+                    });
                 }
             }
         });

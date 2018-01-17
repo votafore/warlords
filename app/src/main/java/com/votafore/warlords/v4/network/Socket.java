@@ -166,7 +166,12 @@ public class Socket implements ISocket {
     @Override
     public Disposable setReceiver(Consumer<JSONObject> consumer) {
         Log.d(Constants.TAG_SOCKET, "add new receiver");
-        return emitter.subscribe(consumer);
+        return emitter.subscribe(consumer, new Consumer<Throwable>() {
+            @Override
+            public void accept(Throwable throwable) throws Exception {
+                
+            }
+        });
     }
 
     @Override

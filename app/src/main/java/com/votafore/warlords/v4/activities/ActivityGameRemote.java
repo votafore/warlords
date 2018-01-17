@@ -2,6 +2,7 @@ package com.votafore.warlords.v4.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -57,26 +58,37 @@ public class ActivityGameRemote extends AppCompatActivity {
             }
         });
 
+        final Handler h = new Handler();
+
         dsp_receiver = mApp.getServer().setReceiver(new Consumer<JSONObject>() {
             @Override
             public void accept(JSONObject response) throws Exception {
 
-                if(response.get("type").equals("info")
-                        && response.get("data").equals("CloseSocket")){
+                if(response.get("type").equals("info")){
 
-                    dsp_receiver.dispose();
-                    mApp.dismissServer();
+                    if(response.get("data").equals("CloseSocket")){
 
-                    finish();
-                }
+                        dsp_receiver.dispose();
+                        mApp.dismissServer();
 
-                if(response.get("type").equals("GlobalEvent")
-                        && response.get("event").equals("StartGame")){
+                        finish();
+                    }
 
-                    mApp.startGame();
+                }else if(response.get("type").equals("GlobalEvent")){
 
-                    startActivity(new Intent(ActivityGameRemote.this, ActivityGame.class));
-                    finish();
+                    if(response.get("event").equals("StartGame")){
+
+                        h.post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                mApp.startGame();
+
+                                startActivity(new Intent(ActivityGameRemote.this, ActivityGame.class));
+                                finish();
+                            }
+                        });
+                    }
                 }
             }
         });

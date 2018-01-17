@@ -54,9 +54,9 @@ public class Game {
             @Override
             protected void init() {
 
-                mHandler = new MotionHandlerJoystick(mContext);
+                mMotionHandler = new MotionHandlerJoystick(mContext);
 
-                mHandler.setCameraListener(new MotionHandlerJoystick.ICameraListener() {
+                mMotionHandler.setCameraListener(new MotionHandlerJoystick.ICameraListener() {
                     @Override
                     public void onCamMove(float deltaX, float deltaY) {
 
@@ -79,11 +79,11 @@ public class Game {
                 });
             }
 
-            private MotionHandlerJoystick mHandler;
+            private MotionHandlerJoystick mMotionHandler;
 
             @Override
             public boolean onTouchEvent(MotionEvent event) {
-                return mHandler.onHandleEvent(event);
+                return mMotionHandler.onHandleEvent(event);
             }
         };
     }
@@ -134,9 +134,11 @@ public class Game {
      */
     private void handleServerData(JSONObject data)throws Exception{
 
+        if(!data.has("event"))
+            return;
 
         // TODO: 11.01.2018 analize data and make appropriate actions
-        switch(data.getString("command")){
+        switch(data.getString("event")){
             case "camMove":
 
                 mICamera.setMovingDelta(GLWorld.AXIS_X, Float.valueOf(data.getString("deltaX")));
