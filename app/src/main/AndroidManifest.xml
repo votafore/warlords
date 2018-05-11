@@ -16,14 +16,13 @@
         android:screenOrientation="landscape"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!-- v4
         <activity android:name=".ActivityMain">
         </activity>
         <activity android:name=".ActivityTest">
         </activity>
-
-
-
-        <!-- v4 -->
+        -->
 
         <activity android:name=".v4.activities.ActivityStart">
             <intent-filter>
